@@ -10,6 +10,7 @@
 import React, { memo } from 'react';
 import { Switch } from 'react-router-dom';
 import Routes from '../../routes/routes';
+import { withRouter } from 'react-router';
 import GlobalStyle from '../../global-styles';
 
 function App() {
@@ -23,4 +24,4 @@ function App() {
   );
 }
 
-export default memo(App);
+export default withRouter(App);

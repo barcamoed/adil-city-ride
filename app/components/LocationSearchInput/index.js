@@ -15,7 +15,7 @@ class LocationSearchInput extends React.Component {
     console.log('This.Props', this.props);
     this.props.form.setFieldValue('destination', address);
     this.setState({ address });
-    this.props.onSetAbc(address);
+    this.props.onSetFeildText(address);
     console.log('State Address', address);
   };
 
@@ -23,7 +23,7 @@ class LocationSearchInput extends React.Component {
     console.log('Address geocode:', geocodeByAddress(address));
     geocodeByAddress(address)
       .then(results => getLatLng(results[0]))
-      .then(latLng => this.props.onSetAbc(latLng || 'Rizwannnnnn'))
+      .then(latLng => this.props.onSetAbc(latLng))
       .catch(error => console.error('Error', error));
     this.setState({ address });
     localStorage.setItem('address', address);

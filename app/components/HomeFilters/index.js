@@ -23,12 +23,13 @@ import { Link } from 'react-router-dom';
 import ReactGMap from '../ReactGMap/index';
 
 var filteredAirports = [];
-const HomeFilters = props => {
+const HomeFilters = (props, { history }) => {
   var [selectOptions, setSelectOptions] = useState(true);
   var LocationSeacrh = (
     <Field
       name="destination"
-      onSetAbc={value => setAbc(value)}
+      onSetAbc={value => setAdvnacedSearchVal(value)}
+      onSetFeildText={value => setAdvnacedSearchFieldText(value)}
       component={LocationSearchInput}
     />
   );
@@ -74,10 +75,14 @@ const HomeFilters = props => {
   const [selecetdApDestinationIdValue, setDestinationIDValue] = useState(0);
   const [showCarsSection, setCarsSection] = useState(false);
   const [myData, setmyData] = useState({});
-  const [abc, setAbc] = useState(null);
+  const [advnacedSearchVal, setAdvnacedSearchVal] = useState(null);
+  const [advnacedSearchFieldText, setAdvnacedSearchFieldText] = useState(null);
   var [switchCheck, setSwitchCheck] = useState(0);
-  var check = useRef(false);
-  console.log('My abc Valueeeeee from Location to here...', abc);
+  const [propsSearchData, setPropsSearchData] = useState(null);
+  console.log(
+    'Advanced Search Field Text..... . ... .. .',
+    advnacedSearchFieldText,
+  );
   function changePosition() {
     console.log('Before Switch Val:', switchCheck);
     if (switchCheck == 0) {
@@ -239,29 +244,29 @@ const HomeFilters = props => {
     }
 
     /*car slider*/
-    $('.carslider').owlCarousel({
-      loop: false,
-      margin: 0,
-      nav: true,
-      dots: false,
-      dotsContainer: '.rightdots',
-      dotsSpeed: 1000,
+    // $('.carslider').owlCarousel({
+    //   loop: false,
+    //   margin: 0,
+    //   nav: true,
+    //   dots: false,
+    //   dotsContainer: '.rightdots',
+    //   dotsSpeed: 1000,
 
-      responsive: {
-        0: {
-          items: 1,
-        },
-        600: {
-          items: 1,
-        },
-        991: {
-          items: 2,
-        },
-        1000: {
-          items: 3,
-        },
-      },
-    });
+    //   responsive: {
+    //     0: {
+    //       items: 1,
+    //     },
+    //     600: {
+    //       items: 1,
+    //     },
+    //     991: {
+    //       items: 2,
+    //     },
+    //     1000: {
+    //       items: 3,
+    //     },
+    //   },
+    // });
   }, [props.searchData.searchField, selectOptions]);
 
   var subtitle;
@@ -272,20 +277,46 @@ const HomeFilters = props => {
   };
 
   async function fetchCarsToSelect() {
+    // setPropsSearchData(props.searchData);
     console.log('Inside Car Fetching Method', switchCheck);
     if (switchCheck == 1) {
       console.log('switchCheck is checked to 1:Switched');
       await setCarsSection(true);
+      if (selectOptions) {
+        console.log(
+          'Switched and not advanced inside HomeFilterssssssssssssss',
+        );
+        await setmyData({
+          searchField: props.searchData.searchField,
+          From: selecetdApFromValue,
+          Destination: selecetdApDestinationIdValue,
+          pax_num: props.searchData.passengers,
+          switched: true,
+          isAdvanced: false,
+        });
+      } else if (!selectOptions) {
+        console.log('Switched and Advanced inside HomeFilterssssssssssssss');
+        await setmyData({
+          searchField: props.searchData.searchField,
+          From: selecetdApFromValue,
+          Destination: advnacedSearchVal,
+          pax_num: props.searchData.passengers,
+          switched: true,
+          isAdvanced: true,
+          destination_address: advnacedSearchFieldText,
+        });
+      }
     } else if (switchCheck == 0) {
       console.log('switchCheck is checked to 0: Not Switched');
       await setCarsSection(true);
       if (selectOptions) {
-        console.log('Not Switched Not Advanced');
-        console.log('From', selecetdApFromValue);
-        console.log('Destination ID', selecetdApDestinationIdValue);
-        console.log('props from Home Page', props);
+        // console.log('Not Switched Not Advanced');
+        // console.log('From', selecetdApFromValue);
+        // console.log('Destination ID', selecetdApDestinationIdValue);
+        // console.log('props from Home Page', props);
 
         await setmyData({
+          searchField: props.searchData.searchField,
           From: selecetdApFromValue,
           Destination: selecetdApDestinationIdValue,
           pax_num: props.searchData.passengers,
@@ -294,7 +325,19 @@ const HomeFilters = props => {
         });
         console.log('myData:', myData);
       } else if (selectOptions == false) {
-        console.log('Not Switched But Advanced');
+        // console.log('Not Switched But Advanced');
+        // console.log('From', selecetdApFromValue);
+        // console.log('Destination ID', selecetdApDestinationIdValue);
+        // console.log('Props from Home Page', props);
+        await setmyData({
+          searchField: props.searchData.searchField,
+          From: selecetdApFromValue,
+          Destination: advnacedSearchVal,
+          pax_num: props.searchData.passengers,
+          switched: false,
+          isAdvanced: true,
+          destination_address: advnacedSearchFieldText,
+        });
       }
     }
   }
@@ -380,7 +423,10 @@ const HomeFilters = props => {
                           validationSchema={mapSchema}
                           onSubmit={values => {
                             // orderRequest(values);
-                            console.log('Moeed:', values);
+                            console.log(
+                              'Moeed Values inFormik submit:',
+                              values,
+                            );
                           }}
                         >
                           {({ errors, touched }) => (

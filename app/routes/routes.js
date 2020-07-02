@@ -12,10 +12,12 @@ import OrderSummary from '../components/OrderSummary';
 import TermsAndConditions from '../components/TermsAndConditions';
 import Contact from '../components/Contact';
 import NotFoundPage from '../containers/NotFoundPage';
+import { Router, browserHistory } from 'react-router';
 
 const Routes = () => (
   <Suspense fallback="Loading......">
     <Switch>
+      {/* <Router history={browserHistory}> */}
       <Route exact path="/" component={Home} />
       <Route exact path="/order-number" component={OrderNumber} />
       <Route exact path="/booking" component={Booking} />
@@ -30,6 +32,7 @@ const Routes = () => (
       <Route exact path="/contact" component={Contact} />
       {/* <Route component={Login} exact path="/login" /> */}
       <Route component={NotFoundPage} />
+      {/* </Router> */}
     </Switch>
   </Suspense>
 );

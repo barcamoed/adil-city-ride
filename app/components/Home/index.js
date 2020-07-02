@@ -26,9 +26,10 @@ import { Formik, Form, Field } from 'formik';
 import { searchSchema } from '../Login/schema';
 import { IDENTIFIER, GETKEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
+
 //import Autosuggest from 'react-autosuggest';
 import MyAutosuggest from '../ReactAutoSuggest';
-const Home = () => {
+const Home = ({ history }) => {
   const [showFilter, setShowFilters] = useState(false);
   const [searchValAndPassengers, setSearchValAndPassengers] = useState({});
 

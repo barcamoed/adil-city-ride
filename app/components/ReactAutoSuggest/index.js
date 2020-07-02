@@ -20,7 +20,7 @@ const getSuggestions = value => {
   if (langReturns.length > 1) {
     // langReturns.pop();
     console.log('New Lang returned', langReturns);
-    for (var i = 0; i < langReturns.length; i++) {
+    for (var i = 0; i < langReturns.length - 1; i++) {
       if (langReturns[i].city == langReturns[i + 1].city) {
         langReturns.splice(i + 1, 1);
       } else {
