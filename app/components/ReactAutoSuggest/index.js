@@ -55,63 +55,84 @@ class ReactAutoSuggest extends React.Component {
       value: '',
       suggestions: [],
     };
-    this.componentDidMount = () => {
-      if (JSON.parse(localStorage.getItem('CityAirports'))) {
-        console.log('If ComponentDidM 1');
-        this.setState({
-          languages: JSON.parse(localStorage.getItem('CityAirports')),
-        });
-        mlanguages = JSON.parse(localStorage.getItem('CityAirports'));
-        console.log('If ComponentDidM 1 state', this.state.languages);
-        console.log('If ComponentDidM 1', mlanguages);
-      } else {
-        console.log('Else ComponentDidM 2');
-        const headers = {
-          'Content-type': 'application/x-www-form-urlencoded',
-        };
-        const params = new URLSearchParams();
-        params.append('command', 'get_cities');
-        params.append('identifier', IDENTIFIER);
-        params.append('key', GETKEY());
-        params.append('data', []);
+  }
 
-        var outerLoopSize = 0;
-        var newAirportsArray = [];
-        var i = 0;
-        // if (!localStorage.getItem('CityAirports')) {
+  componentDidMount = () => {
+    // console.log('If ComponentDidM 1');
+    if (localStorage.getItem('CityAirports')) {
+      console.log('If ComponentDidM 1');
+      this.setState({
+        languages: JSON.parse(localStorage.getItem('CityAirports')),
+      });
+      mlanguages = JSON.parse(localStorage.getItem('CityAirports'));
+      console.log('If ComponentDidM 1 state', this.state.languages);
+      console.log('If ComponentDidM 1', mlanguages);
+    } else {
+      console.log('Else ComponentDidM 2');
+      const headers = {
+        'Content-type': 'application/x-www-form-urlencoded',
+      };
+      const params = new URLSearchParams();
+      params.append('command', 'get_cities');
+      params.append('identifier', IDENTIFIER);
+      params.append('key', GETKEY());
+      params.append('data', []);
+
+      var outerLoopSize = 0;
+      var newAirportsArray = [];
+      var i = 0;
+
+      {
         postRequest(params, headers).then(data => {
-          data.forEach(element => {
-            outerLoopSize = outerLoopSize + element.airports.length;
-            element.airports.forEach(airport => {
-              newAirportsArray[i] = airport;
-              newAirportsArray[i].city = element.city;
-              i++;
+          console.log('City Dataaaaaaaa:', data.cities.length);
+          for (var j = 0; j < data.cities.length; ) {
+            console.log('City Dataaaaaaaammmmmmmm');
+            data['cities'][j]['airports'].forEach(element => {
+              console.log('elementMMMM', element);
+              newAirportsArray[j] = element;
+              newAirportsArray[j].city = data['cities'][j]['city'];
             });
-          });
+            j++;
+          }
+
           console.log('Else ComponentDidM 2 arrayyyy', newAirportsArray);
           localStorage.setItem(
             'CityAirports',
             JSON.stringify(newAirportsArray),
           );
-
           this.setState({ languages: newAirportsArray });
           mlanguages = JSON.parse(localStorage.getItem('CityAirports'));
-          console.log('after Post request state:', this.state.languages);
-          console.log('mlanguages:', mlanguages);
-          // customJS();
+          console.log('after Post request state is:', this.state.languages);
+          console.log('mlanguages after request:', mlanguages);
         });
-        // }
       }
-    };
-  }
+
+      // postRequest(params, headers).then(data => {
+      //   data.forEach(element => {
+      //     outerLoopSize = outerLoopSize + element.airports.length;
+      //     element.airports.forEach(airport => {
+      //       newAirportsArray[i] = airport;
+      //       newAirportsArray[i].city = element.city;
+      //       i++;
+      //     });
+      //   });
+      //   console.log('Else ComponentDidM 2 arrayyyy', newAirportsArray);
+      //   localStorage.setItem('CityAirports', JSON.stringify(newAirportsArray));
+
+      //   this.setState({ languages: newAirportsArray });
+      //   mlanguages = JSON.parse(localStorage.getItem('CityAirports'));
+      //   console.log('after Post request state:', this.state.languages);
+      //   console.log('mlanguages:', mlanguages);
+      //   // customJS();
+      // });
+    }
+  };
 
   onChange = (event, { newValue }) => {
     this.setState({
       value: newValue,
     });
     this.props.form.setFieldValue('searchField', newValue);
-    // console.log('this.props after', this.props);
-    // console.log('Value onchange:', newValue);
   };
 
   // Autosuggest will call this function every time you need to update suggestions.

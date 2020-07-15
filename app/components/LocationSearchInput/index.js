@@ -79,7 +79,7 @@ class LocationSearchInput extends React.Component {
               validationSchema={mapSchema}
               onSubmit={values => {
                 // orderRequest(values);
-                console.log('Moeed:', values);
+                console.log('Moeed Valuessssssssssssssssss:', values);
               }}
             >
               {({ errors, touched }) => (

@@ -30,6 +30,7 @@ import { postRequest } from '../../utils/requests';
 //import Autosuggest from 'react-autosuggest';
 import MyAutosuggest from '../ReactAutoSuggest';
 const Home = ({ history }) => {
+  // console.log('Historyyyyyyyyyyyyy:', history);
   const [showFilter, setShowFilters] = useState(false);
   const [searchValAndPassengers, setSearchValAndPassengers] = useState({});
 

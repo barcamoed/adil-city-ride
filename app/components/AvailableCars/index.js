@@ -32,7 +32,7 @@ const customStyles = {
   },
 };
 
-const AvailableCars = (props, { history }) => {
+const AvailableCars = props => {
   const [modalIsOpen, setIsOpen] = useState(false);
   const [ap_iata, setAp_iata] = useState(null);
   var [availableCars, setAvailableCars] = useState([]);
@@ -307,13 +307,21 @@ const AvailableCars = (props, { history }) => {
   function closeModal() {
     setIsOpen(false);
   }
-  const onRoundTripChecked = (priceVal, vehicle_id, currency) => {
+  const onRoundTripChecked = (
+    priceVal,
+    vehicle_id,
+    currency,
+    sec_bef_pick,
+    max_pax,
+  ) => {
     const route = 'rt';
     const vehicleObj = {
       vehicle_id: vehicle_id,
       route: route,
       price: priceVal,
       currency: currency,
+      seconds_before_pick: sec_bef_pick,
+      max_pax: max_pax,
     };
     if (oneWayTrip) {
       setOneWayTrip(null);
@@ -323,14 +331,23 @@ const AvailableCars = (props, { history }) => {
     console.log('VehicleObject.. .. ..', localStorage.getItem('vehicleObj'));
   };
 
-  const onOneWayChecked = (priceVal, vehicle_id, currency) => {
+  const onOneWayChecked = (
+    priceVal,
+    vehicle_id,
+    currency,
+    sec_bef_pick,
+    max_pax,
+  ) => {
     const route = 'ow';
     const vehicleObj = {
       vehicle_id: vehicle_id,
       route: route,
       price: priceVal,
       currency: currency,
+      seconds_before_pick: sec_bef_pick,
+      max_pax: max_pax,
     };
+    console.log('max_paxxxxxxxxxxxxxx:', max_pax);
 
     if (roundTrip) {
       setRoundTrip(null);
@@ -351,6 +368,7 @@ const AvailableCars = (props, { history }) => {
       );
       setSelectTripTypeError(null);
       console.log('Historyyyyyyyyyyyyyy:', history);
+      window.location.href = 'http://localhost:3000/booking';
       // browserHistory.push('/booking');
       // console.log('Historyyyyyyyyyyyyyy:', props.router);
       // history.push('/booking');
@@ -490,6 +508,8 @@ const AvailableCars = (props, { history }) => {
                                           item.rt_price,
                                           item.vehicle_id,
                                           item.currency,
+                                          item.seconds_before_pick,
+                                          item.max_pax,
                                         )
                                       }
                                       name="radio"
@@ -511,6 +531,8 @@ const AvailableCars = (props, { history }) => {
                                           item.ow_price,
                                           item.vehicle_id,
                                           item.currency,
+                                          item.seconds_before_pick,
+                                          item.max_pax,
                                         )
                                       }
                                       name="radio"

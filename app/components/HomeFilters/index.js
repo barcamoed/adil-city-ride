@@ -23,7 +23,8 @@ import { Link } from 'react-router-dom';
 import ReactGMap from '../ReactGMap/index';
 
 var filteredAirports = [];
-const HomeFilters = (props, { history }) => {
+const HomeFilters = props => {
+  // console.log('Propsssssssssssssssssss', props && props);
   var [selectOptions, setSelectOptions] = useState(true);
   var LocationSeacrh = (
     <Field

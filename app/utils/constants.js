@@ -38,3 +38,69 @@ export const GETVEHICLESKEY = () => {
   // console.log('Key', key);
   return key;
 };
+
+export const GET_FLIGHT_DETAILS_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(PASSWORD + IDENTIFIER + 'get_flight_details' + finalToken);
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_CHECK_LOCATION_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(PASSWORD + IDENTIFIER + 'check_location' + finalToken);
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_CREATE_RESERVATION_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(PASSWORD + IDENTIFIER + 'create_reservation' + finalToken);
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_RESERVATION_DETAILS_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(
+    PASSWORD + IDENTIFIER + 'get_reservation_details' + finalToken,
+  );
+  // console.log('Key', key);
+  return key;
+};

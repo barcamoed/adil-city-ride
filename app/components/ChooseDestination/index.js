@@ -171,18 +171,21 @@ const ChooseDestination = () => {
     params.append('key', GETKEY());
     params.append('data', []);
 
+    //
     if (!localStorage.getItem('CityAirports')) {
       postRequest(params, headers).then(data => {
-        data.forEach(element => {
-          outerLoopSize = outerLoopSize + element.airports.length;
-          element.airports.forEach(airport => {
-            newAirportsArray[i] = airport;
-            newAirportsArray[i].city = element.city;
-            i++;
+        console.log('City Dataaaaaaaa:', data.cities.length);
+        for (var j = 0; j < data.cities.length; ) {
+          console.log('City Dataaaaaaaammmmmmmm');
+          data['cities'][j]['airports'].forEach(element => {
+            console.log('elementMMMM', element);
+            newAirportsArray[j] = element;
+            newAirportsArray[j].city = data['cities'][j]['city'];
           });
-        });
+          j++;
+        }
+        console.log('newAirportsArray:', newAirportsArray);
         localStorage.setItem('CityAirports', JSON.stringify(newAirportsArray));
-        console.log(' Inside Ifffffff');
         setArray(newAirportsArray);
         customJS();
       });
