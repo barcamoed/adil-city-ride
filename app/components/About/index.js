@@ -12,6 +12,7 @@ import Footer from '../Footer';
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 import whatsappImg from '../../assets/images/whatsapp.png';
+// import '../../assets/css/style.css';
 
 function About() {
   return (

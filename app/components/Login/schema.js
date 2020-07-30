@@ -3,7 +3,7 @@ export const SignupSchema = Yup.object().shape({
   fullName: Yup.string().required('Required'),
   password: Yup.string()
     .min(6, 'Password too short!')
-    .max(32, 'Password should less than 32 digits')
+    .max(32, 'Password should be less than 32 digits')
     .required('Required'),
   email: Yup.string()
     .email('Invalid email Address')
@@ -14,7 +14,7 @@ export const SignupSchema = Yup.object().shape({
       is: val => !!(val && val.length > 0),
       then: Yup.string().oneOf(
         [Yup.ref('password')],
-        'Both password need to be the same',
+        'Both passwords need to be the same',
       ),
     }),
 });
@@ -34,6 +34,7 @@ export const phoneNumberMask = [
   /\d/,
   /\d/,
 ];
+
 export const LoginShema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email Address')
@@ -41,18 +42,64 @@ export const LoginShema = Yup.object().shape({
   password: Yup.string().required('Required'),
 });
 
+export const CreateAffiliateUserSchema = Yup.object().shape({
+  name: Yup.string()
+    .required('Required')
+    .max(70, 'Name is too long'),
+  email: Yup.string()
+    .email('Invalid email address')
+    .required('Required'),
+  // commission: Yup.number().required('Required'),
+  commission: Yup.number()
+    // .required('Required')
+    .test('is-decimal', 'invalid decimal', value =>
+      (value + '').match(/^(?:100(?:\.0)?|\d{1,2}(?:\.\d)?)$/),
+    ),
+  password: Yup.string()
+    .required('Required')
+    .max(40, 'Password is too long'),
+});
+
+export const AdminEditUserSchema = Yup.object().shape({
+  name: Yup.string()
+    .required('Required')
+    .max(70, 'Name is too long'),
+
+  email: Yup.string()
+    .email('Invalid email address')
+    .required('Required'),
+  commission: Yup.number()
+    // .required('Required')
+    .test('is-decimal', 'invalid decimal', value =>
+      (value + '').match(/^(?:100(?:\.0)?|\d{1,2}(?:\.\d)?)$/),
+    ),
+  cookie: Yup.string().required('Required'),
+  earning: Yup.string().required('Required'),
+  role: Yup.string().required('Required'),
+  active: Yup.string().required('Required'),
+
+  // password: Yup.string()
+  //   .required('Required')
+  //   .max(40, 'Password is too long'),
+});
+
 export const ForgotPasswordSchema = Yup.object().shape({
   email: Yup.string()
-    .email('Invalid email Address')
+    .email('Invalid email address')
     .required('Please enter your email'),
 });
 
-export const ContactUsScheme = Yup.object().shape({
+export const ContactUsSchema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email Address')
     .required('Please enter your email'),
   name: Yup.string().required('Required'),
-  message: Yup.string().required('Required'),
+  phone: Yup.string()
+    // .typeError('Must be a number')
+    .required('Required'),
+  message: Yup.string()
+    .max(2500, 'Too Long')
+    .required('Required'),
 });
 
 export const UpdatePasswordSchema = Yup.object().shape({
@@ -123,24 +170,24 @@ export const bookingSchema = Yup.object().shape({
   departure_time: Yup.string()
     .nullable()
     .required('Required'),
-  card_holder_name: Yup.string().required('Required'),
-  card_number: Yup.string()
-    .label('Card Number')
-    .typeError('Must be a number of length 16-19')
-    .max(19)
-    .min(16)
-    .required('Required'),
-  exp_date: Yup.date()
-    .label('Date')
-    .min(new Date())
-    .required('Required'),
-  cvv: Yup.string()
-    .label('CVV')
-    .min(3)
-    .max(4)
-    .required(),
-  from: Yup.string().required(),
-  destination: Yup.string().required(),
+  // card_holder_name: Yup.string().required('Required'),
+  // card_number: Yup.string()
+  //   .label('Card Number')
+  //   .typeError('Must be a number of length 16-19')
+  //   .max(19)
+  //   .min(16)
+  //   .required('Required'),
+  // exp_date: Yup.date()
+  //   .label('Date')
+  //   .min(new Date())
+  //   .required('Required'),
+  // cvv: Yup.string()
+  //   .label('CVV')
+  //   .min(3)
+  //   .max(4)
+  //   .required(),
+  remark: Yup.string().required('Required'),
+  destination: Yup.string().required('Required'),
 });
 
 export const ProfileSchema = Yup.object().shape(

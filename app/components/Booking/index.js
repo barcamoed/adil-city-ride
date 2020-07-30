@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
 // import PropTypes from 'prop-types';
 // import styled from 'styled-components';
+import car1Img from '../../assets/images/car1.png';
 import { Formik, Form, Field } from 'formik';
 import Header from '../Header';
 import Footer from '../Footer';
@@ -25,6 +26,7 @@ import {
   GET_FLIGHT_DETAILS_KEY,
   GET_CHECK_LOCATION_KEY,
   GET_CREATE_RESERVATION_KEY,
+  GET_CREATE_BOOKING_KEY,
 } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 import LocationSearchInput from '../LocationSearchInput/index';
@@ -39,7 +41,10 @@ const customStyles = {
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
+    width: '50%',
+    heigh: '50%',
   },
+  overlay: { zIndex: 1000 },
 };
 
 const Booking = () => {
@@ -77,7 +82,7 @@ const Booking = () => {
     set_Departure_Flight_Airport_Match_Error,
   ] = useState('');
 
-  const [destination, setDestination] = useState(null);
+  const [destination, setDestination] = useState('');
   const [advnacedSearchVal, setAdvnacedSearchVal] = useState(null);
   const [advnacedSearchFieldText, setAdvnacedSearchFieldText] = useState(null);
   const [modalIsOpen, setIsOpen] = useState(false);
@@ -88,10 +93,21 @@ const Booking = () => {
   const [wheelChairVal, setWheelChairVal] = useState('');
   const [remark, setRemark] = useState('');
   const [seconds_before_pick, setSeconds_before_pick] = useState('');
-  const [differentVehicles, setDifferentVehicles] = useState({});
   const [pickUpTime, setPickUpTime] = useState('');
   const [babyObjects, setBabyObjects] = useState('');
   const [childObjects, setChildObjects] = useState('');
+  const [differentVehicles, setDifferentVehicles] = useState([]);
+  const [noMatchingVehicleError, setNoMatchingVehicleError] = useState('');
+  var [roundTrip, setRoundTrip] = useState(null);
+  var [oneWayTrip, setOneWayTrip] = useState(null);
+  var [showPaymentArea, setShowPayment] = useState(true);
+  var [status3PriceError, setStatus3PriceError] = useState(null);
+  var [contactByEmail, setContactByEmail] = useState(null);
+  var [contactByWa, setContactByWa] = useState(null);
+  var [contactEmail, setContactEmail] = useState('');
+  var [contactNumber, setContactNumber] = useState('');
+  var [showContactInfoError, setShowContactInfoError] = useState('');
+  var [reqStatus, setReqStatus] = useState(null);
 
   const [passengers, setPassengers] = useState([
     { id: '1', val: '1' },
@@ -230,7 +246,6 @@ const Booking = () => {
     ) {
       const myGeneralObj1 = JSON.parse(localStorage.getItem('myGeneralObj'));
       // console.log('Hhhhhhhhhhhhhhhhhhhhhh', myGeneralObj1);
-
       const destinationLatLng =
         '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
       console.log('myStructured Destination:', destinationLatLng);
@@ -269,18 +284,109 @@ const Booking = () => {
         // console.log('Dataaaaaaaaaaa...', data);
         if (data.status == '1') {
           console.log('Status==1', data);
-          // setIsOpen(false);
+          setShowPayment(true);
+          setNoMatchingVehicleError('');
         } else if (data.status == '2') {
           const status2WithVehicles = data.vehicles;
           console.log('Status==2', data);
+          setShowPayment(false);
           setDifferentVehicles(status2WithVehicles);
-          // setIsOpen(true);
+          setReqStatus(2);
+          setIsOpen(true);
+          $('.carslider').owlCarousel({
+            loop: false,
+            margin: 0,
+            nav: true,
+            dots: false,
+            dotsContainer: '.rightdots',
+            dotsSpeed: 1000,
+
+            responsive: {
+              0: {
+                items: 1,
+              },
+              600: {
+                items: 1,
+              },
+              991: {
+                items: 2,
+              },
+              1000: {
+                items: 3,
+              },
+            },
+          });
+          setNoMatchingVehicleError('');
         } else if (data.status == '3') {
-          const notValid = 'Invalid';
-          console.log('Status==3', data);
+          setReqStatus(3);
+          console.log('Status==3', data.message);
+          // setNoMatchingVehicleError(data.message);
+          setShowPayment(false);
+          setStatus3PriceError(3);
         }
       });
     }
+
+    // If is Advanced is changed(Edited) in the booking form by user (iss mayn destination_id nai ja raha)
+    // if (
+    //   advnacedSearchVal &&
+    //   advnacedSearchVal &&
+    //   myGeneralObj.myData.isAdvanced == true
+    // ) {
+    //   const myGeneralObj1 = JSON.parse(localStorage.getItem('myGeneralObj'));
+    //   // console.log('Hhhhhhhhhhhhhhhhhhhhhh', myGeneralObj1);
+    //   const destinationLatLng =
+    //     '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+    //   console.log('myStructured Destination:', destinationLatLng);
+    //   const headers = {
+    //     'Content-type': 'application/x-www-form-urlencoded',
+    //   };
+
+    //   let formData = new FormData();
+    //   let data = {
+    //     command: 'check_location',
+    //     identifier: IDENTIFIER,
+    //     key: GET_CHECK_LOCATION_KEY(),
+    //     data: {
+    //       ap_code: myGeneralObj1.myData.ap_iata,
+    //       destination_point: destinationLatLng,
+    //       pax_num: myGeneralObj1.myData.pax_num,
+    //     },
+    //   };
+
+    //   for (let dataKey in data) {
+    //     if (dataKey === 'data') {
+    //       // append nested object
+    //       for (let previewKey in data[dataKey]) {
+    //         formData.append(`data[${previewKey}]`, data[dataKey][previewKey]);
+    //       }
+    //     } else {
+    //       formData.append(dataKey, data[dataKey]);
+    //     }
+    //   }
+    //   for (var pair of formData.entries()) {
+    //     console.log(pair[0] + ', ' + pair[1]);
+    //   }
+
+    //   postRequest(formData, headers).then(data => {
+    //     // console.log('Dataaaaaaaaaaa...', data);
+    //     if (data.status == '1') {
+    //       console.log('Status==1', data);
+    //       // setIsOpen(false);
+    //     } else if (data.status == '2') {
+    //       const status2WithVehicles = data.vehicles;
+    //       console.log('Status==2', data);
+    //       setDifferentVehicles(status2WithVehicles);
+    //       // setIsOpen(true);
+    //     } else if (data.status == '3') {
+    //       const notValid = 'Invalid';
+    //       console.log('Status==3', data);
+    //     }
+    //   });
+    // }
+
+    console.log('After Cars Slider');
+
     //To restrict past date
     $('#exp_date').attr('min', date);
     $('#arrivaldate').attr('min', date);
@@ -290,7 +396,10 @@ const Booking = () => {
     arrival_time,
     flight_Airport_Match_Error,
     advnacedSearchVal,
-    modalIsOpen,
+    differentVehicles.length,
+    // showPaymentArea,
+    // myGeneralObj.isAdvanced,
+    // modalIsOpen,
     // departure_flight_Airport_Match_Error,
     // arrival_flight_Airport_Match_Error,
   ]);
@@ -371,19 +480,16 @@ const Booking = () => {
         postRequest(formData, headers).then(data => {
           console.log('Response Status:', data);
           if (data.status == 'ok') {
-            console.log(
-              'myGeneralObj.myData.ap_iata :',
-              myGeneralObj.myData.ap_iata,
-            );
-            console.log('data.data.arrival_airport :', data.data);
+            console.log('data.asdfasdfasdf :', data.data);
             if (data.data.arrival_airport == myGeneralObj.myData.ap_iata) {
               console.log('Airport Matches');
               if (data.data.arrival_time) {
                 const arrivalTime = data.data.arrival_time;
-                if (showArrivalAndDeparture) {
+                if (showArrivalAndDeparture || showJustArrival) {
                   set_Arrival_Flight_Airport_Match_Error('');
                 } else {
                   set_Flight_Airport_Match_Error('');
+                  set_Arrival_Flight_Airport_Match_Error('');
                 }
                 setArrival_Time(arrivalTime);
               }
@@ -400,10 +506,102 @@ const Booking = () => {
                   'Flight Number and the Airport you selected donot match.',
                 );
               }
-              // const noResultFound = 'No Result Found';
-              // setNoResultFound(noResultFound);
-              // setFormData(myObj);
             }
+            if (
+              ((arrival_date && data.data.arrival_time) ||
+                (arrival_date && arrival_time)) &&
+              JSON.parse(localStorage.getItem('vehicleObj')).route == 'ow'
+            ) {
+              var myDate = new Date(
+                arrival_date + ' ' + data.data.arrival_time,
+              );
+              var nowDatePlusReleaseHours = new Date(Date.now());
+              nowDatePlusReleaseHours.setHours(
+                nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
+              );
+              const diffTime = Math.abs(nowDatePlusReleaseHours - myDate);
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              // console.log(diffTime + ' milliseconds');
+              console.log(diffDays + ' days');
+              if (diffDays > 0) {
+                console.log(
+                  'Show Payment Area and Continue normal reservation',
+                );
+                setShowPayment(true);
+              } else {
+                console.log(
+                  'Show Errors Area and Do create_booking_request on Subbmit',
+                );
+                setShowPayment(false);
+              }
+            }
+
+            var myPickUpTime = null;
+            if (
+              ((departure_date &&
+                pickUpTime &&
+                (arrival_date && data.data.arrival_time)) ||
+                (arrival_date && arrival_time)) &&
+              JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt'
+            ) {
+              console.log(
+                'Both Arrival And Departure Set Inside Arrival Function',
+              );
+              var myArrivalDate = new Date(
+                arrival_date + ' ' + data.data.arrival_time,
+              );
+              console.log('Arrival Date:', myArrivalDate);
+              var myDepartureDate = new Date(departure_date + ' ' + pickUpTime);
+              console.log('Departure Date:', myDepartureDate);
+              if (myDepartureDate > myArrivalDate) {
+                console.log('myDepartureDate is Greater');
+                var nowDatePlusReleaseHours = new Date(Date.now());
+                nowDatePlusReleaseHours.setHours(
+                  nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
+                );
+                const diffTime = Math.abs(
+                  nowDatePlusReleaseHours - myArrivalDate,
+                );
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                // console.log(diffTime + ' milliseconds');
+                console.log(diffDays + ' days');
+                if (diffDays > 0) {
+                  console.log(
+                    'Show Payment Area and Continue normal reservation',
+                  );
+                  setShowPayment(true);
+                } else {
+                  console.log(
+                    'Show Errors Area and Do create_booking_request on Subbmit',
+                  );
+                  setShowPayment(false);
+                }
+              } else {
+                console.log('myArrivalDate is Greater');
+                var nowDatePlusReleaseHours = new Date(Date.now());
+                nowDatePlusReleaseHours.setHours(
+                  nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
+                );
+                const diffTime = Math.abs(
+                  nowDatePlusReleaseHours - myDepartureDate,
+                );
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                // console.log(diffTime + ' milliseconds');
+                console.log(diffDays + ' days');
+                if (diffDays > 0) {
+                  console.log(
+                    'Show Payment Area and Continue normal reservation',
+                  );
+                  setShowPayment(true);
+                } else {
+                  console.log(
+                    'Show Errors Area and Do create_booking_request on Subbmit',
+                  );
+                  setShowPayment(false);
+                }
+              }
+            }
+
             // setFormData(myObj);
           } else if (data.status == 'error') {
             set_Arrival_Flight_Airport_Match_Error(data.data.message);
@@ -487,7 +685,8 @@ const Booking = () => {
               'myGeneralObj.myData.ap_iata :',
               myGeneralObj.myData.ap_iata,
             );
-            console.log('data.data.departure_airport :', data.data);
+            console.log('Departure Date and Time Selected:', data.data);
+            var myPickUpTime = null;
             if (data.data.departure_airport == myGeneralObj.myData.ap_iata) {
               console.log('Airport Matches:My Vehicles:');
               if (data.data.departure_time) {
@@ -496,6 +695,7 @@ const Booking = () => {
                   set_Departure_Flight_Airport_Match_Error('');
                 }
                 set_Flight_Airport_Match_Error('');
+                set_Departure_Flight_Airport_Match_Error('');
                 setDeparture_Time(departureTime);
                 console.log('Departure date', departure_date);
                 var dep_Date = new Date(departure_date);
@@ -511,13 +711,13 @@ const Booking = () => {
                 var abc1 = moment(
                   departure_date + ' ' + data.data.departure_time,
                 );
-                var PickUpTime = abc1
+                myPickUpTime = abc1
                   .subtract({ hours: hourDelta, minutes: minuteDelta })
                   .toString();
                 console.log('Vehicle Obj', vehicleObj);
-                setSeconds_before_pick(moment(PickUpTime).format('hh:mm')); // To Show in the Rc Time Picker
+                setSeconds_before_pick(moment(myPickUpTime).format('hh:mm')); // To Show in the Rc Time Picker
                 setPickUpTime(
-                  moment(PickUpTime)
+                  moment(myPickUpTime)
                     .format('hh:mm')
                     .toString(),
                 ); // To use in request
@@ -526,20 +726,128 @@ const Booking = () => {
               data.data.departure_airport != myGeneralObj.myData.ap_iata
             ) {
               console.log(
-                'Flight Number and the Airport you selected donot match.',
+                'Flight Number and the Airport you selected do not match.',
               );
               if (showArrivalAndDeparture) {
                 console.log('Set Flight and Airport Match Errorrrrrrrr');
                 set_Departure_Flight_Airport_Match_Error(
-                  'Flight Number and the Airport you selected donot match.',
+                  'Flight Number and the Airport you selected do not match.',
                 );
               } else {
                 set_Flight_Airport_Match_Error(
-                  'Flight Number and the Airport you selected donot match.',
+                  'Flight Number and the Airport you selected do not match.',
                 );
               }
             }
+
+            if (
+              ((departure_date &&
+                moment(myPickUpTime)
+                  .format('hh:mm')
+                  .toString()) ||
+                (departure_date && pickUpTime)) &&
+              JSON.parse(localStorage.getItem('vehicleObj')).route == 'ow'
+            ) {
+              console.log('Departureeeeeeeeeeeeeeeee Innnn ');
+              var myDate = new Date(
+                departure_date +
+                  ' ' +
+                  moment(myPickUpTime)
+                    .format('hh:mm')
+                    .toString(),
+              );
+              var nowDatePlusReleaseHours = new Date(Date.now());
+              nowDatePlusReleaseHours.setHours(
+                nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
+              );
+              const diffTime = Math.abs(nowDatePlusReleaseHours - myDate);
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              // console.log(diffTime + ' milliseconds');
+              console.log(diffDays + ' days');
+              if (diffDays > 0) {
+                console.log(
+                  'Show Payment Area and Continue normal reservation',
+                );
+                setShowPayment(true);
+              } else {
+                console.log(
+                  'Show Errors Area and Do create_booking_request on Subbmit',
+                );
+                setShowPayment(false);
+              }
+            }
+            if (
+              (departure_date &&
+                moment(myPickUpTime)
+                  .format('hh:mm')
+                  .toString()) ||
+              (((departure_date &&
+                pickUpTime &&
+                (arrival_date && data.data.arrival_time)) ||
+                (arrival_date && arrival_time)) &&
+                JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt')
+            ) {
+              console.log('Both Arrival And Departure Set Hereeee');
+              var myArrivalDate = new Date(arrival_date + ' ' + arrival_time);
+              console.log('Arrival Date:', myArrivalDate);
+              var myDepartureDate = new Date(
+                departure_date +
+                  ' ' +
+                  moment(myPickUpTime)
+                    .format('hh:mm')
+                    .toString(),
+              );
+              console.log('Departure Date:', myDepartureDate);
+              if (myDepartureDate > myArrivalDate) {
+                console.log('myDepartureDate is Greater');
+                var nowDatePlusReleaseHours = new Date(Date.now());
+                nowDatePlusReleaseHours.setHours(
+                  nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
+                );
+                const diffTime = Math.abs(
+                  nowDatePlusReleaseHours - myArrivalDate,
+                );
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                // console.log(diffTime + ' milliseconds');
+                console.log(diffDays + ' days');
+                if (diffDays > 0) {
+                  console.log(
+                    'Show Payment Area and Continue normal reservation',
+                  );
+                  setShowPayment(true);
+                } else {
+                  console.log(
+                    'Show Errors Area and Do create_booking_request on Subbmit',
+                  );
+                  setShowPayment(false);
+                }
+              } else {
+                console.log('myArrivalDate is Greater');
+                var nowDatePlusReleaseHours = new Date(Date.now());
+                nowDatePlusReleaseHours.setHours(
+                  nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
+                );
+                const diffTime = Math.abs(
+                  nowDatePlusReleaseHours - myDepartureDate,
+                );
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                // console.log(diffTime + ' milliseconds');
+                console.log(diffDays + ' days');
+                if (diffDays > 0) {
+                  console.log(
+                    'Show Payment Area and Continue normal reservation',
+                  );
+                  setShowPayment(true);
+                } else {
+                  console.log(
+                    'Show Errors Area and Do create_booking_request on Subbmit',
+                  );
+                  setShowPayment(false);
+                }
+              }
+            }
           } else if (data.status == 'error') {
+            console.log('Data Status Message', data.data.message);
             set_Departure_Flight_Airport_Match_Error(data.data.message);
             // setFormData(myObj);
           }
@@ -644,13 +952,141 @@ const Booking = () => {
     setPaxSelected(e.target.value);
   };
 
+  // const onRoundTripChecked = (
+  //   priceVal,
+  //   vehicle_id,
+  //   currency,
+  //   sec_bef_pick,
+  //   max_pax,
+  // ) => {
+  //   const route = 'rt';
+  //   const vehicleObj = {
+  //     vehicle_id: vehicle_id,
+  //     route: route,
+  //     price: priceVal,
+  //     currency: currency,
+  //     seconds_before_pick: sec_bef_pick,
+  //     max_pax: max_pax,
+  //   };
+  //   if (oneWayTrip) {
+  //     setOneWayTrip(null);
+  //   }
+  //   setRoundTrip(priceVal);
+  //   console.log('Vehicle Obbbbbbbjjjjjjj:', vehicleObj);
+  //   localStorage.setItem('vehicleObj', JSON.stringify(vehicleObj));
+  //   console.log(
+  //     'New VehicleObject.. .. ..',
+  //     localStorage.getItem('vehicleObj'),
+  //   );
+  // };
+
+  function saveNewVehicle(item) {
+    console.log('Newwwww Item', item);
+    if (JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt') {
+      const myVehicleObj = {
+        vehicle_id: item.vehicle_id,
+        route: 'rt',
+        price: item.rt_price,
+        currency: item.currency,
+        seconds_before_pick: item.seconds_before_pick,
+        max_pax: item.max_pax,
+        release_hours: item.release_hours,
+      };
+      const myData = {
+        Destination: myGeneralObj.myData.Destination,
+        From: myGeneralObj.myData.From,
+        isAdvanced: true,
+        ap_iata: myGeneralObj.myData.ap_iata,
+        pax_num: myGeneralObj.myData.pax_num,
+        searchField: myGeneralObj.myData.searchField,
+        switched: myGeneralObj.myData.switched,
+      };
+      setMyGeneralObj({ myData });
+      setVehicleObj(myVehicleObj);
+      localStorage.setItem('vehicleObj', JSON.stringify(myVehicleObj));
+      // localStorage.setItem('myGeneralObj', JSON.stringify(myNewGeneralObj));
+      console.log('My New General Obj', myGeneralObj);
+      setIsOpen(false);
+    } else if (JSON.parse(localStorage.getItem('vehicleObj')).route == 'ow') {
+      // Default route=rt
+      const myVehicleObj = {
+        vehicle_id: item.vehicle_id,
+        route: 'ow',
+        price: item.ow_price,
+        currency: item.currency,
+        seconds_before_pick: item.seconds_before_pick,
+        max_pax: item.max_pax,
+        release_hours: item.release_hours,
+      };
+      const myData = {
+        Destination: myGeneralObj.myData.Destination,
+        From: myGeneralObj.myData.From,
+        isAdvanced: true,
+        ap_iata: myGeneralObj.myData.ap_iata,
+        pax_num: myGeneralObj.myData.pax_num,
+        searchField: myGeneralObj.myData.searchField,
+        switched: myGeneralObj.myData.switched,
+      };
+      setMyGeneralObj({ myData });
+      setVehicleObj(myVehicleObj);
+      localStorage.setItem('vehicleObj', JSON.stringify(myVehicleObj));
+      // localStorage.setItem('myGeneralObj', JSON.stringify(myNewGeneralObj));
+      setIsOpen(false);
+    }
+    console.log('Arrival Data and Time', arrival_date, arrival_time);
+    if (arrival_date && arrival_time) {
+      console.log('InsideM MMMMMMMMMMMm');
+      var myDate = new Date(arrival_date + ' ' + arrival_time);
+      var nowDatePlusReleaseHours = new Date(Date.now());
+      nowDatePlusReleaseHours.setHours(
+        nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
+      );
+      const diffTime = Math.abs(nowDatePlusReleaseHours - myDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // console.log(diffTime + ' milliseconds');
+      console.log(diffDays + ' days');
+      if (diffDays > 0) {
+        console.log('Show Payment Area and Continue normal reservation');
+        setShowPayment(true);
+      } else {
+        console.log(
+          'Show Errors Area and Do create_booking_request on Subbmit',
+        );
+        setShowPayment(false);
+      }
+    } else if (departure_date && pickUpTime) {
+      console.log('InsideM Departureeeee', pickUpTime);
+      var myDate = new Date(departure_date + ' ' + pickUpTime);
+      var nowDatePlusReleaseHours = new Date(Date.now());
+      nowDatePlusReleaseHours.setHours(
+        nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
+      );
+      const diffTime = Math.abs(nowDatePlusReleaseHours - myDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // console.log(diffTime + ' milliseconds');
+      console.log(diffDays + ' days');
+      if (diffDays > 0) {
+        console.log('Show Payment Area and Continue normal reservation');
+        setShowPayment(true);
+      } else {
+        console.log(
+          'Show Errors Area and Do create_booking_request on Subbmit',
+        );
+        setShowPayment(false);
+      }
+    }
+  }
+
   function submitRequest(e) {
     e.preventDefault();
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
     };
 
-    console.log('Vehicle Objectttttttttttttttttttt', vehicleObj.route);
+    // console.log('Vehicle Objecttt', vehicleObj.route);
+    // console.log('myGeneralObj.myData', myGeneralObj);
+    // isAdvanced
+
     let formData = new FormData();
     if (
       myGeneralObj.myData.isAdvanced == false &&
@@ -846,29 +1282,569 @@ const Booking = () => {
         }
       }
 
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
-      // for (var value of formData.values()) {
-      //   console.log('FormData Value:', value);
-      // }
-
-      postRequest(formData, headers).then(data => {
-        console.log('Data Status:', data);
-        if (data.status == 'ok') {
-          console.log('Data Status:', data.status);
+      if (showPaymentArea) {
+        // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
+        for (var pair of formData.entries()) {
+          console.log(pair[0] + ', ' + pair[1]);
         }
-      });
+        console.log('Showing Payment Area');
+        postRequest(formData, headers).then(data => {
+          console.log('Data Status:', data);
+          if (data.status == 'ok') {
+            console.log('Data Status:', data.status);
+          }
+        });
+      } else if (!showPaymentArea) {
+        if (
+          (contactByEmail == 1 && contactEmail) ||
+          (contactByWa == 1 && contactNumber)
+        ) {
+          console.log('Not showPaymentArea');
+          if (reqStatus == 3) {
+            formData.append(`data[rejects][address]`, 1);
+          } else {
+            formData.append(`data[rejects][release_time]`, 1);
+          }
+          if (contactByEmail) {
+            formData.append(`data[contact][contact_by_mail]`, 1);
+            formData.append(`data[contact][email_address]`, contactEmail);
+          }
+          if (contactByWa) {
+            formData.append(`data[contact][contact_by_wa]`, 1);
+            formData.append(`data[contact][wa_number]`, contactNumber);
+          }
+          formData.set('command', 'create_booking_request');
+          formData.set('key', GET_CREATE_BOOKING_KEY());
+          for (var pair of formData.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+          }
+          postRequest(formData, headers).then(data => {
+            console.log('Data Status:', data);
+            if (data.status == 'ok') {
+              console.log('Data Status:', data.status);
+              setShowContactInfoError('');
+              setStatus3PriceError(null);
+            }
+          });
+        } else {
+          console.log('Show Error To Select One');
+          setShowContactInfoError('Select One of the following');
+        }
+      }
     } // if is_advanced=0/false && switched=true&& ow
+    else if (
+      myGeneralObj.myData.isAdvanced == true &&
+      myGeneralObj.myData.switched == false &&
+      vehicleObj.route == 'ow'
+    ) {
+      const destinationLatLng =
+        '(' +
+        myGeneralObj.myData.Destination.lat +
+        ', ' +
+        myGeneralObj.myData.Destination.lng +
+        ')';
+      var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
+      var withNoDigits = arrival_flight_number.replace(/[0-9]/g, '').trim();
+      var babyObj1 = null;
+      var babyObj2 = null;
+      var childObj1 = null;
+      var childObj2 = null;
+      var wheelChairObj = null;
+      if (babySelectedAge) {
+        console.log('1 baby Object');
+        babyObj1 = {
+          type: 'baby_seat',
+          val: babySelectedAge,
+        };
+      }
+      if (babySelectedAge1) {
+        babyObj2 = {
+          type: 'baby_seat',
+          val: babySelectedAge1,
+        };
+      }
+      if (childSelectedAge) {
+        childObj1 = {
+          type: 'child_seat',
+          val: childSelectedAge,
+        };
+      }
+      if (childSelectedAge1) {
+        childObj2 = {
+          type: 'child_seat',
+          val: childSelectedAge1,
+        };
+      }
+
+      if (wheelChairVal != '') {
+        wheelChairObj = {
+          type: 'endicape',
+          val: 'Folding',
+        };
+      }
+
+      let data = {
+        command: 'create_reservation',
+        identifier: IDENTIFIER,
+        key: GET_CREATE_RESERVATION_KEY(),
+
+        data: {
+          environment: 'test',
+          general: {
+            city: myGeneralObj.myData.searchField,
+            ap_code: myGeneralObj.myData.ap_iata,
+            // destination_id: myGeneralObj.myData.Destination,
+            is_advanced: '1',
+            destination_point: destinationLatLng,
+            destination_address: advnacedSearchFieldText,
+            pax_num: paxSelected,
+            remark: remark,
+          },
+          passenger: {
+            first_name: first_name,
+            last_name: last_name,
+            email: email,
+            phone: phone_number,
+          },
+          vehicle: {
+            vehicle_id: vehicleObj.vehicle_id,
+            route: vehicleObj.route,
+            price: vehicleObj.price,
+            currency: vehicleObj.currency,
+          },
+          services: [
+            {
+              type: 'arriving',
+              airline_iata: withNoDigits,
+              flight_num: myStringNumbers,
+              flight_date: arrival_date,
+              flight_time: arrival_time,
+              pick_time: 'null',
+            },
+          ],
+          extra_equipment: [
+            babyObj1,
+            babyObj2,
+            childObj1,
+            childObj2,
+            wheelChairObj,
+          ],
+        },
+      };
+
+      for (let dataKey in data) {
+        if (dataKey == 'command') {
+          formData.append(`command`, 'create_reservation');
+        } else if (dataKey == 'identifier') {
+          formData.append(`identifier`, IDENTIFIER);
+        } else if (dataKey == 'key') {
+          formData.append(`key`, GET_CREATE_RESERVATION_KEY());
+        }
+        if (dataKey === 'data') {
+          // append nested object
+          for (let previewKey in data[dataKey]) {
+            if (previewKey == 'environment') {
+              formData.append(`data[${previewKey}]`, 'test');
+            }
+
+            if (previewKey == 'general') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'passenger') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'vehicle') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'services') {
+              if (data[dataKey][previewKey].length == 1) {
+                for (let ipk in data[dataKey][previewKey][0]) {
+                  formData.append(
+                    `data[${previewKey}][${0}][${ipk}]`,
+                    data[dataKey][previewKey][0][ipk],
+                  );
+                }
+              } else if (data[dataKey][previewKey].length > 1) {
+                var i = 0;
+                for (let ipk in data[dataKey][previewKey][i]) {
+                  formData.append(
+                    `data[${previewKey}][${i}][${ipk}]`,
+                    data[dataKey][previewKey][i][ipk],
+                  );
+                  if (data[dataKey][previewKey][i + 1]) {
+                    i++;
+                  }
+                }
+              }
+            }
+            if (previewKey == 'extra_equipment') {
+              if (data[dataKey][previewKey].length == 1) {
+                for (let ipk in data[dataKey][previewKey][0]) {
+                  formData.append(
+                    `data[${previewKey}][${0}][${ipk}]`,
+                    data[dataKey][previewKey][0][ipk],
+                  );
+                }
+              } else if (data[dataKey][previewKey].length > 1) {
+                console.log(
+                  'More than 1 Equipments',
+                  data[dataKey][previewKey],
+                );
+                var i = 0;
+                for (var a = 0; a < data[dataKey][previewKey].length; a++) {
+                  for (let ipk in data[dataKey][previewKey][a]) {
+                    console.log('Object1', data[dataKey][previewKey][a]);
+                    console.log('Object2', data[dataKey][previewKey][a + 1]);
+                    formData.append(
+                      `data[${previewKey}][${a}][${ipk}]`,
+                      data[dataKey][previewKey][a][ipk],
+                    );
+                  }
+                  if (data[dataKey][previewKey][a + 1]) {
+                    console.log(
+                      'Next Exists 1',
+                      data[dataKey][previewKey][a + 1],
+                    );
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (showPaymentArea) {
+        // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
+        for (var pair of formData.entries()) {
+          console.log(pair[0] + ', ' + pair[1]);
+        }
+        console.log('Showing Payment Area');
+        postRequest(formData, headers).then(data => {
+          console.log('Data Status:', data);
+          if (data.status == 'ok') {
+            console.log('Data Status:', data.status);
+          }
+        });
+      } else if (!showPaymentArea) {
+        if (
+          (contactByEmail == 1 && contactEmail) ||
+          (contactByWa == 1 && contactNumber)
+        ) {
+          console.log('Not showPaymentArea');
+          if (reqStatus == 3) {
+            formData.append(`data[rejects][address]`, 1);
+          } else {
+            formData.append(`data[rejects][release_time]`, 1);
+          }
+          if (contactByEmail) {
+            formData.append(`data[contact][contact_by_mail]`, 1);
+            formData.append(`data[contact][email_address]`, contactEmail);
+          }
+          if (contactByWa) {
+            formData.append(`data[contact][contact_by_wa]`, 1);
+            formData.append(`data[contact][wa_number]`, contactNumber);
+          }
+          formData.set('command', 'create_booking_request');
+          formData.set('key', GET_CREATE_BOOKING_KEY());
+          for (var pair of formData.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+          }
+          postRequest(formData, headers).then(data => {
+            console.log('Data Status:', data);
+            if (data.status == 'ok') {
+              console.log('Data Status:', data.status);
+              setShowContactInfoError('');
+              setStatus3PriceError(null);
+            }
+          });
+        } else {
+          console.log('Show Error To Select One');
+          setShowContactInfoError('Select One of the following');
+        }
+      }
+    } // isAdvanced=true,switched=false,ow
+    else if (
+      myGeneralObj.myData.isAdvanced == true &&
+      myGeneralObj.myData.switched == true &&
+      vehicleObj.route == 'ow'
+    ) {
+      console.log(
+        'Loggedddddddddddddddddddddddddddddddddddddd',
+        myGeneralObj.myData.destination_address,
+      );
+      var myDestinationLatLng = null;
+      var previousDestAddress = null;
+      if (
+        myGeneralObj.myData.destination_address &&
+        myGeneralObj.myData.Destination.lat
+      ) {
+        destinationLatLng =
+          '(' +
+          myGeneralObj.myData.Destination.lat +
+          ', ' +
+          myGeneralObj.myData.Destination.lng +
+          ')';
+        previousDestAddress = myGeneralObj.myData.destination_address;
+      } else {
+        console.log('Objeeeeeeeeeeeeeeeeeeeeee', advnacedSearchVal);
+        myDestinationLatLng =
+          '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+        previousDestAddress = advnacedSearchFieldText;
+      }
+      var myStringNumbers = departure_flight_number.replace(/\D/g, '').trim();
+      var withNoDigits = departure_flight_number.replace(/[0-9]/g, '').trim();
+      var babyObj1 = null;
+      var babyObj2 = null;
+      var childObj1 = null;
+      var childObj2 = null;
+      var wheelChairObj = null;
+      if (babySelectedAge) {
+        console.log('1 baby Object');
+        babyObj1 = {
+          type: 'baby_seat',
+          val: babySelectedAge,
+        };
+      }
+      if (babySelectedAge1) {
+        babyObj2 = {
+          type: 'baby_seat',
+          val: babySelectedAge1,
+        };
+      }
+      if (childSelectedAge) {
+        childObj1 = {
+          type: 'child_seat',
+          val: childSelectedAge,
+        };
+      }
+      if (childSelectedAge1) {
+        childObj2 = {
+          type: 'child_seat',
+          val: childSelectedAge1,
+        };
+      }
+
+      if (wheelChairVal != '') {
+        wheelChairObj = {
+          type: 'endicape',
+          val: 'Folding',
+        };
+      }
+
+      let data = {
+        command: 'create_reservation',
+        identifier: IDENTIFIER,
+        key: GET_CREATE_RESERVATION_KEY(),
+
+        data: {
+          environment: 'test',
+          general: {
+            city: myGeneralObj.myData.searchField,
+            ap_code: myGeneralObj.myData.ap_iata,
+            // destination_id: myGeneralObj.myData.Destination,
+            is_advanced: '1',
+            destination_point: myDestinationLatLng,
+            destination_address: previousDestAddress,
+            pax_num: paxSelected,
+            remark: remark,
+          },
+          passenger: {
+            first_name: first_name,
+            last_name: last_name,
+            email: email,
+            phone: phone_number,
+          },
+          vehicle: {
+            vehicle_id: vehicleObj.vehicle_id,
+            route: vehicleObj.route,
+            price: vehicleObj.price,
+            currency: vehicleObj.currency,
+          },
+          services: [
+            {
+              type: 'departing',
+              airline_iata: withNoDigits,
+              flight_num: myStringNumbers,
+              flight_date: departure_date,
+              flight_time: departure_time,
+              pick_time: pickUpTime,
+            },
+          ],
+          extra_equipment: [
+            babyObj1,
+            babyObj2,
+            childObj1,
+            childObj2,
+            wheelChairObj,
+          ],
+        },
+      };
+
+      for (let dataKey in data) {
+        if (dataKey == 'command') {
+          formData.append(`command`, 'create_reservation');
+        } else if (dataKey == 'identifier') {
+          formData.append(`identifier`, IDENTIFIER);
+        } else if (dataKey == 'key') {
+          formData.append(`key`, GET_CREATE_RESERVATION_KEY());
+        }
+        if (dataKey === 'data') {
+          // append nested object
+          for (let previewKey in data[dataKey]) {
+            if (previewKey == 'environment') {
+              formData.append(`data[${previewKey}]`, 'test');
+            }
+
+            if (previewKey == 'general') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'passenger') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'vehicle') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'services') {
+              if (data[dataKey][previewKey].length == 1) {
+                for (let ipk in data[dataKey][previewKey][0]) {
+                  formData.append(
+                    `data[${previewKey}][${0}][${ipk}]`,
+                    data[dataKey][previewKey][0][ipk],
+                  );
+                }
+              } else if (data[dataKey][previewKey].length > 1) {
+                var i = 0;
+                for (let ipk in data[dataKey][previewKey][i]) {
+                  formData.append(
+                    `data[${previewKey}][${i}][${ipk}]`,
+                    data[dataKey][previewKey][i][ipk],
+                  );
+                  if (data[dataKey][previewKey][i + 1]) {
+                    i++;
+                  }
+                }
+              }
+            }
+            if (previewKey == 'extra_equipment') {
+              if (data[dataKey][previewKey].length == 1) {
+                for (let ipk in data[dataKey][previewKey][0]) {
+                  formData.append(
+                    `data[${previewKey}][${0}][${ipk}]`,
+                    data[dataKey][previewKey][0][ipk],
+                  );
+                }
+              } else if (data[dataKey][previewKey].length > 1) {
+                console.log(
+                  'More than 1 Equipments',
+                  data[dataKey][previewKey],
+                );
+                var i = 0;
+                for (var a = 0; a < data[dataKey][previewKey].length; a++) {
+                  for (let ipk in data[dataKey][previewKey][a]) {
+                    console.log('Object1', data[dataKey][previewKey][a]);
+                    console.log('Object2', data[dataKey][previewKey][a + 1]);
+                    formData.append(
+                      `data[${previewKey}][${a}][${ipk}]`,
+                      data[dataKey][previewKey][a][ipk],
+                    );
+                  }
+                  if (data[dataKey][previewKey][a + 1]) {
+                    console.log(
+                      'Next Exists 1',
+                      data[dataKey][previewKey][a + 1],
+                    );
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (showPaymentArea) {
+        // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
+        for (var pair of formData.entries()) {
+          console.log(pair[0] + ', ' + pair[1]);
+        }
+        console.log('Showing Payment Area');
+        postRequest(formData, headers).then(data => {
+          console.log('Data Status:', data);
+          if (data.status == 'ok') {
+            console.log('Data Status:', data.status);
+          }
+        });
+      } else if (!showPaymentArea) {
+        if (
+          (contactByEmail == 1 && contactEmail) ||
+          (contactByWa == 1 && contactNumber)
+        ) {
+          if (reqStatus == 3) {
+            formData.append(`data[rejects][address]`, 1);
+          } else {
+            formData.append(`data[rejects][release_time]`, 1);
+          }
+          console.log('Not showPaymentArea');
+          formData.append(`data[rejects][release_time]`, 1);
+          if (contactByEmail) {
+            formData.append(`data[contact][contact_by_mail]`, 1);
+            formData.append(`data[contact][email_address]`, contactEmail);
+          }
+          if (contactByWa) {
+            formData.append(`data[contact][contact_by_wa]`, 1);
+            formData.append(`data[contact][wa_number]`, contactNumber);
+          }
+          formData.set('command', 'create_booking_request');
+          formData.set('key', GET_CREATE_BOOKING_KEY());
+          postRequest(formData, headers).then(data => {
+            console.log('Data Status:', data);
+            if (data.status == 'ok') {
+              console.log('Data Status:', data.status);
+            }
+          });
+        } else {
+          console.log('Show Error To Select One');
+          setShowContactInfoError('Select One of the following');
+        }
+      }
+    } // isAdvanced=true,switched=true,ow
     else if (
       myGeneralObj.myData.isAdvanced == false &&
       myGeneralObj.myData.switched == false &&
       vehicleObj.route == 'ow'
     ) {
+      console.log('Hehe Hoho Haha', myGeneralObj.myData);
       const destinationLatLng =
         '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
-      // console.log('My Keyyyyy', GET_CREATE_RESERVATION_KEY());
-      console.log('My Vehicle', vehicleObj);
       var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
       var withNoDigits = arrival_flight_number.replace(/[0-9]/g, '').trim();
       var babyObj1 = null;
@@ -1054,20 +2030,633 @@ const Booking = () => {
         }
       }
 
+      if (showPaymentArea) {
+        // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
+        for (var pair of formData.entries()) {
+          console.log(pair[0] + ', ' + pair[1]);
+        }
+        console.log('Showing Payment Area');
+        postRequest(formData, headers).then(data => {
+          console.log('Data Status:', data);
+          if (data.status == 'ok') {
+            console.log('Data Status:', data.status);
+          }
+        });
+      } else if (!showPaymentArea) {
+        console.log('Not showPaymentArea');
+        if (
+          (contactByEmail == 1 && contactEmail) ||
+          (contactByWa == 1 && contactNumber)
+        ) {
+          if (reqStatus == 3) {
+            formData.append(`data[rejects][address]`, 1);
+          } else {
+            formData.append(`data[rejects][release_time]`, 1);
+          }
+          if (contactByEmail) {
+            formData.append(`data[contact][contact_by_mail]`, 1);
+            formData.append(`data[contact][email_address]`, contactEmail);
+          }
+          if (contactByWa) {
+            formData.append(`data[contact][contact_by_wa]`, 1);
+            formData.append(`data[contact][wa_number]`, contactNumber);
+          }
+          formData.set('command', 'create_booking_request');
+          formData.set('key', GET_CREATE_BOOKING_KEY());
+          postRequest(formData, headers).then(data => {
+            console.log('Data Status:', data);
+            if (data.status == 'ok') {
+              console.log('Data Status:', data.status);
+            }
+          });
+        }
+      }
+    } //isAdvance=false,switched=false,ow
+    else if (
+      myGeneralObj.myData.isAdvanced == false &&
+      JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt'
+      //myGeneralObj.myData.switched == false &&
+    ) {
+      //
+      console.log(
+        'Local Storage Vehicle Obj',
+        JSON.parse(localStorage.getItem('vehicleObj')),
+      );
+      const destinationLatLng =
+        '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+      console.log(
+        'Round Trip with Newwwwwwwwwwwwww destinationLatLng',
+        destinationLatLng,
+      );
+      // console.log('My Keyyyyy', GET_CREATE_RESERVATION_KEY());
+      console.log('My Vehicle State Object', typeof vehicleObj.price);
+      var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
+      var withNoDigits = arrival_flight_number.replace(/[0-9]/g, '').trim();
+      var myStringNumbersDeparting = departure_flight_number
+        .replace(/\D/g, '')
+        .trim();
+      var withNoDigitsDeparting = departure_flight_number
+        .replace(/[0-9]/g, '')
+        .trim();
+      var babyObj1 = null;
+      var babyObj2 = null;
+      var childObj1 = null;
+      var childObj2 = null;
+      var wheelChairObj = null;
+      if (babySelectedAge) {
+        console.log('1 baby Object');
+        babyObj1 = {
+          type: 'baby_seat',
+          val: babySelectedAge,
+        };
+      }
+      if (babySelectedAge1) {
+        babyObj2 = {
+          type: 'baby_seat',
+          val: babySelectedAge1,
+        };
+      }
+      if (childSelectedAge) {
+        childObj1 = {
+          type: 'child_seat',
+          val: childSelectedAge,
+        };
+      }
+      if (childSelectedAge1) {
+        childObj2 = {
+          type: 'child_seat',
+          val: childSelectedAge1,
+        };
+      }
+
+      if (wheelChairVal != '') {
+        wheelChairObj = {
+          type: 'endicape',
+          val: 'Folding',
+        };
+      }
+
+      let data = {
+        command: 'create_reservation',
+        identifier: IDENTIFIER,
+        key: GET_CREATE_RESERVATION_KEY(),
+
+        data: {
+          environment: 'test',
+          general: {
+            city: myGeneralObj.myData.searchField,
+            ap_code: myGeneralObj.myData.ap_iata,
+            destination_id: myGeneralObj.myData.Destination,
+            is_advanced: '0',
+            destination_point: destinationLatLng,
+            destination_address: advnacedSearchFieldText,
+            pax_num: paxSelected,
+            remark: remark,
+          },
+          passenger: {
+            first_name: first_name,
+            last_name: last_name,
+            email: email,
+            phone: phone_number,
+          },
+          vehicle: {
+            vehicle_id: vehicleObj.vehicle_id,
+            route: vehicleObj.route,
+            price: vehicleObj.price,
+            currency: vehicleObj.currency,
+          },
+          services: [
+            {
+              type: 'arriving',
+              airline_iata: withNoDigits,
+              flight_num: myStringNumbers,
+              flight_date: arrival_date,
+              flight_time: arrival_time,
+              pick_time: 'null',
+            },
+            {
+              type: 'departing',
+              airline_iata: withNoDigitsDeparting,
+              flight_num: myStringNumbersDeparting,
+              flight_date: departure_date,
+              flight_time: departure_time,
+              pick_time: pickUpTime,
+            },
+          ],
+          extra_equipment: [
+            babyObj1,
+            babyObj2,
+            childObj1,
+            childObj2,
+            wheelChairObj,
+          ],
+        },
+      };
+
+      for (let dataKey in data) {
+        if (dataKey == 'command') {
+          formData.append(`command`, 'create_reservation');
+        } else if (dataKey == 'identifier') {
+          formData.append(`identifier`, IDENTIFIER);
+        } else if (dataKey == 'key') {
+          formData.append(`key`, GET_CREATE_RESERVATION_KEY());
+        }
+        if (dataKey === 'data') {
+          // append nested object
+          for (let previewKey in data[dataKey]) {
+            if (previewKey == 'environment') {
+              formData.append(`data[${previewKey}]`, 'test');
+            }
+
+            if (previewKey == 'general') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'passenger') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'vehicle') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'services') {
+              if (data[dataKey][previewKey].length == 1) {
+                for (let ipk in data[dataKey][previewKey][0]) {
+                  formData.append(
+                    `data[${previewKey}][${0}][${ipk}]`,
+                    data[dataKey][previewKey][0][ipk],
+                  );
+                }
+              } else if (data[dataKey][previewKey].length > 1) {
+                var i = 0;
+                for (var a = 0; a < data[dataKey][previewKey].length; a++) {
+                  for (let ipk in data[dataKey][previewKey][a]) {
+                    formData.append(
+                      `data[${previewKey}][${a}][${ipk}]`,
+                      data[dataKey][previewKey][a][ipk],
+                    );
+                  }
+                  if (data[dataKey][previewKey][a + 1]) {
+                    console.log(
+                      'Next Exists 1',
+                      data[dataKey][previewKey][a + 1],
+                    );
+                  }
+                }
+              }
+            }
+            if (previewKey == 'extra_equipment') {
+              if (data[dataKey][previewKey].length == 1) {
+                for (let ipk in data[dataKey][previewKey][0]) {
+                  formData.append(
+                    `data[${previewKey}][${0}][${ipk}]`,
+                    data[dataKey][previewKey][0][ipk],
+                  );
+                }
+              } else if (data[dataKey][previewKey].length > 1) {
+                var i = 0;
+                for (var a = 0; a < data[dataKey][previewKey].length; a++) {
+                  for (let ipk in data[dataKey][previewKey][a]) {
+                    console.log('Object1', data[dataKey][previewKey][a]);
+                    console.log('Object2', data[dataKey][previewKey][a + 1]);
+                    formData.append(
+                      `data[${previewKey}][${a}][${ipk}]`,
+                      data[dataKey][previewKey][a][ipk],
+                    );
+                  }
+                  if (data[dataKey][previewKey][a + 1]) {
+                    console.log(
+                      'Next Exists 1',
+                      data[dataKey][previewKey][a + 1],
+                    );
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // for (var pair of formData.entries()) {
+      //   console.log(pair[0] + ', ' + pair[1]);
+      // }
+      // postRequest(formData, headers).then(data => {
+      //   console.log('Data Status:', data);
+      //   if (data.status == 'ok') {
+      //     console.log('Data Status:', data.status);
+      //   }
+      // });
+
+      if (showPaymentArea) {
+        // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
+        for (var pair of formData.entries()) {
+          console.log(pair[0] + ', ' + pair[1]);
+        }
+        console.log('Showing Payment Area');
+        postRequest(formData, headers).then(data => {
+          console.log('Data Status:', data);
+          if (data.status == 'ok') {
+            console.log('Data Status:', data.status);
+          }
+        });
+      } else if (!showPaymentArea) {
+        if (
+          (contactByEmail == 1 && contactEmail) ||
+          (contactByWa == 1 && contactNumber)
+        ) {
+          console.log('Not showPaymentArea');
+          if (reqStatus == 3) {
+            formData.append(`data[rejects][address]`, 1);
+          } else {
+            formData.append(`data[rejects][release_time]`, 1);
+          }
+          if (contactByEmail) {
+            formData.append(`data[contact][contact_by_mail]`, 1);
+            formData.append(`data[contact][email_address]`, contactEmail);
+          }
+          if (contactByWa) {
+            formData.append(`data[contact][contact_by_wa]`, 1);
+            formData.append(`data[contact][wa_number]`, contactNumber);
+          }
+          formData.set('command', 'create_booking_request');
+          formData.set('key', GET_CREATE_BOOKING_KEY());
+          for (var pair of formData.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+          }
+          postRequest(formData, headers).then(data => {
+            console.log('Data Status:', data);
+            if (data.status == 'ok') {
+              console.log('Data Status:', data.status);
+              setShowContactInfoError('');
+              setStatus3PriceError(null);
+            }
+          });
+        } else {
+          console.log('Show Error To Select One');
+          setShowContactInfoError('Select One of the following');
+        }
+      }
+    } // if() is_advanced=0/false && switched=false&& roudTrip
+    else if (
+      myGeneralObj.myData.isAdvanced == true &&
+      JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt'
+      //myGeneralObj.myData.switched == false &&
+    ) {
+      //
+      console.log(
+        'IsAdvanced is TRUEEEEEEEEEEEEEE Hereeeeeeeeeeeeeeeeeee',
+        myGeneralObj,
+      );
+      var destinationLatLng = null;
+      if (
+        myGeneralObj.myData.Destination.lat != undefined &&
+        myGeneralObj.myData.Destination.lng != undefined
+      ) {
+        destinationLatLng =
+          '(' +
+          myGeneralObj.myData.Destination.lat +
+          ', ' +
+          myGeneralObj.myData.Destination.lng +
+          ')';
+      } else if (advnacedSearchVal) {
+        destinationLatLng =
+          '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+      }
+
+      console.log('advnacedSearchFieldText', advnacedSearchFieldText);
+      console.log(
+        'myGeneralObj.myData.Destination',
+        myGeneralObj.myData.destination_address,
+      );
+      var myAdvnacedSearchFieldText = advnacedSearchFieldText;
+      if (myAdvnacedSearchFieldText == null) {
+        myAdvnacedSearchFieldText = myGeneralObj.myData.destination_address;
+      }
+      var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
+      var withNoDigits = arrival_flight_number.replace(/[0-9]/g, '').trim();
+      var myStringNumbersDeparting = departure_flight_number
+        .replace(/\D/g, '')
+        .trim();
+      var withNoDigitsDeparting = departure_flight_number
+        .replace(/[0-9]/g, '')
+        .trim();
+      var babyObj1 = null;
+      var babyObj2 = null;
+      var childObj1 = null;
+      var childObj2 = null;
+      var wheelChairObj = null;
+      if (babySelectedAge) {
+        console.log('1 baby Object');
+        babyObj1 = {
+          type: 'baby_seat',
+          val: babySelectedAge,
+        };
+      }
+      if (babySelectedAge1) {
+        babyObj2 = {
+          type: 'baby_seat',
+          val: babySelectedAge1,
+        };
+      }
+      if (childSelectedAge) {
+        childObj1 = {
+          type: 'child_seat',
+          val: childSelectedAge,
+        };
+      }
+      if (childSelectedAge1) {
+        childObj2 = {
+          type: 'child_seat',
+          val: childSelectedAge1,
+        };
+      }
+
+      if (wheelChairVal != '') {
+        wheelChairObj = {
+          type: 'endicape',
+          val: 'Folding',
+        };
+      }
+
+      let data = {
+        command: 'create_reservation',
+        identifier: IDENTIFIER,
+        key: GET_CREATE_RESERVATION_KEY(),
+
+        data: {
+          environment: 'test',
+          general: {
+            city: myGeneralObj.myData.searchField,
+            ap_code: myGeneralObj.myData.ap_iata,
+            // destination_id: myGeneralObj.myData.Destination,
+            is_advanced: '1',
+            destination_point: destinationLatLng,
+            destination_address: myAdvnacedSearchFieldText,
+            pax_num: paxSelected,
+            remark: remark,
+          },
+          passenger: {
+            first_name: first_name,
+            last_name: last_name,
+            email: email,
+            phone: phone_number,
+          },
+          vehicle: {
+            vehicle_id: vehicleObj.vehicle_id,
+            route: vehicleObj.route,
+            price: vehicleObj.price,
+            currency: vehicleObj.currency,
+          },
+          services: [
+            {
+              type: 'arriving',
+              airline_iata: withNoDigits,
+              flight_num: myStringNumbers,
+              flight_date: arrival_date,
+              flight_time: arrival_time,
+              pick_time: 'null',
+            },
+            {
+              type: 'departing',
+              airline_iata: withNoDigitsDeparting,
+              flight_num: myStringNumbersDeparting,
+              flight_date: departure_date,
+              flight_time: departure_time,
+              pick_time: pickUpTime,
+            },
+          ],
+          extra_equipment: [
+            babyObj1,
+            babyObj2,
+            childObj1,
+            childObj2,
+            wheelChairObj,
+          ],
+        },
+      };
+
+      for (let dataKey in data) {
+        if (dataKey == 'command') {
+          formData.append(`command`, 'create_reservation');
+        } else if (dataKey == 'identifier') {
+          formData.append(`identifier`, IDENTIFIER);
+        } else if (dataKey == 'key') {
+          formData.append(`key`, GET_CREATE_RESERVATION_KEY());
+        }
+        if (dataKey === 'data') {
+          // append nested object
+          for (let previewKey in data[dataKey]) {
+            if (previewKey == 'environment') {
+              formData.append(`data[${previewKey}]`, 'test');
+            }
+
+            if (previewKey == 'general') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'passenger') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'vehicle') {
+              for (let ipk in data[dataKey][previewKey]) {
+                formData.append(
+                  `data[${previewKey}][${ipk}]`,
+                  data[dataKey][previewKey][ipk],
+                );
+              }
+            }
+            if (previewKey == 'services') {
+              if (data[dataKey][previewKey].length == 1) {
+                for (let ipk in data[dataKey][previewKey][0]) {
+                  formData.append(
+                    `data[${previewKey}][${0}][${ipk}]`,
+                    data[dataKey][previewKey][0][ipk],
+                  );
+                }
+              } else if (data[dataKey][previewKey].length > 1) {
+                var i = 0;
+                for (var a = 0; a < data[dataKey][previewKey].length; a++) {
+                  for (let ipk in data[dataKey][previewKey][a]) {
+                    formData.append(
+                      `data[${previewKey}][${a}][${ipk}]`,
+                      data[dataKey][previewKey][a][ipk],
+                    );
+                  }
+                  if (data[dataKey][previewKey][a + 1]) {
+                    console.log(
+                      'Next Exists 1',
+                      data[dataKey][previewKey][a + 1],
+                    );
+                  }
+                }
+              }
+            }
+            if (previewKey == 'extra_equipment') {
+              if (data[dataKey][previewKey].length == 1) {
+                for (let ipk in data[dataKey][previewKey][0]) {
+                  formData.append(
+                    `data[${previewKey}][${0}][${ipk}]`,
+                    data[dataKey][previewKey][0][ipk],
+                  );
+                }
+              } else if (data[dataKey][previewKey].length > 1) {
+                var i = 0;
+                for (var a = 0; a < data[dataKey][previewKey].length; a++) {
+                  for (let ipk in data[dataKey][previewKey][a]) {
+                    console.log('Object1', data[dataKey][previewKey][a]);
+                    console.log('Object2', data[dataKey][previewKey][a + 1]);
+                    formData.append(
+                      `data[${previewKey}][${a}][${ipk}]`,
+                      data[dataKey][previewKey][a][ipk],
+                    );
+                  }
+                  if (data[dataKey][previewKey][a + 1]) {
+                    console.log(
+                      'Next Exists 1',
+                      data[dataKey][previewKey][a + 1],
+                    );
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
       for (var pair of formData.entries()) {
         console.log(pair[0] + ', ' + pair[1]);
       }
-      // for (var value of formData.values()) {
-      //   console.log('FormData Value:', value);
-      // }
-
-      postRequest(formData, headers).then(data => {
-        console.log('Data Status:', data);
-        if (data.status == 'ok') {
-          console.log('Data Status:', data.status);
+      if (showPaymentArea) {
+        // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
+        for (var pair of formData.entries()) {
+          console.log(pair[0] + ', ' + pair[1]);
         }
-      });
-    } // if is_advanced=0/false && switched=true&& ow
+        console.log('Showing Payment Area');
+        postRequest(formData, headers).then(data => {
+          console.log('Data Status:', data);
+          if (data.status == 'ok') {
+            console.log('Data Status:', data.status);
+          }
+        });
+      } else if (!showPaymentArea) {
+        if (
+          (contactByEmail == 1 && contactEmail) ||
+          (contactByWa == 1 && contactNumber)
+        ) {
+          console.log('Not showPaymentArea');
+          if (reqStatus == 3) {
+            formData.append(`data[rejects][address]`, 1);
+          } else {
+            formData.append(`data[rejects][release_time]`, 1);
+          }
+          if (contactByEmail) {
+            formData.append(`data[contact][contact_by_mail]`, 1);
+            formData.append(`data[contact][email_address]`, contactEmail);
+          }
+          if (contactByWa) {
+            formData.append(`data[contact][contact_by_wa]`, 1);
+            formData.append(`data[contact][wa_number]`, contactNumber);
+          }
+          formData.set('command', 'create_booking_request');
+          formData.set('key', GET_CREATE_BOOKING_KEY());
+          for (var pair of formData.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+          }
+          postRequest(formData, headers).then(data => {
+            console.log('Data Status:', data);
+            if (data.status == 'ok') {
+              console.log('Data Status:', data.status);
+              setShowContactInfoError('');
+              setStatus3PriceError(null);
+            }
+          });
+        } else {
+          console.log('Show Error To Select One');
+          setShowContactInfoError('Select One of the following');
+        }
+      }
+    }
+  }
+
+  function handleContactCheck(e) {
+    if (e.currentTarget.name == 'checkboxG1') {
+      setContactByEmail(1);
+      console.log('checkboxG1', e.currentTarget.value);
+    } else if (e.currentTarget.name == 'checkboxG2') {
+      setContactByWa(1);
+      console.log('checkboxG2');
+    }
+  }
+  function handleInputValue(e) {
+    if (e.currentTarget.name == 'contact_email') {
+      console.log('contact_email', e.currentTarget.value);
+      setContactEmail(e.currentTarget.value);
+    } else if (e.currentTarget.name == 'wa_number') {
+      console.log('wa_number', e.currentTarget.value);
+      setContactNumber(e.currentTarget.value);
+    }
   }
   return (
     <div>
@@ -1087,7 +2676,7 @@ const Booking = () => {
                     initialValues={{
                       // ordernumber: '',
                       first_name: first_name,
-                      lastname: last_name,
+                      last_name: last_name,
                       phone_number: phone_number,
                       email: email,
                       arrival_date: arrival_date,
@@ -1097,6 +2686,7 @@ const Booking = () => {
                       departure_flight_number: departure_flight_number,
                       departure_time: departure_time,
                       destination: destination,
+                      remark: remark,
                       // card_holder_name: '',
                       // card_number: '',
                       // exp_date: '',
@@ -1107,6 +2697,7 @@ const Booking = () => {
                       // submitValues(values);
                       console.log('Moeed:', values);
                     }}
+                    validator={() => ({})}
                   >
                     {({ errors, touched, setFieldValue }) => (
                       <Form className="bookingform">
@@ -1226,7 +2817,7 @@ const Booking = () => {
                                     handleFlightInputsChange(e);
                                     let someValue = e.currentTarget.value;
                                     setFieldValue('arrival_date', someValue);
-                                    if (departure_flight_number) {
+                                    if (arrival_flight_number) {
                                       setArrival_flight_number('');
                                       setFieldValue(
                                         'arrival_flight_number',
@@ -1427,6 +3018,13 @@ const Booking = () => {
                                     handleFlightInputsChange(e);
                                     let someValue = e.currentTarget.value;
                                     setFieldValue('departure_date', someValue);
+                                    if (departure_flight_number) {
+                                      setDeparture_flight_number('');
+                                      setFieldValue(
+                                        'departure_flight_number',
+                                        '',
+                                      );
+                                    }
                                   }}
                                 />
                                 {errors.departure_date &&
@@ -1483,10 +3081,10 @@ const Booking = () => {
                                   </div>
                                 ) : null}
 
-                                {flight_Airport_Match_Error &&
-                                flight_Airport_Match_Error ? (
+                                {departure_flight_Airport_Match_Error &&
+                                departure_flight_Airport_Match_Error ? (
                                   <div className="errorMsg">
-                                    {flight_Airport_Match_Error}
+                                    {departure_flight_Airport_Match_Error}
                                   </div>
                                 ) : null}
                               </div>
@@ -1538,6 +3136,13 @@ const Booking = () => {
                                     handleFlightInputsChange(e);
                                     let someValue = e.currentTarget.value;
                                     setFieldValue('arrival_date', someValue);
+                                    if (arrival_flight_number) {
+                                      setArrival_flight_number('');
+                                      setFieldValue(
+                                        'arrival_flight_number',
+                                        '',
+                                      );
+                                    }
                                   }}
                                 />
                                 {errors.arrival_date && touched.arrival_date ? (
@@ -1592,10 +3197,10 @@ const Booking = () => {
                                   </div>
                                 ) : null}
 
-                                {flight_Airport_Match_Error &&
-                                flight_Airport_Match_Error ? (
+                                {arrival_flight_Airport_Match_Error &&
+                                arrival_flight_Airport_Match_Error ? (
                                   <div className="errorMsg">
-                                    {flight_Airport_Match_Error}
+                                    {arrival_flight_Airport_Match_Error}
                                   </div>
                                 ) : null}
                               </div>
@@ -1620,6 +3225,17 @@ const Booking = () => {
                                 }
                                 component={LocationSearchInput}
                               />
+                              {errors.destination && touched.destination ? (
+                                <div className="errorMsg">
+                                  {errors.destination}
+                                </div>
+                              ) : null}
+
+                              {noMatchingVehicleError ? (
+                                <div className="errorMsg">
+                                  {noMatchingVehicleError}
+                                </div>
+                              ) : null}
                             </div>
                           ) : (
                             <div className="form-group col-md-12">
@@ -1631,6 +3247,11 @@ const Booking = () => {
                                 onSetAbc={value => setAdvnacedSearchVal(value)}
                                 onSetFeildText={value =>
                                   setAdvnacedSearchFieldText(value)
+                                }
+                                myProp={
+                                  JSON.parse(
+                                    localStorage.getItem('myGeneralObj'),
+                                  ).myData
                                 }
                                 component={LocationSearchInput}
                               />
@@ -1644,25 +3265,6 @@ const Booking = () => {
                               Advanced location search
                             </a>
                           </div> */}
-
-                          {/* {modalIsOpen ? ( */}
-                          {/* <div>
-                            <Modal
-                              isOpen={modalIsOpen}
-                              onAfterOpen={afterOpenModal}
-                              onRequestClose={closeModal}
-                              style={customStyles}
-                              contentLabel="Example Modal"
-                            >
-                              <h2 ref={_subtitle => (subtitle = _subtitle)}>
-                                Map
-                              </h2>
-
-                             
-                              <div>I am a modal</div>
-                            </Modal>
-                          </div> */}
-                          {/* ) : null} */}
 
                           <div className="form-group col-md-12">
                             <div className="selectwrap">
@@ -1827,142 +3429,174 @@ const Booking = () => {
                         <hr />
                         <div className="form-row">
                           <div className="form-group col-md-12">
-                            <input
-                              onChange={remarkEntered}
+                            <Field
+                              // onChange={remarkEntered}
+                              onChange={e => {
+                                // call the built-in handleChange for formik
+                                remarkEntered(e);
+                                let someValue = e.currentTarget.value;
+                                setFieldValue('remark', someValue);
+                              }}
                               type="text"
                               className="form-control"
+                              name="remark"
                             />
+                            {errors.remark && touched.remark ? (
+                              <div className="errorMsg">{errors.remark}</div>
+                            ) : null}
                           </div>
                         </div>
-                        <h2>Payment</h2>
-                        <hr />
-                        <div className="if_not_calc_display_none ">
-                          <div className="form-row">
-                            <div className="form-group col-md-12">
-                              <label>Card holder name</label>
-                              <Field
-                                type="text"
-                                name="card_holder_name"
-                                className="form-control"
-                              />
+                        {showPaymentArea ? (
+                          <div>
+                            <h2>Payment</h2>
+                            <hr />
+                            <div className="if_not_calc_display_none ">
+                              <div className="form-row">
+                                <div className="form-group col-md-12">
+                                  <label>Card holder name</label>
+                                  <Field
+                                    type="text"
+                                    name="card_holder_name"
+                                    className="form-control"
+                                  />
 
-                              {errors.card_holder_name &&
-                              touched.card_holder_name ? (
-                                <div className="errorMsg">
-                                  {errors.card_holder_name}
+                                  {errors.card_holder_name &&
+                                  touched.card_holder_name ? (
+                                    <div className="errorMsg">
+                                      {errors.card_holder_name}
+                                    </div>
+                                  ) : null}
                                 </div>
-                              ) : null}
-                            </div>
-                            <div className="form-group col-md-4">
-                              <label>Card Number</label>
-                              <div className="isvalid">
-                                <Field
-                                  type="text"
-                                  className="form-control"
-                                  id="cardnumber"
-                                  name="card_number"
-                                />
-                                {errors.card_number && touched.card_number ? (
-                                  <div className="errorMsg">
-                                    {errors.card_number}
+                                <div className="form-group col-md-4">
+                                  <label>Card Number</label>
+                                  <div className="isvalid">
+                                    <Field
+                                      type="text"
+                                      className="form-control"
+                                      id="cardnumber"
+                                      name="card_number"
+                                    />
+                                    {errors.card_number &&
+                                    touched.card_number ? (
+                                      <div className="errorMsg">
+                                        {errors.card_number}
+                                      </div>
+                                    ) : (
+                                      <img src={tickImg} alt />
+                                    )}
                                   </div>
-                                ) : (
-                                  <img src={tickImg} alt />
-                                )}
+                                </div>
+                                <div className="form-group col-md-4">
+                                  <label>Expiration Date</label>
+                                  <Field
+                                    type="date"
+                                    // min={new Date()}
+                                    max="2050-02-20"
+                                    className="form-control"
+                                    id="prev_dates"
+                                    name="exp_date"
+                                  />
+
+                                  {errors.exp_date && touched.exp_date ? (
+                                    <div className="errorMsg">
+                                      {errors.exp_date}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                <div className="form-group col-md-4">
+                                  <label>CVV</label>
+                                  <Field
+                                    type="text"
+                                    name="cvv"
+                                    className="form-control"
+                                  />
+
+                                  {errors.cvv && touched.cvv ? (
+                                    <div className="errorMsg">{errors.cvv}</div>
+                                  ) : null}
+                                </div>
+                                <div className="form-group col-md-12">
+                                  <p>
+                                    Amount: <b className="black">00.00 USD </b>
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                            <div className="form-group col-md-4">
-                              <label>Expiration Date</label>
-                              <Field
-                                type="date"
-                                // min={new Date()}
-                                max="2050-02-20"
-                                className="form-control"
-                                id="prev_dates"
-                                name="exp_date"
-                              />
-
-                              {errors.exp_date && touched.exp_date ? (
-                                <div className="errorMsg">
-                                  {errors.exp_date}
-                                </div>
-                              ) : null}
-                            </div>
-                            <div className="form-group col-md-4">
-                              <label>CVV</label>
-                              <Field
-                                type="text"
-                                name="cvv"
-                                className="form-control"
-                              />
-
-                              {errors.cvv && touched.cvv ? (
-                                <div className="errorMsg">{errors.cvv}</div>
-                              ) : null}
-                            </div>
-                            <div className="form-group col-md-12">
-                              <p>
-                                Amount: <b className="black">00.00 USD </b>
-                              </p>
-                            </div>
                           </div>
-                        </div>
+                        ) : null}
                         <div className="form-row">
-                          <div className="form-group col-md-12">
-                            <div className="bookingnotvalid">
-                              <p className="invalid">
-                                Booking cannot be instantly confirmed for these
-                                dates. Send Cityride a booking request.
-                              </p>
-                              <p className="invalid">
-                                The price is not valid for your selected
-                                address. Send Cityride a price request.
-                              </p>
-                              <label className="ml-0">
-                                I would like to be contact by:
-                              </label>
-                              <div className="mycheck border-top-0 pt-0">
-                                <div className="checks">
-                                  <input
-                                    type="checkbox"
-                                    name="checkboxG1"
-                                    id="checkboxG1"
-                                    className="css-checkbox"
-                                  />
-                                  <label
-                                    htmlFor="checkboxG1"
-                                    className="css-label ml-0"
-                                  >
-                                    Email to{' '}
-                                  </label>
-                                  <input
-                                    type="email"
-                                    className="form-control"
-                                    id="email"
-                                  />
-                                </div>
-                                <div className="checks">
-                                  <input
-                                    type="checkbox"
-                                    name="checkboxG2"
-                                    id="checkboxG2"
-                                    className="css-checkbox"
-                                  />
-                                  <label
-                                    htmlFor="checkboxG2"
-                                    className="css-label"
-                                  >
-                                    WhatsApp to{' '}
-                                  </label>
-                                  <input
-                                    type="tel"
-                                    className="form-control"
-                                    id="whatsapp"
-                                  />
+                          {!showPaymentArea ? (
+                            <div className="form-group col-md-12">
+                              <div className="bookingnotvalid">
+                                {status3PriceError == 3 ? (
+                                  <p className="invalid">
+                                    The price is not valid for your selected
+                                    address. Send Cityride a price request.
+                                  </p>
+                                ) : (
+                                  <p className="invalid">
+                                    Booking cannot be instantly confirmed for
+                                    these dates. Send Cityride a booking
+                                    request.
+                                  </p>
+                                )}
+                                <label className="ml-0">
+                                  I would like to be contact by:
+                                </label>
+                                {showContactInfoError ? (
+                                  <p>{showContactInfoError}</p>
+                                ) : null}
+                                <div className="mycheck border-top-0 pt-0">
+                                  <div className="checks">
+                                    <input
+                                      type="checkbox"
+                                      // checked={contactByEmail}
+                                      // value={values.flag}
+                                      id="checkboxG1"
+                                      name="checkboxG1"
+                                      className="css-checkbox"
+                                      onChange={handleContactCheck}
+                                    />
+                                    <label
+                                      htmlFor="checkboxG1"
+                                      className="css-label ml-0"
+                                    >
+                                      Email to{' '}
+                                    </label>
+                                    <input
+                                      type="email"
+                                      className="form-control"
+                                      id="email"
+                                      name="contact_email"
+                                      onChange={handleInputValue}
+                                    />
+                                  </div>
+                                  <div className="checks">
+                                    <input
+                                      type="checkbox"
+                                      name="checkboxG2"
+                                      id="checkboxG2"
+                                      className="css-checkbox"
+                                      onChange={handleContactCheck}
+                                    />
+                                    <label
+                                      htmlFor="checkboxG2"
+                                      className="css-label"
+                                    >
+                                      WhatsApp to{' '}
+                                    </label>
+                                    <input
+                                      type="tel"
+                                      className="form-control"
+                                      id="whatsapp"
+                                      name="wa_number"
+                                      onChange={handleInputValue}
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          ) : null}
                           <div className="form-group col-md-12">
                             <div className="mycheck">
                               <input
@@ -2010,6 +3644,121 @@ const Booking = () => {
       </div>
 
       <Footer />
+      {modalIsOpen ? (
+        <div>
+          <Modal
+            isOpen={modalIsOpen}
+            onAfterOpen={afterOpenModal}
+            onRequestClose={closeModal}
+            style={customStyles}
+            contentLabel="Vehicles"
+            shouldCloseOnOverlayClick={false}
+          >
+            <h2 ref={_subtitle => (subtitle = _subtitle)}>Select Vehicle</h2>
+
+            <div className="row">
+              <div className="col-md-12">
+                {differentVehicles && differentVehicles.length > 0 ? (
+                  <div className="owl-carousel owl-theme carslider">
+                    {/* {'aaaaaaaaaaaaaaaaaaaaaaaaaa'} */}
+                    {differentVehicles && differentVehicles.length > 0
+                      ? differentVehicles.map(item => (
+                          <div className="item">
+                            <div className="carbox">
+                              <div className="bluebg" />
+                              <img src={car1Img} alt="cars" />
+                              <div className="choosedesc">
+                                <h4>{item.vehicle_name}</h4>
+                                <p className="grey">
+                                  Max Passengers:{' '}
+                                  <span className="blue">{item.max_pax}</span>
+                                </p>
+                                <p className="grey">
+                                  Max Luggage:{' '}
+                                  <span className="blue">
+                                    {item.max_luggage}
+                                  </span>
+                                </p>
+                                <p className="grey">
+                                  CXL Deadline:{' '}
+                                  <span className="blue">{item.cxl_days}</span>
+                                </p>
+                              </div>
+                              <div>
+                                {/* <div className="selecttrip">
+                                  
+                                  <label className="radiowrap">
+                                    Round Trip{' '}
+                                    <span className="blue">
+                                      {item.rt_price}
+                                      {item.currency == 'EUR' ? '€' : '$'}
+                                    </span>
+                                    <input
+                                      type="radio"
+                                      value={item.rt_price}
+                                      defaultValue={item.rt_price}
+                                      checked={roundTrip == item.rt_price}
+                                      onChange={e =>
+                                        onRoundTripChecked(
+                                          item.rt_price,
+                                          item.vehicle_id,
+                                          item.currency,
+                                          item.seconds_before_pick,
+                                          item.max_pax,
+                                        )
+                                      }
+                                      name="radio"
+                                    />
+                                    <span className="checkmark" />
+                                  </label>
+                                  <label className="radiowrap">
+                                    One Way{' '}
+                                    <span className="blue">
+                                      {item.ow_price}
+                                      {item.currency == 'EUR' ? '€' : '$'}
+                                    </span>
+                                    <input
+                                      type="radio"
+                                      checked={oneWayTrip === item.ow_price}
+                                      value={item.ow_price}
+                                      onChange={e =>
+                                        onOneWayChecked(
+                                          item.ow_price,
+                                          item.vehicle_id,
+                                          item.currency,
+                                          item.seconds_before_pick,
+                                          item.max_pax,
+                                        )
+                                      }
+                                      name="radio"
+                                    />
+                                    <span className="checkmark" />
+                                  </label>
+                                </div> */}
+                                <div className="booknow">
+                                  <button
+                                    type="button"
+                                    name="button"
+                                    className="btn btnstyle4 btn-block "
+                                    onClick={() => saveNewVehicle(item)}
+                                  >
+                                    Book Now
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      : null}
+                  </div>
+                ) : (
+                  'null'
+                )}
+              </div>
+            </div>
+          </Modal>
+        </div>
+      ) : null}
     </div>
   );
 };

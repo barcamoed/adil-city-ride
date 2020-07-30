@@ -12,14 +12,11 @@ import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 import airport1Img from '../../assets/images/airport1.jpg';
 import switchImg from '../../assets/images/switch.png';
-
 import LocationSearchInput from '../LocationSearchInput/index';
 import AvailableCars from '../AvailableCars/index';
-
 import { mapSchema } from '../Login/schema';
 import { func } from 'prop-types';
 import { Link } from 'react-router-dom';
-
 import ReactGMap from '../ReactGMap/index';
 
 var filteredAirports = [];
@@ -50,12 +47,19 @@ const HomeFilters = props => {
           as="select"
           name="destination"
           className="form-control form-control-sm"
+          // defaultValue="2"
+          onChange={getOnChangeVal}
         >
           <option value="">Select</option>
           {selecetdApDestinations && selecetdApDestinations.length > 0
             ? selecetdApDestinations.map((destination, key) => {
                 return (
-                  <option value={destination.id}>{destination.name}</option>
+                  <option
+                    value={destination.id}
+                    // onClick={getOnChangeDestinationObjec(destination)}
+                  >
+                    {destination.name}
+                  </option>
                 );
               })
             : 'Loading...'}
@@ -80,10 +84,18 @@ const HomeFilters = props => {
   const [advnacedSearchFieldText, setAdvnacedSearchFieldText] = useState(null);
   var [switchCheck, setSwitchCheck] = useState(0);
   const [propsSearchData, setPropsSearchData] = useState(null);
+  const [apLatLong, setApLatLong] = useState({});
+  const [destLatLng, setDestinationLatLng] = useState({});
+  const [dropDownDestinationText, setDropDownDestinationText] = useState('');
+
+  const [, updateState] = React.useState();
+  const forceUpdate = React.useCallback(() => updateState({}), []);
   console.log(
     'Advanced Search Field Text..... . ... .. .',
     advnacedSearchFieldText,
   );
+  console.log('Advanced Search Val...', advnacedSearchVal);
+  console.log('Propss Searc', props.searchData);
   function changePosition() {
     console.log('Before Switch Val:', switchCheck);
     if (switchCheck == 0) {
@@ -102,6 +114,13 @@ const HomeFilters = props => {
     setSwitch(newArr);
   }
   function apSelected(airport) {
+    console.log('Airport Lat Long', parseFloat(airport.ap_latitude));
+
+    setApLatLong({
+      lat: parseFloat(airport.ap_latitude),
+      lng: parseFloat(airport.ap_longitude),
+    });
+
     activateCardClass('card active');
     setCardName(airport.ap_name);
     setFromValue(airport.ap_name);
@@ -121,7 +140,11 @@ const HomeFilters = props => {
             {airport.destinations && airport.destinations.length > 0
               ? airport.destinations.map((destination, key) => {
                   return (
-                    <option key={key} value={destination.id}>
+                    <option
+                      key={key}
+                      value={destination.id}
+                      // onClick={getOnChangeDestinationObjec(destination)}
+                    >
                       {destination.name}
                     </option>
                   );
@@ -138,10 +161,13 @@ const HomeFilters = props => {
 
     const newArr = [first, second];
     setSwitch(newArr);
-    console.log('selectedApDestinations:', selecetdApDestinations);
+    console.log(
+      'selectedApDestinationsssssssssssssss:',
+      selecetdApDestinations,
+    );
   }
   function getOnChangeVal(e) {
-    console.log('Valueeeeeeeee', e.target.value);
+    console.log('Selected Dest ID hereeeeee', e.target.value);
     setDestinationIDValue(e.target.value);
   }
 
@@ -164,7 +190,10 @@ const HomeFilters = props => {
       if (filteredAirports.length == 1) {
       }
     }
-    if (selectOptions == false) {
+    if (switchCheck == 1 && selectOptions == false) {
+      const newArr = [second, first];
+      setSwitch(newArr);
+    } else if (switchCheck == 0 && selectOptions == false) {
       const newArr = [first, second];
       setSwitch(newArr);
     }
@@ -174,6 +203,23 @@ const HomeFilters = props => {
     }
     if (switchCheck == 0) {
       console.log(' Notttt.....Switcheddddd');
+    }
+
+    if (
+      Object.keys(destLatLng).length === 0 &&
+      destLatLng.constructor === Object &&
+      selecetdApDestinationIdValue != 0
+    ) {
+      selecetdApDestinations.map((item, key) => {
+        if (item.id == selecetdApDestinationIdValue) {
+          console.log('ID Matched hereeeeeeeeeOOOOOOOOOO', item);
+          setDestinationLatLng({
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lng),
+          });
+          setDropDownDestinationText(item.name);
+        }
+      });
     }
 
     var date = new Date().toISOString().slice(0, 10);
@@ -243,32 +289,24 @@ const HomeFilters = props => {
         map.fitBounds(bounds);
       });
     }
-
-    /*car slider*/
-    // $('.carslider').owlCarousel({
-    //   loop: false,
-    //   margin: 0,
-    //   nav: true,
-    //   dots: false,
-    //   dotsContainer: '.rightdots',
-    //   dotsSpeed: 1000,
-
-    //   responsive: {
-    //     0: {
-    //       items: 1,
-    //     },
-    //     600: {
-    //       items: 1,
-    //     },
-    //     991: {
-    //       items: 2,
-    //     },
-    //     1000: {
-    //       items: 3,
-    //     },
-    //   },
-    // });
-  }, [props.searchData.searchField, selectOptions]);
+    if (apLatLong && destLatLng) {
+      console.log('apLat Long', apLatLong);
+      console.log('destLatLng mmm', destLatLng);
+      // forceUpdate();
+      // console.log('Updateddddddddddddd', apLatLong);
+    }
+    if (advnacedSearchVal != null) {
+      setDestinationLatLng(advnacedSearchVal);
+      // forceUpdate();
+    }
+  }, [
+    props.searchData.searchField,
+    selectOptions,
+    apLatLong,
+    selecetdApDestinationIdValue,
+    destLatLng,
+    // advnacedSearchVal,
+  ]);
 
   var subtitle;
 
@@ -294,9 +332,15 @@ const HomeFilters = props => {
           pax_num: props.searchData.passengers,
           switched: true,
           isAdvanced: false,
+          apLatLong: apLatLong,
+          destLatLng: destLatLng,
+          dropDownDestinationText: dropDownDestinationText,
         });
       } else if (!selectOptions) {
-        console.log('Switched and Advanced inside HomeFilterssssssssssssss');
+        console.log(
+          'Switched and Advanced inside HomeFiltersccccccccccc',
+          advnacedSearchFieldText,
+        );
         await setmyData({
           searchField: props.searchData.searchField,
           From: selecetdApFromValue,
@@ -305,6 +349,9 @@ const HomeFilters = props => {
           switched: true,
           isAdvanced: true,
           destination_address: advnacedSearchFieldText,
+          apLatLong: apLatLong,
+          destLatLng: destLatLng,
+          dropDownDestinationText: dropDownDestinationText,
         });
       }
     } else if (switchCheck == 0) {
@@ -323,6 +370,9 @@ const HomeFilters = props => {
           pax_num: props.searchData.passengers,
           switched: false,
           isAdvanced: false,
+          apLatLong: apLatLong,
+          destLatLng: destLatLng,
+          dropDownDestinationText: dropDownDestinationText,
         });
         console.log('myData:', myData);
       } else if (selectOptions == false) {
@@ -338,6 +388,9 @@ const HomeFilters = props => {
           switched: false,
           isAdvanced: true,
           destination_address: advnacedSearchFieldText,
+          apLatLong: apLatLong,
+          destLatLng: destLatLng,
+          dropDownDestinationText: dropDownDestinationText,
         });
       }
     }
@@ -359,7 +412,7 @@ const HomeFilters = props => {
         </div>
         <div className="container">
           <div className="row">
-            {airportsArray && airportsArray.length > 0
+            {airportsArray && airportsArray.length > 1
               ? airportsArray.map(item => (
                   <div className="col-md-6">
                     <div
@@ -373,7 +426,40 @@ const HomeFilters = props => {
                       <div className="row no-gutters">
                         <div className="col-md-5">
                           <img
-                            src={airport1Img}
+                            src={item.ap_image}
+                            className="card-img"
+                            alt="destination"
+                          />
+                        </div>
+                        <div className="col-md-7">
+                          <div className="card-body">
+                            <p className="cityname">{item.ap_iata}</p>
+                            <h3>{item.ap_name}</h3>
+                            <p className="state">
+                              {item.city}
+                              {/* , {item.country} */}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              : airportsArray && airportsArray.length == 1
+              ? airportsArray.map(item => (
+                  <div className="col-md-6">
+                    <div
+                      onLoad={() => apSelected(item)}
+                      className={
+                        activate && ap_name == item.ap_name
+                          ? 'card active'
+                          : 'card'
+                      }
+                    >
+                      <div className="row no-gutters">
+                        <div className="col-md-5">
+                          <img
+                            src={item.ap_image}
                             className="card-img"
                             alt="destination"
                           />
@@ -432,8 +518,16 @@ const HomeFilters = props => {
                         >
                           {({ errors, touched }) => (
                             <Form className="form">
-                              {errors.from && touched.from ? (
+                              {errors.from &&
+                              touched.from &&
+                              switchCheck == 0 ? (
                                 <div className="errorMsg">{errors.from}</div>
+                              ) : errors.destination &&
+                                touched.destination &&
+                                switchCheck == 1 ? (
+                                <div className="errorMsg">
+                                  {errors.destination}
+                                </div>
                               ) : null}
 
                               {/* {showFromFirst[0].props.children.props.children ==
@@ -449,10 +543,16 @@ const HomeFilters = props => {
                                 {showFromFirst[1]}
                               </div>
 
-                              {errors.destination && touched.destination ? (
+                              {errors.destination &&
+                              touched.destination &&
+                              switchCheck == 0 ? (
                                 <div className="errorMsg">
                                   {errors.destination}
                                 </div>
+                              ) : errors.from &&
+                                touched.from &&
+                                switchCheck == 0 ? (
+                                <div className="errorMsg">{errors.from}</div>
                               ) : null}
 
                               <div className="form-group">
@@ -475,23 +575,41 @@ const HomeFilters = props => {
                     </div>
                   </div>
                   <div className="col-lg-5 col-md-12">
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d83907.59515727437!2d2.3529858436156954!3d48.91325171356301!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x47e6703bb5abfe17%3A0x67d9ee40dcd96ca0!2sNouvel%20H%C3%B4tel%20Eiffel%2C%20Rue%20des%20Volontaires%2C%20Paris%2C%20France!3m2!1d48.843395!2d2.3068478!4m5!1s0x47e61622698d2851%3A0x8f4061ad11f6f5fd!2sAeroport%20Paris%20Charles-de-Gaulle%20TERMINAL%20L%2C%20Le%20Mesnil-Amelot%2C%20France!3m2!1d49.0057827!2d2.5847271!5e0!3m2!1sen!2s!4v1588700343560!5m2!1sen!2s"
-                      width="100%"
-                      height="100%"
-                      frameBorder={0}
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      aria-hidden="false"
-                      tabIndex={0}
-                    />
-                    {/* <ReactGMap
-                      containerElement={
-                        <div style={{ height: `100%`, width: '100%' }} />
-                      }
-                      mapElement={<div style={{ height: `100%` }} />}
-                      isMarkerShown
-                    /> */}
+                    {Object.keys(apLatLong).length != 0 &&
+                    apLatLong.constructor === Object &&
+                    (Object.keys(destLatLng).length != 0 &&
+                      destLatLng.constructor === Object) &&
+                    advnacedSearchVal == null ? (
+                      <ReactGMap
+                        containerElement={
+                          <div style={{ height: `100%`, width: '100%' }} />
+                        }
+                        mapElement={<div style={{ height: `100%` }} />}
+                        isMarkerShown
+                        origin={{ lat: apLatLong.lat, lng: apLatLong.lng }}
+                        destination={{
+                          lat: destLatLng.lat,
+                          lng: destLatLng.lng,
+                        }}
+                      />
+                    ) : null}
+
+                    {Object.keys(apLatLong).length != 0 &&
+                    apLatLong.constructor === Object &&
+                    advnacedSearchVal != null ? (
+                      <ReactGMap
+                        containerElement={
+                          <div style={{ height: `100%`, width: '100%' }} />
+                        }
+                        mapElement={<div style={{ height: `100%` }} />}
+                        isMarkerShown
+                        origin={{ lat: apLatLong.lat, lng: apLatLong.lng }}
+                        destination={{
+                          lat: advnacedSearchVal.lat,
+                          lng: advnacedSearchVal.lng,
+                        }}
+                      />
+                    ) : null}
                   </div>
                 </div>
               </div>

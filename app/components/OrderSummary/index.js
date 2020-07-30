@@ -60,33 +60,69 @@ const OrderSummary = () => {
                       <div className="eachdetail">
                         <span className="blue">From:</span>
                         <p>
-                          John F. Kennedy International Airport – JFK 95 West
-                          Broadway, New York NY 10007
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[0].pick_location
+                          }
                         </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Pick-up date:</span>
-                        <p>2020-04-07</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[0].date
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Pick-up time:</span>
-                        <p>00:15</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[0].time
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Passengers:</span>
-                        <p>1 (Standard Car)</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[0].pax_num
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Service type:</span>
-                        <p>Private service</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[0].service_type
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Flight number:</span>
-                        <p>W6 1387</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[0].flight_num
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Price:</span>
-                        <p>41 EUR </p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[0].price
+                          }{' '}
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[0].currency
+                          }{' '}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -99,35 +135,79 @@ const OrderSummary = () => {
                     <div className="summarydetail">
                       <div className="eachdetail">
                         <span className="blue">From:</span>
-                        <p>95 West Broadway, New York NY 10007</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[1].pick_location
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">To:</span>
-                        <p>John F. Kennedy International Airport – JFK</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[1].drop_location
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Pick-up date:</span>
-                        <p>2020-04-07</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[1].date
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
-                        <span className="blue">Pick-up time:</span>
-                        <p>00:15</p>
+                        <span className="blue">Depart time:</span>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[1].depart_time
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Passengers:</span>
-                        <p>1 (Standard Car)</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[1].pax_num
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Service type:</span>
-                        <p>Private service</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[1].service_type
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Flight number:</span>
-                        <p>W6 1387</p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[1].flight_num
+                          }
+                        </p>
                       </div>
                       <div className="eachdetail">
                         <span className="blue">Price:</span>
-                        <p>41 EUR </p>
+                        <p>
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[1].price
+                          }{' '}
+                          {
+                            JSON.parse(localStorage.getItem('order_detail'))
+                              .transfers[1].currency
+                          }{' '}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -165,7 +245,7 @@ const OrderSummary = () => {
                     <div className="eachdetail">
                       <span className="blue">
                         {JSON.parse(localStorage.getItem('order_detail'))
-                          .transfers[0].depart_time
+                          .transfers[0].date
                           ? 'Departing date'
                           : 'Pickup date'}
                       </span>

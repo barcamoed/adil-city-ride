@@ -65,6 +65,10 @@
   },
   "dependencies": {
     "@babel/polyfill": "7.4.3",
+    "@fortawesome/fontawesome-svg-core": "^1.2.30",
+    "@fortawesome/free-solid-svg-icons": "^5.14.0",
+    "@fortawesome/react-fontawesome": "^0.1.11",
+    "armageddon": "file:../../..",
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
     "chalk": "2.4.2",
@@ -91,6 +95,7 @@
     "rc-time-picker": "^3.7.3",
     "react": "16.8.6",
     "react-autosuggest": "^10.0.2",
+    "react-confirm-alert": "^2.6.1",
     "react-datepicker": "^2.16.0",
     "react-dom": "16.8.6",
     "react-google-maps": "^9.4.5",

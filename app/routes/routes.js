@@ -11,6 +11,14 @@ import Faq from '../components/Faq';
 import OrderSummary from '../components/OrderSummary';
 import TermsAndConditions from '../components/TermsAndConditions';
 import Contact from '../components/Contact';
+import ReferalLogin from '../components/ReferalLogin';
+import ReferalAccount from '../components/ReferralAccount';
+import ReferalStat from '../components/ReferralStats';
+import AdminLogin from '../components/AdminLogin';
+import AdminAccount from '../components/AdminAccount';
+import AdminBookings from '../components/AdminBookings';
+import AdminReferrals from '../components/AdminReferrals';
+
 import NotFoundPage from '../containers/NotFoundPage';
 import { Router, browserHistory } from 'react-router';
 
@@ -30,6 +38,14 @@ const Routes = () => (
         component={TermsAndConditions}
       />
       <Route exact path="/contact" component={Contact} />
+      <Route exact path="/referral/login" component={ReferalLogin} />
+      <Route exact path="/referral/account" component={ReferalAccount} />
+      <Route exact path="/referral/stat" component={ReferalStat} />
+      <Route exact path="/admin/login" component={AdminLogin} />
+      <Route exact path="/admin/account" component={AdminAccount} />
+      <Route exact path="/admin/bookings" component={AdminBookings} />
+      <Route exact path="/admin/referrals" component={AdminReferrals} />
+
       {/* <Route component={Login} exact path="/login" /> */}
       <Route component={NotFoundPage} />
       {/* </Router> */}

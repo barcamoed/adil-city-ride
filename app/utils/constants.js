@@ -104,3 +104,189 @@ export const GET_RESERVATION_DETAILS_KEY = () => {
   // console.log('Key', key);
   return key;
 };
+
+export const GET_CONTACT_US_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(PASSWORD + IDENTIFIER + 'send_contact_form' + finalToken);
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_CREATE_BOOKING_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(
+    PASSWORD + IDENTIFIER + 'create_booking_request' + finalToken,
+  );
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_AFFILIATE_USER_LOGIN_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(PASSWORD + IDENTIFIER + 'affiliate_user_login' + finalToken);
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_CREATE_AFFILIATE_USER_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(PASSWORD + IDENTIFIER + 'create_affiliate_user' + finalToken);
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_ALL_AFFILIATE_USERS_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(PASSWORD + IDENTIFIER + 'get_affiliate_users' + finalToken);
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_AFFILIATE_APPROVED_EARNING_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(
+    PASSWORD + IDENTIFIER + 'get_affiliate_approved_earning' + finalToken,
+  );
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_EDIT_AFFILIATE_USER_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(PASSWORD + IDENTIFIER + 'edit_affiliate_user' + finalToken);
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_DELETE_AFFILIATE_USER_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(PASSWORD + IDENTIFIER + 'delete_affiliate_user' + finalToken);
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_CLEAR_AFFILIATE_APPROVED_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(
+    PASSWORD + IDENTIFIER + 'clear_affiliate_approved_earning' + finalToken,
+  );
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_AFFILIATE_ADMIN_VIEW_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(
+    PASSWORD + IDENTIFIER + 'get_affiliate_admin_view' + finalToken,
+  );
+  // console.log('Key', key);
+  return key;
+};
+
+export const GET_AFFILIATE_USER_VIEW_KEY = () => {
+  const myDate = new Date().toLocaleDateString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+  });
+  const myTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    hour12: false,
+    hour: 'numeric',
+  });
+  const formattedToken = myDate + ' ' + myTime + ':00';
+  const finalToken = new Date(formattedToken).getTime() / 1000;
+  const key = md5(
+    PASSWORD + IDENTIFIER + 'get_affiliate_user_view' + finalToken,
+  );
+  // console.log('Key', key);
+  return key;
+};

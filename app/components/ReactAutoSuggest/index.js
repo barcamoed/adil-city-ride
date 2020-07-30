@@ -59,8 +59,9 @@ class ReactAutoSuggest extends React.Component {
 
   componentDidMount = () => {
     // console.log('If ComponentDidM 1');
+    console.log('propsssssiiiiiiiieeeeeeee', this.props);
     if (localStorage.getItem('CityAirports')) {
-      console.log('If ComponentDidM 1');
+      // console.log('If ComponentDidM 1');
       this.setState({
         languages: JSON.parse(localStorage.getItem('CityAirports')),
       });
@@ -100,6 +101,7 @@ class ReactAutoSuggest extends React.Component {
             'CityAirports',
             JSON.stringify(newAirportsArray),
           );
+          localStorage.setItem('apRequestTime', JSON.stringify(new Date()));
           this.setState({ languages: newAirportsArray });
           mlanguages = JSON.parse(localStorage.getItem('CityAirports'));
           console.log('after Post request state is:', this.state.languages);
@@ -128,11 +130,37 @@ class ReactAutoSuggest extends React.Component {
     }
   };
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.setApValue !== this.props.setApValue) {
+      this.setState({
+        value: this.props.setApValue,
+      });
+      this.props.form.setFieldValue('searchField', this.props.setApValue);
+      console.log('asdfsadfsadfasdfdasd');
+    }
+    // console.log('PRev Props', prevProps);
+    // console.log('NEwwwwww Props', this.props);
+    //When user directly selects Airport.
+    // if (prevProps.setApValue !== this.props.setApValue) {
+    //   console.log('Inside If PRev Props', prevProps);
+    //   this.setState({
+    //     value: this.props.setApValue,
+    //   });
+    //   this.props.form.setFieldValue('searchField', this.props.setApValue);
+    // }
+    // else {
+    //   // this.onChange;
+    // }
+  }
+
   onChange = (event, { newValue }) => {
+    // console.log('New Valueeeeeee:::', newValue);
+    // console.log('New Props Valueeeeeee:::', this.props);
     this.setState({
       value: newValue,
     });
     this.props.form.setFieldValue('searchField', newValue);
+    this.props.onGetSearchVal(newValue);
   };
 
   // Autosuggest will call this function every time you need to update suggestions.
@@ -154,10 +182,15 @@ class ReactAutoSuggest extends React.Component {
     const { value, suggestions } = this.state;
 
     // Autosuggest will pass through all these props to the input.
+    // var makeItTrue = false;
+    // if (this.props.setApValue != undefined) {
+    //   makeItTrue = true;
+    // }
     const inputProps = {
       placeholder: 'Search City',
       value,
       onChange: this.onChange,
+      // disabled: makeItTrue,
     };
 
     // Finally, render it!

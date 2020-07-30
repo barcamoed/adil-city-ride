@@ -12,17 +12,10 @@ import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 import arrowrightImg from '../../assets/images/arrowright.png';
 import destination1Img from '../../assets/images/destination1.jpg';
-import destination2Img from '../../assets/images/destination2.jpg';
-import destination3Img from '../../assets/images/destination3.jpg';
-import destination4Img from '../../assets/images/destination4.jpg';
-import destination5Img from '../../assets/images/destination5.jpg';
-import destination6Img from '../../assets/images/destination6.jpg';
-import destination7Img from '../../assets/images/destination7.jpg';
-import destination8Img from '../../assets/images/destination8.jpg';
 import { IDENTIFIER, GETKEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 // import '../../assets/js/custom';
-const ChooseDestination = () => {
+const ChooseDestination = props => {
   var aloop = [];
   const [myloop, setArray] = useState(aloop);
   const [fakeLoop, setFArray] = useState(aloop);
@@ -172,13 +165,18 @@ const ChooseDestination = () => {
     params.append('data', []);
 
     //
+
+    console.log(
+      'AP Request Time LocalStorage:',
+      localStorage.getItem('apRequestTime'),
+    );
     if (!localStorage.getItem('CityAirports')) {
+      console.log('No AP Data In Local Storage');
       postRequest(params, headers).then(data => {
         console.log('City Dataaaaaaaa:', data.cities.length);
         for (var j = 0; j < data.cities.length; ) {
-          console.log('City Dataaaaaaaammmmmmmm');
           data['cities'][j]['airports'].forEach(element => {
-            console.log('elementMMMM', element);
+            // console.log('elementMMMM', element);
             newAirportsArray[j] = element;
             newAirportsArray[j].city = data['cities'][j]['city'];
           });
@@ -186,43 +184,84 @@ const ChooseDestination = () => {
         }
         console.log('newAirportsArray:', newAirportsArray);
         localStorage.setItem('CityAirports', JSON.stringify(newAirportsArray));
+        localStorage.setItem('apRequestTime', JSON.stringify(new Date()));
         setArray(newAirportsArray);
         customJS();
       });
-    } else {
-      // localStorage.removeItem('CityAirports');
-      localStorageData();
-      console.log('Inside Else');
+    } else if (JSON.parse(localStorage.getItem('apRequestTime'))) {
+      console.log(
+        'AP Request Time LocalStorage:',
+        JSON.parse(localStorage.getItem('CityAirports')),
+      );
+      var hours =
+        Math.abs(
+          new Date(JSON.parse(localStorage.getItem('apRequestTime'))) -
+            new Date(),
+        ) / 36e5;
+      console.log('AP Data In Local Storage Exists', hours);
+      if (hours > 2) {
+        console.log('More Then 2 HOURSSSSSSSSSSSS');
+        // const interval = setInterval(() => {
+        //   console.log('This will run every 3 second!');
+        var myNewAirportsArray = [];
+        // setArray([]);
+        // postRequest(params, headers).then(data => {
+        //   data.forEach(element => {
+        //     outerLoopSize = outerLoopSize + element.airports.length;
+        //     element.airports.forEach(airport => {
+        //       myNewAirportsArray[i] = airport;
+        //       myNewAirportsArray[i].city = element.city;
+        //       i++;
+        //     });
+        //   });
+        //   localStorage.clear();
+        //   var filteredArray = myNewAirportsArray.filter(function(el) {
+        //     return el != null;
+        //   });
+
+        //   console.log('Interval Before setArray', filteredArray);
+        //   localStorage.setItem('CityAirports', JSON.stringify(filteredArray));
+
+        //   setArray(filteredArray);
+        //   // newAirportsArray = [];
+        //   console.log('newAirportsArray after setting empty', filteredArray);
+        //   customJS();
+        // });
+
+        postRequest(params, headers).then(data => {
+          console.log('City Dataaaaaaaa:', data.cities.length);
+          for (var j = 0; j < data.cities.length; ) {
+            console.log('City Dataaaaaaaammmmmmmm');
+            data['cities'][j]['airports'].forEach(element => {
+              // console.log('elementMMMM', element);
+              newAirportsArray[j] = element;
+              newAirportsArray[j].city = data['cities'][j]['city'];
+            });
+            j++;
+          }
+          console.log('newAirportsArray:', newAirportsArray);
+          localStorage.setItem(
+            'CityAirports',
+            JSON.stringify(newAirportsArray),
+          );
+          localStorage.setItem('apRequestTime', JSON.stringify(new Date()));
+          setArray(newAirportsArray);
+          customJS();
+        });
+
+        console.log('Herzzzzzzzzzzzzzzzzzzzzzzzzz');
+        // }, 30000000);
+        // return () => clearInterval(interval);
+      } else {
+        // localStorage.removeItem('CityAirports');
+        console.log(
+          'Get Local Storage Time',
+          localStorage.getItem('apRequestTime'),
+        );
+        localStorageData();
+        console.log('Less than 2 hrs Inside Else');
+      }
     }
-
-    const interval = setInterval(() => {
-      console.log('This will run every 3 second!');
-      var myNewAirportsArray = [];
-      // setArray([]);
-      postRequest(params, headers).then(data => {
-        data.forEach(element => {
-          outerLoopSize = outerLoopSize + element.airports.length;
-          element.airports.forEach(airport => {
-            myNewAirportsArray[i] = airport;
-            myNewAirportsArray[i].city = element.city;
-            i++;
-          });
-        });
-        localStorage.clear();
-        var filteredArray = myNewAirportsArray.filter(function(el) {
-          return el != null;
-        });
-
-        console.log('Interval Before setArray', filteredArray);
-        localStorage.setItem('CityAirports', JSON.stringify(filteredArray));
-
-        setArray(filteredArray);
-        // newAirportsArray = [];
-        console.log('newAirportsArray after setting empty', filteredArray);
-        customJS();
-      });
-    }, 30000000);
-    return () => clearInterval(interval);
   }, []);
 
   async function localStorageData() {
@@ -239,7 +278,11 @@ const ChooseDestination = () => {
   var loopLength = myloop.length;
   const outerLoopLimit = Math.ceil(loopLength / 8);
   var innerLoopEnd = 8;
-
+  const onAirportClick = (searchField, passengers) => {
+    console.log('Airport Clickeddddddddddd', searchField, passengers);
+    console.log('Chose Desination Propsssssssssssssssssss', props);
+    props.onAirportValues({ searchField, passengers });
+  };
   // for (var i = 0; i < cityAndAirports.length; i++) {}
   return (
     <div>
@@ -265,10 +308,14 @@ const ChooseDestination = () => {
                             .slice(innerLoopStart, innerLoopEnd)
                             .map((airport, key) => {
                               return (
-                                <a href="#">
+                                <a
+                                  onClick={() =>
+                                    onAirportClick(airport.city, '2')
+                                  }
+                                >
                                   <div className="choosebox">
                                     <img
-                                      src={destination1Img}
+                                      src={airport.ap_image}
                                       alt="Destintation"
                                     />
                                     <div className="choosedesc">
@@ -304,9 +351,9 @@ const ChooseDestination = () => {
                   ? myloop.slice(0, loopLength).map((item, key) => {
                       return (
                         <div className="item">
-                          <a href="#">
+                          <a onClick={() => onAirportClick(airport.city, '2')}>
                             <div className="choosebox">
-                              <img src={destination1Img} alt="Destintation" />
+                              <img src={item.ap_image} alt="Destintation" />
                               <div className="choosedesc">
                                 <p className="cityname">{item.ap_iata}</p>
                                 <h3>{item.ap_name}</h3>

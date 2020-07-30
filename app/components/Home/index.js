@@ -24,23 +24,55 @@ import driver2Img from '../../assets/images/driver2.jpg';
 import driver3Img from '../../assets/images/driver3.jpg';
 import { Formik, Form, Field } from 'formik';
 import { searchSchema } from '../Login/schema';
-import { IDENTIFIER, GETKEY } from '../../utils/constants';
-import { postRequest } from '../../utils/requests';
-
-//import Autosuggest from 'react-autosuggest';
+import { Link } from 'react-router-dom';
+// import '../../assets/css/style.css';
 import MyAutosuggest from '../ReactAutoSuggest';
-const Home = ({ history }) => {
+const Home = props => {
   // console.log('Historyyyyyyyyyyyyy:', history);
   const [showFilter, setShowFilters] = useState(false);
-  const [searchValAndPassengers, setSearchValAndPassengers] = useState({});
+  const [showAPFilter, setShowAirportFilters] = useState(false);
 
+  const [searchValAndPassengers, setSearchValAndPassengers] = useState({});
+  const [airportSelectedValues, setAirportSelectValues] = useState({});
+  const [paxVal, setPaxVal] = useState('2');
+  const [searchVal, setSearchField] = useState('');
+
+  // console.log('sssssssssssssssssssssss', searchVal);
+  console.log(
+    'Airport Selected Values Coming from Choose Destination',
+    airportSelectedValues && airportSelectedValues,
+  );
   function handleSearch(values) {
-    console.log('City Search Clicked', values);
+    console.log('City Search Clicked.a.a.a.a', values);
     setSearchValAndPassengers(values);
     setShowFilters(true);
+    setShowAirportFilters(false);
+    setPaxVal(values.passengers);
   }
-  console.log('searchValAndPassengers', searchValAndPassengers);
+  console.log(
+    'searchValAndPassengers',
+    searchValAndPassengers && searchValAndPassengers,
+  );
   useEffect(() => {
+    console.log('airportSelectedValues', airportSelectedValues);
+    if (
+      Object.keys(airportSelectedValues).length != 0 &&
+      airportSelectedValues.constructor === Object
+    ) {
+      console.log('aaaaaaaaa', airportSelectedValues);
+      setPaxVal('2');
+      setSearchValAndPassengers({
+        searchField: airportSelectedValues.searchField,
+        passengers: paxVal,
+      });
+      setShowAirportFilters(true);
+      setShowFilters(false);
+    }
+    // if (searchValAndPassengers && searchValAndPassengers) {
+    //   console.log('Yessssssss searchValAndPassengers', searchValAndPassengers);
+
+    // }
+
     var date = new Date().toISOString().slice(0, 10);
     $(window).scroll(function() {
       var sticky = $('#site-header'),
@@ -121,7 +153,27 @@ const Home = ({ history }) => {
         },
       },
     });
-  }, []);
+  }, [searchValAndPassengers.length, airportSelectedValues]);
+
+  function selectPax(e, setFieldValue) {
+    console.log('Selected Val', e.target.value);
+    console.log(
+      'airportSelectedValues.searchField',
+      airportSelectedValues.searchField,
+    );
+    setPaxVal(e.target.value);
+
+    // setAirportSelectValues({
+    //   searchField: searchVal,
+    //   passengers: e.target.value,
+    // });
+  }
+  function setDefaultPaxVal(setFieldValue) {
+    setPaxVal('2');
+    setFieldValue('passengers', '2');
+    console.log('Default Pax Val');
+    // return paxVal;
+  }
 
   return (
     <div>
@@ -152,10 +204,10 @@ const Home = ({ history }) => {
                   validationSchema={searchSchema}
                   onSubmit={values => {
                     handleSearch(values);
-                    // console.log('Moeed:', values);
+                    console.log('Moeeddddd:', values);
                   }}
                 >
-                  {({ errors, touched, isSubmitting }) => (
+                  {({ errors, touched, isSubmitting, setFieldValue }) => (
                     <Form disabled={isSubmitting} noValidate>
                       <div className="input-group">
                         {errors.searchField && touched.searchField ? (
@@ -167,6 +219,8 @@ const Home = ({ history }) => {
                           name="searchField"
                           className="form-control"
                           aria-label="Text input with dropdown button"
+                          setApValue={airportSelectedValues.searchField}
+                          onGetSearchVal={value => setSearchField(value)}
                           component={MyAutosuggest}
                         />
 
@@ -178,6 +232,12 @@ const Home = ({ history }) => {
                             as="select"
                             name="passengers"
                             className="form-control"
+                            // defaultValue={showAPFilter ? '2' : paxVal}
+                            value={showAPFilter ? paxVal : paxVal}
+                            onChange={e => {
+                              selectPax(e);
+                              setFieldValue('passengers', e.target.value);
+                            }}
                           >
                             <option value="">Select Passengers</option>
                             <option value="1">1</option>
@@ -206,9 +266,9 @@ const Home = ({ history }) => {
                 </Formik>
 
                 <div className="contact">
-                  <a href="#" className="btn btnstyle1">
+                  <Link to="/contact" className="btn btnstyle1">
                     <img src={whatsappImg} alt="img-fluid" /> Contact Us
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -217,12 +277,19 @@ const Home = ({ history }) => {
 
         {/* <ChooseDestination /> */}
 
-        {showFilter ? (
+        {showFilter && !showAPFilter ? (
           <HomeFilters searchData={searchValAndPassengers} />
-        ) : (
-          <ChooseDestination />
-        )}
-        {/* <HomeFilters /> */}
+        ) : !showFilter && !showAPFilter ? (
+          <ChooseDestination
+            onAirportValues={value => setAirportSelectValues(value)}
+          />
+        ) : showAPFilter && !showFilter ? (
+          <HomeFilters searchData={searchValAndPassengers} />
+        ) : null}
+
+        {/* {showAPFilter && !showFilter ? (
+          <HomeFilters searchData={searchValAndPassengers} />
+        ) : null} */}
 
         <section className="book">
           <div className="container">

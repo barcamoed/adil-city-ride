@@ -8,15 +8,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Route, withRouter } from 'react-router-dom';
 import Modal from 'react-modal';
 import car1Img from '../../assets/images/car1.png';
-import car2Img from '../../assets/images/car2.png';
-import car3Img from '../../assets/images/car3.png';
+
 import { IDENTIFIER, GETVEHICLESKEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
+import ReactGMap from '../ReactGMap/index';
+// import '../../assets/css/style.css';
 import request from '../../utils/apiWrappers';
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
-import axios from 'axios';
-import { BASE_URL } from '../../utils/constants';
 import { Router, browserHistory } from 'react-router';
 // import { createHashHistory } from 'history';
 // export const history = createHashHistory();
@@ -30,9 +29,11 @@ const customStyles = {
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
   },
+  overlay: { zIndex: 1000 },
 };
 
 const AvailableCars = props => {
+  var subtitle;
   const [modalIsOpen, setIsOpen] = useState(false);
   const [ap_iata, setAp_iata] = useState(null);
   var [availableCars, setAvailableCars] = useState([]);
@@ -41,6 +42,7 @@ const AvailableCars = props => {
   var [oneWayTrip, setOneWayTrip] = useState(null);
   var [selectTripTypeError, setSelectTripTypeError] = useState(null);
   var [myObj, setMyObj] = useState({});
+  var [vehiclesCount, setVehiclesCount] = useState('');
 
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
@@ -96,6 +98,7 @@ const AvailableCars = props => {
           console.log('Data Status:', data.status);
           const vehiclesData = data.vehicles;
           setAvailableCars(vehiclesData);
+          setVehiclesCount(vehiclesData.length);
           // window.dispatchEvent(new Event('resize'));
 
           // setFormData(myObj);
@@ -145,6 +148,7 @@ const AvailableCars = props => {
           console.log('Data Status:', data.status);
           const vehiclesData = data.vehicles;
           setAvailableCars(vehiclesData);
+          setVehiclesCount(vehiclesData.length);
           // window.dispatchEvent(new Event('resize'));
 
           // setFormData(myObj);
@@ -198,6 +202,7 @@ const AvailableCars = props => {
           // console.log('Data Status ok:', data);
           const vehiclesData = data.vehicles;
           setAvailableCars(vehiclesData);
+          setVehiclesCount(vehiclesData.length);
           // window.dispatchEvent(new Event('resize'));
 
           // setFormData(myObj);
@@ -250,6 +255,7 @@ const AvailableCars = props => {
           console.log('Data Status:', data.status);
           const vehiclesData = data.vehicles;
           setAvailableCars(vehiclesData);
+          setVehiclesCount(vehiclesData.length);
           // window.dispatchEvent(new Event('resize'));
 
           // setFormData(myObj);
@@ -289,7 +295,12 @@ const AvailableCars = props => {
     // return () => {
     //   unmounted = true;
     // };
-  }, [props.myData.ap_iata, availableCars.length]);
+  }, [
+    props.myData.ap_iata,
+    availableCars.length,
+    props.myData.From,
+    vehiclesCount,
+  ]);
 
   // if (availableCars && availableCars.length > 0) {
   //   $('.carslider').trigger('refresh.owl.carousel');
@@ -313,6 +324,7 @@ const AvailableCars = props => {
     currency,
     sec_bef_pick,
     max_pax,
+    release_hours,
   ) => {
     const route = 'rt';
     const vehicleObj = {
@@ -322,11 +334,12 @@ const AvailableCars = props => {
       currency: currency,
       seconds_before_pick: sec_bef_pick,
       max_pax: max_pax,
+      release_hours: release_hours,
     };
     if (oneWayTrip) {
       setOneWayTrip(null);
     }
-    setRoundTrip(priceVal);
+    setRoundTrip(vehicle_id);
     localStorage.setItem('vehicleObj', JSON.stringify(vehicleObj));
     console.log('VehicleObject.. .. ..', localStorage.getItem('vehicleObj'));
   };
@@ -337,6 +350,7 @@ const AvailableCars = props => {
     currency,
     sec_bef_pick,
     max_pax,
+    release_hours,
   ) => {
     const route = 'ow';
     const vehicleObj = {
@@ -346,36 +360,47 @@ const AvailableCars = props => {
       currency: currency,
       seconds_before_pick: sec_bef_pick,
       max_pax: max_pax,
+      release_hours: release_hours,
     };
-    console.log('max_paxxxxxxxxxxxxxx:', max_pax);
 
     if (roundTrip) {
       setRoundTrip(null);
     }
-    setOneWayTrip(priceVal);
-
+    setOneWayTrip(vehicle_id);
     localStorage.setItem('vehicleObj', JSON.stringify(vehicleObj));
-    console.log('VehicleObject.. .. ..', localStorage.getItem('vehicleObj'));
   };
 
-  const goToBookingForm = () => {
+  const goToBookingForm = item => {
     console.log('Inisde function goToBookingForm');
-    if (roundTrip || oneWayTrip) {
+    if (!roundTrip && !oneWayTrip) {
       localStorage.setItem('myGeneralObj', JSON.stringify(props));
+      const route = 'rt';
+      const vehicleObj = {
+        vehicle_id: item.vehicle_id,
+        route: route,
+        price: item.rt_price,
+        currency: item.currency,
+        seconds_before_pick: item.seconds_before_pick,
+        max_pax: item.max_pax,
+        release_hours: item.release_hours,
+      };
+      // setSelectTripTypeError(null);
+      console.log('OBJECTTTTTT', vehicleObj);
+      localStorage.setItem('vehicleObj', JSON.stringify(vehicleObj));
       console.log(
-        'My Props Data for booking Form:',
-        localStorage.getItem('myGeneralObj'),
+        'Storage OBJECTTTTTT',
+        JSON.parse(localStorage.getItem('vehicleObj')),
       );
-      setSelectTripTypeError(null);
-      console.log('Historyyyyyyyyyyyyyy:', history);
       window.location.href = 'http://localhost:3000/booking';
       // browserHistory.push('/booking');
       // console.log('Historyyyyyyyyyyyyyy:', props.router);
       // history.push('/booking');
       // context.history.push('/booking');
     } else {
-      setSelectTripTypeError('Select one of the following');
-      console.log('Select Trip Type First');
+      // setSelectTripTypeError('Select one of the following');
+      localStorage.setItem('myGeneralObj', JSON.stringify(props));
+      console.log('ELSEEEEEEEEEE');
+      window.location.href = 'http://localhost:3000/booking';
     }
   };
   return (
@@ -386,7 +411,8 @@ const AvailableCars = props => {
             <h2 className="bb">
               Available Cars{' '}
               <span className="count">
-                3<span />
+                {vehiclesCount}
+                <span />
               </span>
             </h2>
           </div>
@@ -407,14 +433,35 @@ const AvailableCars = props => {
                       <i class="fas fa-plane-departure" />
                       <div className>
                         <label>From</label>
-                        <p>Rome Airport Fiumicino</p>
+
+                        {!props.myData.switched && !props.myData.isAdvanced ? (
+                          <p>{props.myData.From}</p>
+                        ) : props.myData.switched &&
+                          !props.myData.isAdvanced ? (
+                          <p>{props.myData.dropDownDestinationText}</p>
+                        ) : !props.myData.switched &&
+                          props.myData.isAdvanced ? (
+                          <p>{props.myData.From}</p>
+                        ) : props.myData.switched && props.myData.isAdvanced ? (
+                          <p>{props.myData.destination_address}</p>
+                        ) : null}
                       </div>
                     </div>
                     <div className="des">
                       <i className="fas fa-map-marker-alt" />
                       <div className>
                         <label>Destination</label>
-                        <p>Zone 3</p>
+                        {!props.myData.switched && !props.myData.isAdvanced ? (
+                          <p>{props.myData.dropDownDestinationText}</p>
+                        ) : props.myData.switched &&
+                          !props.myData.isAdvanced ? (
+                          <p>{props.myData.From}</p>
+                        ) : !props.myData.switched &&
+                          props.myData.isAdvanced ? (
+                          <p>{props.myData.destination_address}</p>
+                        ) : props.myData.switched && props.myData.isAdvanced ? (
+                          <p>{props.myData.From}</p>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -432,21 +479,31 @@ const AvailableCars = props => {
                         onAfterOpen={afterOpenModal}
                         onRequestClose={closeModal}
                         style={customStyles}
-                        contentLabel="Example Modal"
+                        contentLabel="Map Modal"
                       >
                         <h2 ref={_subtitle => (subtitle = _subtitle)}>Map</h2>
-                        <iframe
-                          src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d83907.59515727437!2d2.3529858436156954!3d48.91325171356301!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x47e6703bb5abfe17%3A0x67d9ee40dcd96ca0!2sNouvel%20H%C3%B4tel%20Eiffel%2C%20Rue%20des%20Volontaires%2C%20Paris%2C%20France!3m2!1d48.843395!2d2.3068478!4m5!1s0x47e61622698d2851%3A0x8f4061ad11f6f5fd!2sAeroport%20Paris%20Charles-de-Gaulle%20TERMINAL%20L%2C%20Le%20Mesnil-Amelot%2C%20France!3m2!1d49.0057827!2d2.5847271!5e0!3m2!1sen!2s!4v1588700343560!5m2!1sen!2s"
-                          width="100%"
-                          height="100%"
-                          frameBorder={0}
-                          style={{ border: 0 }}
-                          allowFullScreen
-                          aria-hidden="false"
-                          tabIndex={0}
-                        />
+                        {typeof props.myData.Destination == 'string' ? (
+                          <ReactGMap
+                            containerElement={
+                              <div style={{ height: `100%`, width: '100%' }} />
+                            }
+                            mapElement={<div style={{ height: `100%` }} />}
+                            isMarkerShown
+                            origin={props.myData.apLatLong}
+                            destination={props.myData.destLatLng}
+                          />
+                        ) : (
+                          <ReactGMap
+                            containerElement={
+                              <div style={{ height: `100%`, width: '100%' }} />
+                            }
+                            mapElement={<div style={{ height: `100%` }} />}
+                            isMarkerShown
+                            origin={props.myData.apLatLong}
+                            destination={props.myData.Destination}
+                          />
+                        )}
                         {/* <button onClick={closeModal}>close</button> */}
-                        <div>I am a modal</div>
                       </Modal>
                     </div>
                   </div>
@@ -466,8 +523,8 @@ const AvailableCars = props => {
                     {!noResultVehicles &&
                     availableCars &&
                     availableCars.length > 0
-                      ? availableCars.map(item => (
-                          <div className="item">
+                      ? availableCars.map((item, index) => (
+                          <div className="item" key={index}>
                             <div className="carbox">
                               <div className="bluebg" />
                               <img src={car1Img} alt="cars" />
@@ -502,7 +559,9 @@ const AvailableCars = props => {
                                     <input
                                       type="radio"
                                       value={item.rt_price}
-                                      checked={roundTrip === item.rt_price}
+                                      // checked={true}
+                                      checked={roundTrip === item.vehicle_id}
+                                      // defaultChecked={index}
                                       onChange={e =>
                                         onRoundTripChecked(
                                           item.rt_price,
@@ -510,6 +569,7 @@ const AvailableCars = props => {
                                           item.currency,
                                           item.seconds_before_pick,
                                           item.max_pax,
+                                          item.release_hours,
                                         )
                                       }
                                       name="radio"
@@ -524,7 +584,7 @@ const AvailableCars = props => {
                                     </span>
                                     <input
                                       type="radio"
-                                      checked={oneWayTrip === item.ow_price}
+                                      checked={oneWayTrip === item.vehicle_id}
                                       value={item.ow_price}
                                       onChange={e =>
                                         onOneWayChecked(
@@ -533,6 +593,7 @@ const AvailableCars = props => {
                                           item.currency,
                                           item.seconds_before_pick,
                                           item.max_pax,
+                                          item.release_hours,
                                         )
                                       }
                                       name="radio"
@@ -545,7 +606,7 @@ const AvailableCars = props => {
                                     type="button"
                                     name="button"
                                     className="btn btnstyle4 btn-block "
-                                    onClick={goToBookingForm}
+                                    onClick={() => goToBookingForm(item)}
                                   >
                                     Book Now
                                   </button>
@@ -555,147 +616,6 @@ const AvailableCars = props => {
                           </div>
                         ))
                       : noResultVehicles}
-
-                    {/* {noResultVehicles && !availableCars ? (
-                    <p>{noResultVehicles}</p>
-                  ) : null} */}
-                    {/* <div className="item">
-                    <div className="carbox">
-                      <div className="bluebg" />
-                      <img src={car2Img} alt="cars" />
-                      <div className="choosedesc">
-                        <h4>Shuttle</h4>
-                        <p className="grey">
-                          Max Passengers:{' '}
-                          <span className="blue">2 Passengers</span>
-                        </p>
-                        <p className="grey">
-                          Max Luggage:{' '}
-                          <span className="blue">6 Large, 12 Small</span>
-                        </p>
-                        <p className="grey">
-                          CXL Deadline: <span className="blue">2 Days</span>
-                        </p>
-                      </div>
-                      <div className="selecttrip">
-                        <label className="radiowrap">
-                          Round Trip <span className="blue">30€</span>
-                          <input
-                            type="radio"
-                            defaultChecked="checked"
-                            name="radio"
-                          />
-                          <span className="checkmark" />
-                        </label>
-                        <label className="radiowrap">
-                          One Way <span className="blue">15€</span>
-                          <input type="radio" name="radio" />
-                          <span className="checkmark" />
-                        </label>
-                      </div>
-                      <div className="booknow">
-                        <button
-                          type="button"
-                          name="button"
-                          className="btn btnstyle4 btn-block "
-                        >
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="item">
-                    <div className="carbox">
-                      <div className="bluebg" />
-                      <img src={car2Img} alt="cars" />
-                      <div className="choosedesc">
-                        <h4>Shuttle</h4>
-                        <p className="grey">
-                          Max Passengers:{' '}
-                          <span className="blue">2 Passengers</span>
-                        </p>
-                        <p className="grey">
-                          Max Luggage:{' '}
-                          <span className="blue">6 Large, 12 Small</span>
-                        </p>
-                        <p className="grey">
-                          CXL Deadline: <span className="blue">2 Days</span>
-                        </p>
-                      </div>
-                      <div className="selecttrip">
-                        <label className="radiowrap">
-                          Round Trip <span className="blue">30€</span>
-                          <input
-                            type="radio"
-                            defaultChecked="checked"
-                            name="radio"
-                          />
-                          <span className="checkmark" />
-                        </label>
-                        <label className="radiowrap">
-                          One Way <span className="blue">15€</span>
-                          <input type="radio" name="radio" />
-                          <span className="checkmark" />
-                        </label>
-                      </div>
-                      <div className="booknow">
-                        <button
-                          type="button"
-                          name="button"
-                          className="btn btnstyle4 btn-block "
-                        >
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="item">
-                    <div className="carbox">
-                      <div className="bluebg" />
-                      <img src={car2Img} alt="cars" />
-                      <div className="choosedesc">
-                        <h4>Shuttle</h4>
-                        <p className="grey">
-                          Max Passengers:{' '}
-                          <span className="blue">2 Passengers</span>
-                        </p>
-                        <p className="grey">
-                          Max Luggage:{' '}
-                          <span className="blue">6 Large, 12 Small</span>
-                        </p>
-                        <p className="grey">
-                          CXL Deadline: <span className="blue">2 Days</span>
-                        </p>
-                      </div>
-                      <div className="selecttrip">
-                        <label className="radiowrap">
-                          Round Trip <span className="blue">30€</span>
-                          <input
-                            type="radio"
-                            defaultChecked="checked"
-                            name="radio"
-                          />
-                          <span className="checkmark" />
-                        </label>
-                        <label className="radiowrap">
-                          One Way <span className="blue">15€</span>
-                          <input type="radio" name="radio" />
-                          <span className="checkmark" />
-                        </label>
-                      </div>
-                      <div className="booknow">
-                        <button
-                          type="button"
-                          name="button"
-                          className="btn btnstyle4 btn-block "
-                        >
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-                  </div> */}
                   </div>
                 ) : null}
               </div>

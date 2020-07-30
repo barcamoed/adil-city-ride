@@ -393,15 +393,6 @@ a{
   h2{
     color: $grey;
   }
-  .choosedesktopslider{
-    .item{
-      a{
-        display: block;
-        float: left;
-      }
-    }
-  }
-
   .chooseslider img {
     height: 170px;
     -o-object-fit: cover;
@@ -802,10 +793,7 @@ width: 100%;
     }
   }
 }
-.cars .viewmap .fromdes .from i {
-    margin-right: 10px;
-    color: #3C84BB;
-}
+
 .destination{
   padding: 100px 0 0 0;
   background: $lightwhite;
@@ -961,6 +949,7 @@ width: 100%;
                 align-items: center;
         i{
               margin-right: 10px;
+              color: $blue;
         }
         label{
           font-size: 16px;
@@ -1004,8 +993,8 @@ width: 100%;
       border-color: $blue;
       background: $blue;
       color: $white;
-      border-top-right-radius: 10px !important;
-      border-bottom-right-radius: 10px !important;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
           min-width: 195px;
   }
 }
@@ -1769,6 +1758,12 @@ padding: 10px 0 0 0;
   padding-left: 45px;
   background-position: 15px 5px;
 }
+#whatsapp{
+  background: #ffffff url(../../assets/images/whatsapp-b.png);
+  background-repeat: no-repeat;
+  padding-left: 45px;
+  background-position: 15px 8px;
+}
 #email{
   background: #ffffff url(../../assets/images/email.png);
   background-repeat: no-repeat;
@@ -1782,11 +1777,10 @@ padding: 10px 0 0 0;
   background-position: 15px 8px;
 }
 #arrivaltime{
-  background: transparent url(../../assets/images/time.png);
+  background: #ffffff url(../../assets/images/time.png);
   background-repeat: no-repeat;
   padding-left: 45px;
-    background-position: 0 0;
-    border: 0px;
+  background-position: 15px 8px;
 }
 #cardnumber{
   background: #ffffff url(../../assets/images/visa.png);
@@ -1795,27 +1789,7 @@ padding: 10px 0 0 0;
 background-position: 15px 6px;
     padding-right: 45px;
 }
-#whatsapp {
-    background: #ffffff url(../../assets/images/whatsapp-b.png);
-    background-repeat: no-repeat;
-    padding-left: 45px;
-    background-position: 15px 8px;
-    max-width: 50%;
-}
-.rc-time-picker.form-control{
-  border-radius: 25px;
-background: transparent;
-.rc-time-picker-input{
-  outline: 0px;
-  padding: 0;
-margin: 0;
-padding-left: 40px;
-}
-}
-.errorMsg{
-  color: red;
-  padding-left: 15px;
-}
+
 /*customcheckbox*/
 input[type=checkbox].css-checkbox {
 	position:absolute; z-index:-1000; left:-1000px; overflow: hidden; clip: rect(0 0 0 0); height:1px; width:1px; margin:-1px; padding:0; border:0;
@@ -1866,6 +1840,9 @@ label.css-label {
     }
 }
 
+/*customeradmin*/
+
+
 /*responsive*/
 @media(min-width: 1023px){
   .carslider {
@@ -1898,18 +1875,6 @@ label.css-label {
     }
     input[type=checkbox].css-checkbox + label.css-label{
       margin-left: 0px;
-    }
-  }
-  .choosedesktopslider{
-    margin-top: 35px;
-    margin: 35px auto 0 auto;
-    max-width: 86%;
-  }
-
-  .cookieswrap{
-    .btnstyle2{
-          padding: 10px 20px;
-          min-width: 110px;
     }
   }
 }
@@ -2323,11 +2288,7 @@ label.css-label {
   .bookingcontent{
     padding: 8rem 0 100px 0;
   }
-  #whatsapp {
-    max-width: 100%;
-  }
 }
-
 @media(max-width:360px){
   .carslider button.owl-prev, .carslider button.owl-next{
     bottom: -35px;

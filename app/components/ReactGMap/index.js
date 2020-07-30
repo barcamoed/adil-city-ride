@@ -1,43 +1,20 @@
-/**
- *
- * ReactGMap
- *
- */
-
-import React from 'react';
-// import PropTypes from 'prop-types';
-// import styled from 'styled-components';
-
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
-
-// import { withGoogleMap, GoogleMap, Marker } from 'react-google-maps';
-
-// const ReactGMap = withGoogleMap(props => (
-//   <GoogleMap defaultZoom={8} defaultCenter={{ lat: -34.397, lng: 150.644 }}>
-//     {props.isMarkerShown && (
-//       <Marker position={{ lat: -34.397, lng: 150.644 }} />
-//     )}
-//   </GoogleMap>
-
-// ));
-
+import React, { Component } from 'react';
 import {
   withGoogleMap,
   withScriptjs,
   GoogleMap,
   DirectionsRenderer,
 } from 'react-google-maps';
-class ReactGMap extends React.Component {
+class ReactGMap extends Component {
   state = {
     directions: null,
   };
 
   componentDidMount() {
     const directionsService = new google.maps.DirectionsService();
-
-    const origin = { lat: 40.756795, lng: -73.954298 };
-    const destination = { lat: 41.756795, lng: -78.954298 };
+    console.log('PropssssZZZZZZZZZZZZZZZ', this.props);
+    const origin = this.props.origin;
+    const destination = this.props.destination;
 
     directionsService.route(
       {
@@ -47,6 +24,7 @@ class ReactGMap extends React.Component {
       },
       (result, status) => {
         if (status === google.maps.DirectionsStatus.OK) {
+          console.log('Result.....', result);
           this.setState({
             directions: result,
           });
@@ -56,9 +34,33 @@ class ReactGMap extends React.Component {
       },
     );
   }
+  componentDidUpdate(prevProps) {
+    if (prevProps.destination !== this.props.destination) {
+      const directionsService = new google.maps.DirectionsService();
+      const origin = this.props.origin;
+      const destination = this.props.destination;
+      directionsService.route(
+        {
+          origin: origin,
+          destination: destination,
+          travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === google.maps.DirectionsStatus.OK) {
+            console.log('Component props Changed', result);
+            this.setState({
+              directions: result,
+            });
+          } else {
+            console.error(`error fetching directions ${result}`);
+          }
+        },
+      );
+    }
+  }
 
   render() {
-    const GoogleMapExample = withGoogleMap(props => (
+    const ReactGMap = withGoogleMap(props => (
       <GoogleMap
         defaultCenter={{ lat: 40.756795, lng: -73.954298 }}
         defaultZoom={13}
@@ -69,8 +71,8 @@ class ReactGMap extends React.Component {
 
     return (
       <div>
-        <GoogleMapExample
-          containerElement={<div style={{ height: `100%`, width: '100%' }} />}
+        <ReactGMap
+          containerElement={<div style={{ height: `500px`, width: '500px' }} />}
           mapElement={<div style={{ height: `100%` }} />}
         />
       </div>

@@ -21,17 +21,18 @@ import './assets/css/owl.theme.default.css';
 // import 'slick-carousel/slick/slick.css';
 // import 'slick-carousel/slick/slick-theme.css';
 import './assets/css/bootstrap.min.css';
-import './assets/css/style.css';
 
-// import jQuery from 'jquery';
-// window.jQuery = jQuery;
+import './assets/css/dashboardcore.css';
+import './assets/css/dashboard.css';
+import './assets/cssOld/style.css';
+
 import './assets/js/jquery.min.js';
-console.log('HereeeeeeeeeJQ', jQuery);
+// console.log('HereeeeeeeeeJQ', jQuery);
 // //Popper in index.html
 import 'popper.js';
 // console.log('Popper');
 import './assets/js/bootstrap.min.js';
-// console.log('Bootstrappppp');
+import './assets/js/dashboard.js';
 import './assets/js/owl.carousel.min.js';
 // console.log('HereeeeeeeeeCarousel');
 // import './assets/js/custom.js';

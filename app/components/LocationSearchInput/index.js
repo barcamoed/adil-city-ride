@@ -3,20 +3,31 @@ import PlacesAutocomplete, {
   geocodeByAddress,
   getLatLng,
 } from 'react-places-autocomplete';
+
+import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Formik, Form, Field, getIn } from 'formik';
 import { mapSchema } from '../Login/schema';
 class LocationSearchInput extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { address: '' };
+    this.state = { address: '', disableField: null, enableField: null };
   }
 
   handleChange = address => {
-    console.log('This.Props', this.props);
-    this.props.form.setFieldValue('destination', address);
-    this.setState({ address });
-    this.props.onSetFeildText(address);
-    console.log('State Address', address);
+    console.log('This.Propssssssssssssssssssssss', this.props.field.name);
+    if (this.props.field.name == 'destination') {
+      console.log('Advance 123123123 Seeeeeee', address);
+      this.props.form.setFieldValue('destination', address);
+      this.setState({ address });
+      this.props.onSetFeildText(address);
+      console.log('State Address', address);
+    } else if (this.props.field.name == 'address_search') {
+      this.props.form.setFieldValue('address_search', address);
+      this.setState({ address });
+      this.props.onSetFeildText(address);
+      console.log('State Address', address);
+    }
   };
 
   handleSelect = address => {
@@ -30,27 +41,45 @@ class LocationSearchInput extends React.Component {
   };
   componentDidMount() {
     console.log('localStorage address', localStorage.getItem('address'));
+    console.log('Propsssssssssszzzzzzzzzzzzz', this.props);
+
     if (
-      localStorage.getItem('address') &&
-      localStorage.getItem('address') != undefined
+      this.props.field.name == 'address_search' &&
+      this.props.myProp.isAdvanced == true
     ) {
-      this.props.form.setFieldValue(
-        'destination',
-        localStorage.getItem('address'),
-      );
-      var address = localStorage.getItem('address');
+      console.log('Inside Iff props matchessssssssssss');
+      var address = this.props.myProp.destination_address;
       this.setState({ address });
-      console.log('Inside LocationSearch Input Iffff:', this.state.address);
-      localStorage.removeItem('address');
+      this.setState({ disableField: true });
+      this.setState({ enableField: false });
+    } else {
+      this.setState({ disableField: false });
+      this.setState({ enableField: true });
     }
-    // localStorage.removeItem('address');
-    // this.props.form.setFieldValue('destination', '');
+    // if (
+    //   localStorage.getItem('address') &&
+    //   localStorage.getItem('address') != undefined
+    // ) {
+    //   this.props.form.setFieldValue(
+    //     'destination',
+    //     localStorage.getItem('address'),
+    //   );
+    //   var address = localStorage.getItem('address');
+    //   this.setState({ address });
+    //   console.log('Inside LocationSearch Input Iffff:', this.state.address);
+    //   localStorage.removeItem('address');
+    // }
   }
   componentDidUpdate() {
     // console.log('Value Selected...state updated....');
     // if (localStorage.getItem('address')) {
     // }
   }
+
+  // editField = () => {
+  //   console.log('Edit Field Calledddddddddd');
+  //   this.setState({ disableField: false, enableField: true });
+  // };
 
   render() {
     return (
@@ -74,7 +103,7 @@ class LocationSearchInput extends React.Component {
             {/* {({ errors, touched }) => ( */}
             <Formik
               initialValues={{
-                destination: '',
+                destination: this.state.address,
               }}
               validationSchema={mapSchema}
               onSubmit={values => {
@@ -84,12 +113,32 @@ class LocationSearchInput extends React.Component {
             >
               {({ errors, touched }) => (
                 <div>
-                  <input
-                    {...getInputProps({
-                      placeholder: 'Search Places ...',
-                      className: 'location-search-input',
-                    })}
-                  />
+                  {this.props.myProp && this.props.field.name ? (
+                    <span>
+                      <input
+                        readOnly={
+                          this.props.myProp.isAdvanced &&
+                          this.props.field.name == 'address_search'
+                            ? this.state.disableField
+                            : this.state.enableField
+                        }
+                        {...getInputProps({
+                          placeholder: 'Search Places ...',
+                          className: 'location-search-input',
+                        })}
+                      />
+                      {/* <FontAwesomeIcon onClick={this.editField} icon={faEdit} /> */}
+                    </span>
+                  ) : (
+                    <span>
+                      <input
+                        {...getInputProps({
+                          placeholder: 'Search Places ...',
+                          className: 'location-search-input',
+                        })}
+                      />
+                    </span>
+                  )}
                 </div>
               )}
             </Formik>
