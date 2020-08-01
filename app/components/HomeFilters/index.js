@@ -33,9 +33,7 @@ const HomeFilters = props => {
   );
   var first = (
     <div className="form-group">
-      <div>
         <Field name="from" className="form-control form-control-sm" />
-      </div>
     </div>
   );
   var second = (
@@ -130,6 +128,7 @@ const HomeFilters = props => {
         {/* <label>Destination</label> */}
 
         {selectOptions == true ? (
+          <div class="select">
           <Field
             as="select"
             name="destination"
@@ -151,6 +150,7 @@ const HomeFilters = props => {
                 })
               : 'Loading...'}
           </Field>
+          </div>
         ) : (
           LocationSeacrh
         )}
@@ -518,6 +518,15 @@ const HomeFilters = props => {
                         >
                           {({ errors, touched }) => (
                             <Form className="form">
+                              
+                              {/* {showFromFirst[0].props.children.props.children ==
+                              'Destination' ? (
+                                <label>From</label>
+                              ) : null} */}
+                              <div className="form-group">
+                                <label>From</label>
+                                {showFromFirst[0]}
+                              </div>
                               {errors.from &&
                               touched.from &&
                               switchCheck == 0 ? (
@@ -530,14 +539,6 @@ const HomeFilters = props => {
                                 </div>
                               ) : null}
 
-                              {/* {showFromFirst[0].props.children.props.children ==
-                              'Destination' ? (
-                                <label>From</label>
-                              ) : null} */}
-                              <div className="form-group">
-                                <label>From</label>
-                                {showFromFirst[0]}
-                              </div>
                               <div className="form-group">
                                 <label>Destination</label>
                                 {showFromFirst[1]}

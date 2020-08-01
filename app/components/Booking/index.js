@@ -109,6 +109,10 @@ const Booking = () => {
   var [showContactInfoError, setShowContactInfoError] = useState('');
   var [reqStatus, setReqStatus] = useState(null);
 
+  const [showReservationIdModal, setShowReservationIdModal] = useState(false);
+  const [res_ID, setReservationID] = useState(false);
+  const [showDepartureTimeError, setDepartureTimeError] = useState('');
+
   const [passengers, setPassengers] = useState([
     { id: '1', val: '1' },
     { id: '2', val: '2' },
@@ -226,18 +230,21 @@ const Booking = () => {
 
     if (myVehicleObj && myVehicleObj.route == 'rt') {
       setShowArrivalAndDeparture(true);
+      localStorage.setItem('flightType', 'both');
     } else if (
       myVehicleObj &&
       myVehicleObj.route == 'ow' &&
       myGeneralObj.myData.switched == true
     ) {
       setShowJustDeparture(true);
+      localStorage.setItem('flightType', 'justDeparture');
     } else if (
       myVehicleObj &&
       myVehicleObj.route == 'ow' &&
       myGeneralObj.myData.switched == false
     ) {
       setShowJustArrival(true);
+      localStorage.setItem('flightType', 'justArrival');
     }
     if (
       advnacedSearchVal &&
@@ -623,6 +630,8 @@ const Booking = () => {
     var regex = /^([A-Z][A-Z][A-Z]?|[A-Z][0-9]|[0-9][A-Z])[0-9]{1,4}$/.exec(
       flight_num,
     );
+
+    console.log('Old PickUp Time........;;;;;;;;;........', pickUpTime);
     if (regex != null) {
       setDeparture_flight_number(
         regex[1] +
@@ -716,11 +725,17 @@ const Booking = () => {
                   .toString();
                 console.log('Vehicle Obj', vehicleObj);
                 setSeconds_before_pick(moment(myPickUpTime).format('hh:mm')); // To Show in the Rc Time Picker
-                setPickUpTime(
-                  moment(myPickUpTime)
-                    .format('hh:mm')
-                    .toString(),
-                ); // To use in request
+
+                if (vehicleObj.seconds_before_pick != 'null') {
+                  console.log('Seconds Before Not NULLLL', vehicleObj);
+                  setPickUpTime(
+                    moment(myPickUpTime)
+                      .format('hh:mm')
+                      .toString(),
+                  ); // To use in request
+                } else {
+                  setPickUpTime('null');
+                }
               }
             } else if (
               data.data.departure_airport != myGeneralObj.myData.ap_iata
@@ -748,7 +763,7 @@ const Booking = () => {
                 (departure_date && pickUpTime)) &&
               JSON.parse(localStorage.getItem('vehicleObj')).route == 'ow'
             ) {
-              console.log('Departureeeeeeeeeeeeeeeee Innnn ');
+              console.log('Departureeeeeeeee Innnn ');
               var myDate = new Date(
                 departure_date +
                   ' ' +
@@ -1077,8 +1092,8 @@ const Booking = () => {
     }
   }
 
-  function submitRequest(e) {
-    e.preventDefault();
+  function submitRequest() {
+    // e.preventDefault();
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
     };
@@ -1173,7 +1188,10 @@ const Booking = () => {
               flight_num: myStringNumbers,
               flight_date: departure_date,
               flight_time: departure_time,
-              pick_time: pickUpTime,
+              pick_time:
+                vehicleObj.seconds_before_pick == 'null'
+                  ? vehicleObj.seconds_before_pick
+                  : pickUpTime,
             },
           ],
           extra_equipment: [
@@ -1287,11 +1305,18 @@ const Booking = () => {
         for (var pair of formData.entries()) {
           console.log(pair[0] + ', ' + pair[1]);
         }
-        console.log('Showing Payment Area');
+        // console.log('Showing Payment Area:::::::::',pickUpTime);
         postRequest(formData, headers).then(data => {
           console.log('Data Status:', data);
           if (data.status == 'ok') {
             console.log('Data Status:', data.status);
+            setReservationID(data.res_id);
+            setShowReservationIdModal(true);
+            setDepartureTimeError('');
+          } else if (data.status == 'error') {
+            if (data.message[0] == 'flight_time') {
+              setDepartureTimeError('Wrong Departure Time');
+            }
           }
         });
       } else if (!showPaymentArea) {
@@ -1324,6 +1349,8 @@ const Booking = () => {
               console.log('Data Status:', data.status);
               setShowContactInfoError('');
               setStatus3PriceError(null);
+              // setReservationID(data.res_id);
+              // setShowReservationIdModal(true);
             }
           });
         } else {
@@ -1337,12 +1364,22 @@ const Booking = () => {
       myGeneralObj.myData.switched == false &&
       vehicleObj.route == 'ow'
     ) {
-      const destinationLatLng =
-        '(' +
-        myGeneralObj.myData.Destination.lat +
-        ', ' +
-        myGeneralObj.myData.Destination.lng +
-        ')';
+      var destinationLatLng = null;
+      if (
+        myGeneralObj.myData.Destination.lat &&
+        myGeneralObj.myData.Destination.lng
+      ) {
+        destinationLatLng =
+          '(' +
+          myGeneralObj.myData.Destination.lat +
+          ', ' +
+          myGeneralObj.myData.Destination.lng +
+          ')';
+      } else {
+        destinationLatLng =
+          '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+      }
+
       var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
       var withNoDigits = arrival_flight_number.replace(/[0-9]/g, '').trim();
       var babyObj1 = null;
@@ -1537,6 +1574,8 @@ const Booking = () => {
         postRequest(formData, headers).then(data => {
           console.log('Data Status:', data);
           if (data.status == 'ok') {
+            setReservationID(data.res_id);
+            setShowReservationIdModal(true);
             console.log('Data Status:', data.status);
           }
         });
@@ -1570,6 +1609,8 @@ const Booking = () => {
               console.log('Data Status:', data.status);
               setShowContactInfoError('');
               setStatus3PriceError(null);
+              //   setReservationID(data.res_id);
+              // setShowReservationIdModal(true);
             }
           });
         } else {
@@ -1583,10 +1624,7 @@ const Booking = () => {
       myGeneralObj.myData.switched == true &&
       vehicleObj.route == 'ow'
     ) {
-      console.log(
-        'Loggedddddddddddddddddddddddddddddddddddddd',
-        myGeneralObj.myData.destination_address,
-      );
+      console.log('Loggedddd', myGeneralObj.myData.destination_address);
       var myDestinationLatLng = null;
       var previousDestAddress = null;
       if (
@@ -1601,7 +1639,7 @@ const Booking = () => {
           ')';
         previousDestAddress = myGeneralObj.myData.destination_address;
       } else {
-        console.log('Objeeeeeeeeeeeeeeeeeeeeee', advnacedSearchVal);
+        console.log('Objeeeeeeeeee', advnacedSearchVal);
         myDestinationLatLng =
           '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
         previousDestAddress = advnacedSearchFieldText;
@@ -1801,6 +1839,8 @@ const Booking = () => {
           console.log('Data Status:', data);
           if (data.status == 'ok') {
             console.log('Data Status:', data.status);
+            setReservationID(data.res_id);
+            setShowReservationIdModal(true);
           }
         });
       } else if (!showPaymentArea) {
@@ -1829,6 +1869,8 @@ const Booking = () => {
             console.log('Data Status:', data);
             if (data.status == 'ok') {
               console.log('Data Status:', data.status);
+              // setReservationID(data.res_id);
+              // setShowReservationIdModal(true);
             }
           });
         } else {
@@ -2040,6 +2082,8 @@ const Booking = () => {
           console.log('Data Status:', data);
           if (data.status == 'ok') {
             console.log('Data Status:', data.status);
+            setReservationID(data.res_id);
+            setShowReservationIdModal(true);
           }
         });
       } else if (!showPaymentArea) {
@@ -2310,6 +2354,8 @@ const Booking = () => {
           console.log('Data Status:', data);
           if (data.status == 'ok') {
             console.log('Data Status:', data.status);
+            setReservationID(data.res_id);
+            setShowReservationIdModal(true);
           }
         });
       } else if (!showPaymentArea) {
@@ -2598,6 +2644,8 @@ const Booking = () => {
           console.log('Data Status:', data);
           if (data.status == 'ok') {
             console.log('Data Status:', data.status);
+            setReservationID(data.res_id);
+            setShowReservationIdModal(true);
           }
         });
       } else if (!showPaymentArea) {
@@ -2658,6 +2706,7 @@ const Booking = () => {
       setContactNumber(e.currentTarget.value);
     }
   }
+
   return (
     <div>
       <Header />
@@ -2695,9 +2744,10 @@ const Booking = () => {
                     validationSchema={bookingSchema}
                     onSubmit={values => {
                       // submitValues(values);
-                      console.log('Moeed:', values);
+                      console.log('Moeed Booking Values:', values);
+                      // submitRequest();
                     }}
-                    validator={() => ({})}
+                    // validator={() => ({})}
                   >
                     {({ errors, touched, setFieldValue }) => (
                       <Form className="bookingform">
@@ -3070,6 +3120,9 @@ const Booking = () => {
                                       name="departure_time"
                                       at_value={departure_time}
                                       component={RCTimePicker}
+                                      onSetDepartureTime={value =>
+                                        setDeparture_Time(value)
+                                      }
                                     />
                                   </div>
                                 ) : null}
@@ -3186,6 +3239,9 @@ const Booking = () => {
                                       id="arrivaltime"
                                       name="arrival_time"
                                       at_value={arrival_time}
+                                      onSetArrivalTime={value =>
+                                        setArrival_Time(value)
+                                      }
                                       component={RCTimePicker}
                                     />
                                   </div>
@@ -3623,11 +3679,19 @@ const Booking = () => {
                             </div>
                           </div>
                         </div>
+                        {showDepartureTimeError ? (
+                          <div className="form-group text-center">
+                            <div className="errorMsg">
+                              {showDepartureTimeError}
+                            </div>
+                          </div>
+                        ) : null}
+
                         <div className="form-group text-center">
                           <button
                             type="submit"
                             // disabled={!_.isEmpty(errors)}
-                            onClick={submitRequest}
+                            // onClick={submitRequest}
                             className="btn btnstyle4"
                           >
                             Continue
@@ -3644,8 +3708,25 @@ const Booking = () => {
       </div>
 
       <Footer />
+
+      {showReservationIdModal ? (
+        <Modal
+          isOpen={showReservationIdModal}
+          onAfterOpen={afterOpenModal}
+          onRequestClose={closeModal}
+          style={customStyles}
+          contentLabel="Reservation"
+          shouldCloseOnOverlayClick={true}
+        >
+          <h2 ref={_subtitle => (subtitle = _subtitle)}>
+            Reservation ID: {res_ID}
+          </h2>
+          {/* <h4></h4> */}
+        </Modal>
+      ) : null}
+
       {modalIsOpen ? (
-        <div>
+        <div className="selectcarslider">
           <Modal
             isOpen={modalIsOpen}
             onAfterOpen={afterOpenModal}

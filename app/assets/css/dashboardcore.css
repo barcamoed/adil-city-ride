@@ -8361,7 +8361,7 @@ File: scss
     overflow: auto;
   }
   /*Sidebar and wrapper*/
-  .mini-sidebar .page-wrapper {
+.page-wrapper {
     margin-left: 0px;
     padding-top: 70px;
   }

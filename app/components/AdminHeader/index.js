@@ -35,7 +35,6 @@ function AdminHeader() {
               <a className="navbar-brand" href="./">
                 {/* Logo icon */}
                 <b>
-                  <i className="wi wi-sunset" />
                   <img src={LogoImg} alt="logo" className="dark-logo" />
                   <img src={LogoImg} alt="logo" className="mobile-logo" />
                 </b>

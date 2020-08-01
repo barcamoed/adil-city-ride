@@ -210,9 +210,7 @@ const Home = props => {
                   {({ errors, touched, isSubmitting, setFieldValue }) => (
                     <Form disabled={isSubmitting} noValidate>
                       <div className="input-group">
-                        {errors.searchField && touched.searchField ? (
-                          <div className="errorMsg">{errors.searchField}</div>
-                        ) : null}
+                        
 
                         <Field
                           type="text"
@@ -223,11 +221,10 @@ const Home = props => {
                           onGetSearchVal={value => setSearchField(value)}
                           component={MyAutosuggest}
                         />
+                        
 
                         <div className="input-group-append">
-                          {errors.passengers && touched.passengers ? (
-                            <div className="errorMsg">{errors.passengers}</div>
-                          ) : null}
+                          
                           <Field
                             as="select"
                             name="passengers"
@@ -261,6 +258,12 @@ const Home = props => {
                           </button>
                         </div>
                       </div>
+                      {errors.passengers && touched.passengers ? (
+                            <div className="errorMsg">{errors.passengers}</div>
+                          ) : null}
+                      {errors.searchField && touched.searchField ? (
+                          <div className="errorMsg">{errors.searchField}</div>
+                        ) : null}
                     </Form>
                   )}
                 </Formik>

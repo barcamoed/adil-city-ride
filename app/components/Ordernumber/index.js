@@ -119,9 +119,7 @@ const Ordernumber = () => {
                         placeholder="6 Digits"
                         onChange={handleOrder}
                       />
-                      {errors.order_number && touched.order_number ? (
-                        <div className="errorMsg">{errors.order_number}</div>
-                      ) : null}
+                      
 
                       <Field
                         type="text"
@@ -130,9 +128,7 @@ const Ordernumber = () => {
                         placeholder="Last name"
                         onChange={handleOrder}
                       />
-                      {errors.last_name && touched.last_name ? (
-                        <div className="errorMsg">{errors.last_name}</div>
-                      ) : null}
+                      
 
                       <div className="input-group-append">
                         <button
@@ -149,6 +145,13 @@ const Ordernumber = () => {
                         </button>
                       </div>
                     </div>
+                      {errors.order_number && touched.order_number ? (
+                        <div className="errorMsg">{errors.order_number}</div>
+                      ) : null}
+
+                      {errors.last_name && touched.last_name ? (
+                        <div className="errorMsg">{errors.last_name}</div>
+                      ) : null}
                   </Form>
                 )}
               </Formik>

@@ -72,7 +72,7 @@ class ReactGMap extends Component {
     return (
       <div>
         <ReactGMap
-          containerElement={<div style={{ height: `500px`, width: '500px' }} />}
+          containerElement={<div style={{ height: `300px`, width: '100%' }} />}
           mapElement={<div style={{ height: `100%` }} />}
         />
       </div>

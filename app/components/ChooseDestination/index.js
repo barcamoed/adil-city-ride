@@ -300,10 +300,11 @@ const ChooseDestination = props => {
                   ? myloop.slice(0, outerLoopLimit).map((item1, key1) => {
                       return (
                         <div className="item">
+                          <span class="d-none">
                           {loopLength - innerLoopStart < 8
                             ? (innerLoopEnd = loopLength)
                             : (innerLoopEnd = innerLoopStart + 8)}
-
+                          </span>
                           {myloop
                             .slice(innerLoopStart, innerLoopEnd)
                             .map((airport, key) => {
@@ -334,10 +335,11 @@ const ChooseDestination = props => {
                                       </div>
                                     </div>
                                   </div>
-
+                                  <span class="d-none">
                                   {key == 7
                                     ? (innerLoopStart = innerLoopStart + 8)
                                     : null}
+                                  </span>  
                                 </a>
                               );
                             })}

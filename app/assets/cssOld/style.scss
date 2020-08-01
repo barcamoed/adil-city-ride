@@ -219,6 +219,9 @@ a{
     .navbar-light .navbar-nav .dropdown-toggle{
           margin-left: 25px;
     }
+    .navbar-collapse{
+      box-shadow: none;
+    }
 }
 .site-header.sticky{
   background: #fff;
@@ -319,6 +322,7 @@ a{
   padding: 17rem 0 10rem 0;
     h1{
       color: $white;
+      line-height: 1.2;
       span{
         color: $blue;
       }
@@ -367,12 +371,13 @@ a{
 
   }
   input{
-    padding: 30px 25px;
+    padding: 20px 25px;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
     color: $grey;
     font-size: 14px;
     border: transparent;
+    width: 581px;
   }
   .contact {
       position: absolute;
@@ -384,6 +389,30 @@ a{
       -webkit-box-align: center;
           -ms-flex-align: center;
               align-items: center;
+  }
+  div#react-autowhatever-1.react-autosuggest__suggestions-container--open{
+    background: #fff;
+    position: absolute;
+    width: 100%;
+    z-index: 9;
+    padding: 25px;
+    box-shadow: 0px 10px 15px 0px rgba(0, 0, 0, 0.11);
+    margin-top: 5px;
+    ul{
+      list-style: none;
+      li{
+        margin-bottom: 10px;
+        cursor: pointer;
+        &:last-child{
+          padding-bottom: 0;
+        }
+      }
+    }
+  }
+  .errorMsg{
+    display: inline-block;
+    margin-top: 5px;
+    position: absolute;
   }
 }
 
@@ -424,9 +453,11 @@ a{
       }
       h3{
         text-transform: capitalize;
-        font-size: 18px;
+        font-size: 16px;
+        line-height: 25px;
         font-weight: 700;
         color: $black;
+
             padding: 0 0 5px 0;
       }
       .state{
@@ -435,6 +466,7 @@ a{
         color: $grey;
       }
       .choosedesc {
+        min-height: 190px;
         padding: 15px 15px;
       }
   }
@@ -461,12 +493,14 @@ a{
     .owl-nav{
 
       span{
-        font-size: 35px;
+        font-size: 25px;
         background: $blue;
-        padding: 0 15px;
         border-radius: 50px;
         opacity: 1;
         color: $white;
+        display: block;
+        width: 40px;
+        height: 40px;
       }
 
     }
@@ -531,12 +565,14 @@ a{
     }
     .owl-nav{
       span{
-        font-size: 35px;
+        font-size: 25px;
         background: $blue;
-        padding: 0 15px;
         border-radius: 50px;
         opacity: 1;
         color: $white;
+        display: block;
+        width: 40px;
+        height: 40px;
       }
     }
   }
@@ -802,6 +838,9 @@ width: 100%;
     }
   }
 }
+.ReactModal__Content.ReactModal__Content--after-open{
+  width: 25%;
+}
 .cars .viewmap .fromdes .from i {
     margin-right: 10px;
     color: #3C84BB;
@@ -882,24 +921,43 @@ width: 100%;
             cursor: pointer;
           }
         }
+        .autocomplete-dropdown-container {
+          background: #fff;
+          position: absolute;
+          display: none;
+          width: 100%;
+          z-index: 9;
+          padding: 25px;
+          -webkit-box-shadow: 0px 10px 15px 0px rgba(0, 0, 0, 0.11);
+          box-shadow: 0px 10px 15px 0px rgba(0, 0, 0, 0.11);
+          margin-top: 5px;
+        }
         input{
           border: 0;
           border-bottom: 1px solid $grey;
           border-radius: 0;
           padding-left: 0;
+          width: 400px;
+        }
+        input.focus-visible + .autocomplete-dropdown-container{
+          display: block;
         }
         .form-group {
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             &:last-child{
               margin-bottom: 0;
             }
+        }
+        .errorMsg{
+          margin-bottom: 25px;
+          padding-left: 0;
         }
 
       }
       .advancesearchlink {
           position: absolute;
           right: 25px;
-          top: 70px;
+          bottom: 105px;
           a{
             color: $blue;
             text-decoration: underline !important;
@@ -908,6 +966,7 @@ width: 100%;
       }
     }
   }
+  
 }
 
 .cars{
@@ -1033,12 +1092,24 @@ width: 100%;
   }
   .owl-nav{
     span{
-      font-size: 35px;
-      background: $blue;
-      padding: 0 15px;
-      border-radius: 50px;
-      opacity: 1;
-      color: $white;
+      font-size: 25px;
+        background: $blue;
+        border-radius: 50px;
+        opacity: 1;
+        color: $white;
+        display: block;
+        width: 40px;
+        height: 40px;
+    }
+  }
+}
+.selectcarslider{
+  .carslider{
+    button.owl-next{
+      right: 0;
+    }
+    button.owl-prev{
+      left: 0;
     }
   }
 }
@@ -1087,6 +1158,7 @@ width: 100%;
     padding: 0 15px;
         margin: 10px 0 25px 0;
 }
+
 .booknow .btn{
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
@@ -1188,7 +1260,7 @@ width: 100%;
 .accordion{
   margin-top: 60px;
   .card{
-    margin-bottom: 25px;
+    margin-bottom: 25px !important;
     border:0px;
     .card-header{
       cursor: pointer;
@@ -1448,10 +1520,13 @@ width: 100%;
       font-size: 14px;
       border: transparent;
   }
-  .input-group{
+  form{
     max-width: 680px;
     margin: 0 auto;
 
+  }
+  .errorMsg{
+    display: inline-block;
   }
   .input-group .btn.btn-outline-secondary.searchbtn {
       background-color: #3C84BB;
@@ -1575,6 +1650,8 @@ margin-left: auto;
 
 /*bookingform*/
 .banner.booking{
+
+
   background: $blue;
   background-size: cover;
   background-repeat: no-repeat;
@@ -1663,6 +1740,24 @@ margin-left: auto;
     padding: 20px 25px;
 
 
+  }
+  input.textarea{
+    height: 42px;
+  }
+  
+  .autocomplete-dropdown-container {
+    background: #fff;
+    position: absolute;
+    display: none;
+    width: 100%;
+    z-index: 9;
+    padding: 25px;
+    -webkit-box-shadow: 0px 10px 15px 0px rgba(0, 0, 0, 0.11);
+    box-shadow: 0px 10px 15px 0px rgba(0, 0, 0, 0.11);
+    margin-top: 5px;
+  }
+  input.textarea.focus-visible + .autocomplete-dropdown-container{
+    display: block;
   }
   textarea{
     border: 1px solid #cdcdcd;
@@ -1912,6 +2007,9 @@ label.css-label {
           min-width: 110px;
     }
   }
+  .search input{
+    width: 296px;
+  }
 }
 
 @media(max-width:991px){
@@ -2092,8 +2190,11 @@ label.css-label {
   .banner{
         padding: 12rem 0 4rem 0;
   }
-  .search input{
-        padding: 20px 25px;
+  .search .react-autosuggest__container{
+    width: calc(100% - 150px);
+  }
+  .search input {
+    padding: 9.5px 25px;
   }
   .search .input-group{
     box-shadow: none;
@@ -2326,6 +2427,13 @@ label.css-label {
   #whatsapp {
     max-width: 100%;
   }
+  .ReactModal__Content.ReactModal__Content--after-open{
+    width: 100%;
+  }
+  .destination .card .card-body form input{
+    width: 100%;
+  }
+  
 }
 
 @media(max-width:360px){

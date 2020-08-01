@@ -14,15 +14,23 @@ import moment from 'moment';
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 
-const RCTimePicker = (props, { onChange, value, ...rest }) => {
-  const [meTime, setApiArrivalTime] = useState(moment('00:00', 'hh:mm'));
-  function onTimeChange(value) {
+// , { onChange, value, ...rest }
+const RCTimePicker = props => {
+  const [meTime, setApiArrivalTime] = useState(
+    moment()
+      .hour(0)
+      .minute(0),
+  );
+  function onTimeChange(myVal) {
     // setApiArrivalTime('');
-
+    props.form.setFieldValue(props.field.name, '');
+    console.log('My Val', myVal);
     if (props.at_value) {
       console.log('Insideeeeeee', props.field.value);
-      setApiArrivalTime('');
-      console.log('Selected Time:', value);
+
+      setApiArrivalTime(meTime);
+      console.log('Selected Time:', myVal);
+
       // props.form.setFieldValue(props.field.name, '');
     }
     // if (props.sec_before_value) {
@@ -31,6 +39,46 @@ const RCTimePicker = (props, { onChange, value, ...rest }) => {
     // }
 
     // console.log('Time Picker Propssss....:', props);
+    // props.form.setFieldValue(props.field.name, value);
+  }
+
+  function onChange(value) {
+    // console.log(value && value.format('h:mm'));
+    // console.log('Just Time ', value.format('h:mm'));
+
+    const timeIs = value.format('h:mm');
+    console.log('String TimeIs', timeIs.toString());
+    setApiArrivalTime(value);
+    console.log('Propsxxxxxx', props);
+    var convertTimeObject = null;
+    if (props.form.values.arrival_date) {
+      console.log(
+        'props.form.values.arrival_date AAAAAA',
+        props.form.values.arrival_date,
+      );
+      convertTimeObject = new Date(
+        props.form.values.arrival_date + ' ' + timeIs.toString(),
+      );
+    } else if (props.form.values.departure_date) {
+      console.log(
+        'props.form.values.arrival_date ddddddddddd',
+        props.form.values.departure_date,
+      );
+      convertTimeObject = new Date(
+        props.form.values.departure_date + ' ' + timeIs.toString(),
+      );
+    }
+    var myTime = moment(convertTimeObject);
+    setApiArrivalTime(myTime);
+    if (props.onSetArrivalTime) {
+      props.onSetArrivalTime(timeIs.toString());
+    }
+    if (props.onSetDepartureTime) {
+      props.onSetDepartureTime(timeIs.toString());
+    }
+    // console.log('props:', props);
+    props.form.setFieldValue(props.field.name, moment(convertTimeObject));
+
     // props.form.setFieldValue(props.field.name, value);
   }
 
@@ -69,11 +117,14 @@ const RCTimePicker = (props, { onChange, value, ...rest }) => {
         // style={{ width: 100 }}
         // defaultValue={arrivalTime}
         value={meTime}
+        // defaultValue={moment()
+        //   .hour(0)
+        //   .minute(0)}
         showSecond={false}
         className="form-control"
         id="arrivaltime"
         name="arrival_time"
-        // value={props.at_value}
+        // format={'h:mm'}
         onChange={onChange}
       />
     </div>

@@ -8,10 +8,19 @@ import { faEdit } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Formik, Form, Field, getIn } from 'formik';
 import { mapSchema } from '../Login/schema';
+var myClick = 0;
 class LocationSearchInput extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { address: '', disableField: null, enableField: null };
+    this.state = {
+      address: '',
+      disableField: null,
+      enableField: null,
+      myClick: 0,
+    };
+    // this.handleClick = this.handleClick.bind(this);
+    // this.onFocus = this.onFocus.bind(this);
+    // this.onBlur = this.onBlur.bind(this);
   }
 
   handleChange = address => {
@@ -38,6 +47,7 @@ class LocationSearchInput extends React.Component {
       .catch(error => console.error('Error', error));
     this.setState({ address });
     localStorage.setItem('address', address);
+    this.onBlur();
   };
   componentDidMount() {
     console.log('localStorage address', localStorage.getItem('address'));
@@ -70,16 +80,45 @@ class LocationSearchInput extends React.Component {
     //   localStorage.removeItem('address');
     // }
   }
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState, snapShot) {
     // console.log('Value Selected...state updated....');
     // if (localStorage.getItem('address')) {
     // }
+    if (prevState.myClick != this.state.myClick) {
+      console.log('Component Updated');
+    }
   }
+
+  // shouldComponentUpdate(nextProps) {
+  //   // const differentTitle = this.state.myClick !== nextProps.myClick;
+  //   // const differentDone = this.props.done !== nextProps.done
+  //   if (this.state.myClick == 0 || this.state.myClick == 1) {
+  //     return true;
+  //   }
+  // }
 
   // editField = () => {
   //   console.log('Edit Field Calledddddddddd');
   //   this.setState({ disableField: false, enableField: true });
   // };
+
+  handleClick() {
+    console.log('Indieeeeeeeeeeeeeeeemmmmmmmmmmmmmmmmm');
+    // this.setState({ myClick: 1 });
+    // console.log('dhfgfhf', this.state.myClick);
+    // myClick = 1;
+  }
+  onFocus = () => {
+    console.log('On Focus');
+    this.setState({ myClick: 1 });
+    // myClick = 1;
+  };
+  onBlur = () => {
+    console.log('On Blur', this.state.myClick);
+    console.log('On Blur Called');
+    this.setState({ myClick: 0 });
+    // myClick = 0;
+  };
 
   render() {
     return (
@@ -108,14 +147,18 @@ class LocationSearchInput extends React.Component {
               validationSchema={mapSchema}
               onSubmit={values => {
                 // orderRequest(values);
-                console.log('Moeed Valuessssssssssssssssss:', values);
+                console.log('Moeed Valuessssss:', values);
               }}
             >
               {({ errors, touched }) => (
                 <div>
                   {this.props.myProp && this.props.field.name ? (
-                    <span>
+                    <React.Fragment>
                       <input
+                        className="focus-visible"
+                        // onClick={this.handleClick()}
+                        // onFocus={this.onFocus}
+                        // onBlur={this.onBlur}
                         readOnly={
                           this.props.myProp.isAdvanced &&
                           this.props.field.name == 'address_search'
@@ -124,47 +167,84 @@ class LocationSearchInput extends React.Component {
                         }
                         {...getInputProps({
                           placeholder: 'Search Places ...',
-                          className: 'location-search-input',
+                          onFocus: this.onFocus,
+                          onBlur: () => this.onBlur(),
+                          className:
+                            myClick == 1
+                              ? 'location-search-input w-100 textarea focus-visible'
+                              : 'location-search-input w-100 textarea',
                         })}
                       />
-                      {/* <FontAwesomeIcon onClick={this.editField} icon={faEdit} /> */}
-                    </span>
+                      <div className="autocomplete-dropdown-container">
+                        {loading && <div>Loading...</div>}
+                        {suggestions.map(suggestion => {
+                          const className = suggestion.active
+                            ? 'suggestion-item--active'
+                            : 'suggestion-item';
+                          // inline style for demonstration purpose
+                          const style = suggestion.active
+                            ? { backgroundColor: '#fafafa', cursor: 'pointer' }
+                            : { backgroundColor: '#ffffff', cursor: 'pointer' };
+                          return (
+                            <div
+                              {...getSuggestionItemProps(suggestion, {
+                                className,
+                                style,
+                              })}
+                            >
+                              <span>{suggestion.description}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </React.Fragment>
                   ) : (
-                    <span>
+                    <React.Fragment>
                       <input
+                        // className={this.myClick == 1 ? 'focus-visible' : ''}
+                        // className="focus-visible"
+                        // onClick={this.handleClick}
+
                         {...getInputProps({
                           placeholder: 'Search Places ...',
-                          className: 'location-search-input',
+                          onFocus: this.onFocus,
+                          onBlur: () => this.onBlur(),
+
+                          className:
+                            this.state.myClick == 1
+                              ? 'location-search-input w-100 textarea focus-visible'
+                              : 'location-search-input w-100 textarea',
                         })}
                       />
-                    </span>
+                      <div className="autocomplete-dropdown-container">
+                        {loading && <div>Loading...</div>}
+                        {suggestions.map(suggestion => {
+                          const className = suggestion.active
+                            ? 'suggestion-item--active'
+                            : 'suggestion-item';
+                          // inline style for demonstration purpose
+                          const style = suggestion.active
+                            ? { backgroundColor: '#fafafa', cursor: 'pointer' }
+                            : { backgroundColor: '#ffffff', cursor: 'pointer' };
+                          return (
+                            <div
+                              {...getSuggestionItemProps(suggestion, {
+                                className,
+                                style,
+                              })}
+                            >
+                              <span>{suggestion.description}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </React.Fragment>
                   )}
                 </div>
               )}
             </Formik>
             {/* )} */}
-            <div className="autocomplete-dropdown-container">
-              {loading && <div>Loading...</div>}
-              {suggestions.map(suggestion => {
-                const className = suggestion.active
-                  ? 'suggestion-item--active'
-                  : 'suggestion-item';
-                // inline style for demonstration purpose
-                const style = suggestion.active
-                  ? { backgroundColor: '#fafafa', cursor: 'pointer' }
-                  : { backgroundColor: '#ffffff', cursor: 'pointer' };
-                return (
-                  <div
-                    {...getSuggestionItemProps(suggestion, {
-                      className,
-                      style,
-                    })}
-                  >
-                    <span>{suggestion.description}</span>
-                  </div>
-                );
-              })}
-            </div>
+
             {/* </Formik> */}
           </div>
         )}

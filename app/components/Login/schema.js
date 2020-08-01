@@ -137,10 +137,14 @@ export const mapSchema = Yup.object().shape({
   destination: Yup.string().required('Required'),
 });
 
+const check = () => {
+  console.log('Flight Type', localStorage.getItem('flightType'));
+};
+
 export const bookingSchema = Yup.object().shape({
-  first_name: Yup.string()
-    .matches(/^[a-zA-Z]+$/, 'Use only alphabets')
-    .required('Required'),
+  first_name: check(),
+  // .matches(/^[a-zA-Z]+$/, 'Use only alphabets')
+  // .required('Required'),
   last_name: Yup.string().required('Required'),
   phone_number: Yup.number()
     .required('Required')
@@ -150,13 +154,14 @@ export const bookingSchema = Yup.object().shape({
   email: Yup.string()
     .email()
     .required('Required'),
+
   arrival_date: Yup.date().required('Required'),
-  arrival_flight_number: Yup.string()
-    // .matches(
-    //   /^([A-Z][A-Z][A-Z]?|[A-Z][0-9]|[0-9][A-Z])[0-9]{1,4}$/,
-    //   'Invalid Flight Number',
-    // )
-    .required('Required'),
+  // arrival_flight_number: Yup.string()
+  //   // .matches(
+  //   //   /^([A-Z][A-Z][A-Z]?|[A-Z][0-9]|[0-9][A-Z])[0-9]{1,4}$/,
+  //   //   'Invalid Flight Number',
+  //   // )
+  //   .required('Required'),
   arrival_time: Yup.string()
     .nullable()
     .required('Required'),

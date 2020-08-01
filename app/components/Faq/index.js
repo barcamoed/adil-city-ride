@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 // import PropTypes from 'prop-types';
 // import styled from 'styled-components';
 import Header from '../Header';
@@ -15,6 +15,12 @@ import whatsappImg from '../../assets/images/whatsapp.png';
 import downangleImg from '../../assets/images/downangle.png';
 
 function Faq() {
+  useEffect(() => {
+    $(".accordion .card-header").click(function(){
+      $(".accordion .card").removeClass("active");
+      $(this).parent().toggleClass("active");
+    });
+  }, []);
   return (
     <div>
       <Header />

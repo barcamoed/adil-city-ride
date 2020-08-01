@@ -481,7 +481,7 @@ const AvailableCars = props => {
                         style={customStyles}
                         contentLabel="Map Modal"
                       >
-                        <h2 ref={_subtitle => (subtitle = _subtitle)}>Map</h2>
+                        <h2 className="mb-4" ref={_subtitle => (subtitle = _subtitle)}>Map</h2>
                         {typeof props.myData.Destination == 'string' ? (
                           <ReactGMap
                             containerElement={

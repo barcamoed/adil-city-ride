@@ -110,28 +110,30 @@ function ReferalLogin(props) {
                               <label>
                                 Username <span className="help" />
                               </label>
-                              {errors.email && touched.email ? (
-                                <div className="errorLogin">{errors.email}</div>
-                              ) : null}
+                              
 
                               <Field
                                 type="text"
                                 name="email"
                                 className="form-control form-control-line"
                               />
+                              {errors.email && touched.email ? (
+                                <div className="errorMsg pl-0">{errors.email}</div>
+                              ) : null}
                               <label>
                                 Password <span className="help" />
                               </label>
-                              {errors.password && touched.password ? (
-                                <div className="errorLogin">
-                                  {errors.password}
-                                </div>
-                              ) : null}
+                              
                               <Field
                                 type="password"
                                 name="password"
                                 className="form-control form-control-line"
                               />
+                              {errors.password && touched.password ? (
+                                <div className="errorMsg pl-0">
+                                  {errors.password}
+                                </div>
+                              ) : null}
                               <div className="mt-2">
                                 {' '}
                                 <a href className="text-muted ">
