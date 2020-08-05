@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../Header';
 import Footer from '../Footer';
 
-const OrderSummary = () => {
+const OrderSummary = props => {
   const [orderData, setOrderData] = useState({});
   useEffect(() => {
     if (localStorage.getItem('order_detail')) {
@@ -25,7 +25,7 @@ const OrderSummary = () => {
   // console.log('order_Dataaaa', orderData);
   return (
     <div>
-      <Header />
+      <Header props={props} />
       <section className="banner innerbanner ordersummary">
         <div className="container">
           <div className="row align-items-center">

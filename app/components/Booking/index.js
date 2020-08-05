@@ -2998,9 +2998,7 @@ const Booking = props => {
                                     id="fnumber"
                                     name="departure_flight_number"
                                     // onBlur={e => handleChange(e, setFieldValue)}
-                                    onKeyUp={e =>
-                                      handleKeyUp1(e, setFieldValue)
-                                    }
+                                    onBlur={e => handleKeyUp1(e, setFieldValue)}
                                   />
                                   {(errors.departure_flight_number &&
                                     touched.departure_flight_number) ||
@@ -3120,9 +3118,7 @@ const Booking = props => {
                                     id="fnumber"
                                     name="departure_flight_number"
                                     // onBlur={e => handleChange(e, setFieldValue)}
-                                    onKeyUp={e =>
-                                      handleKeyUp1(e, setFieldValue)
-                                    }
+                                    onBlur={e => handleKeyUp1(e, setFieldValue)}
                                   />
                                   {(errors.departure_flight_number &&
                                     touched.departure_flight_number) ||
@@ -3242,7 +3238,7 @@ const Booking = props => {
                                     className="form-control"
                                     id="fnumber"
                                     name="arrival_flight_number"
-                                    onKeyUp={e => handleKeyUp(e, setFieldValue)}
+                                    onBlur={e => handleKeyUp(e, setFieldValue)}
                                   />
                                   {(errors.arrival_flight_number &&
                                     touched.arrival_flight_number) ||

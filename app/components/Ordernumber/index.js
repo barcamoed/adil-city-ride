@@ -17,7 +17,7 @@ import searchImg from '../../assets/images/search.png';
 import messages from './messages';
 import { OrderNumberSchema } from '../Login/schema';
 
-const Ordernumber = () => {
+const Ordernumber = props => {
   const [orderNumber, setOrderNumber] = useState('');
   const [lastName, setLastName] = useState('');
 
@@ -88,7 +88,7 @@ const Ordernumber = () => {
 
   return (
     <div>
-      <Header />
+      <Header props={props} />
 
       <section className="banner innerbanner ordernumber">
         <div className="container">

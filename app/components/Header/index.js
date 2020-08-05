@@ -15,14 +15,18 @@ import carWImg from '../../assets/images/carw.png';
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 
-function Header() {
+function Header(props) {
   return (
     <header className="site-header" id="site-header">
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <div className="container bb">
           <a className="logo" href="./">
             <img
-              src={props.props.match.path == '/booking' ? logoWhite : logoImage}
+              src={
+                props.props.match.path == '/booking' || '/order-summary'
+                  ? logoWhite
+                  : logoImage
+              }
               alt="logo"
             />
           </a>
