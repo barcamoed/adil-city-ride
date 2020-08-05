@@ -5,11 +5,12 @@
 /*Normal Color*/
 /*Extra Variable*/
 /*Preloader*/
-@import 'https://fonts.googleapis.com/css?family=Rubik:300,400,500,700,900';
+/* @import 'https://fonts.googleapis.com/css?family=Rubik:300,400,500,700,900'; */
 /* ../scss/icons/font-awesome/css/font-awesome.min.css */
-@import url();
+@import url(../scss/icons/font-awesome/css/font-awesome.min.css);
 /* ../scss/icons/material-design-iconic-font/css/materialdesignicons.min.css */
-@import url();
+
+@import url(../scss/icons/material-design-iconic-font/css/materialdesignicons.min.css);
 .preloader {
   width: 100%;
   height: 100%;
@@ -8361,7 +8362,7 @@ File: scss
     overflow: auto;
   }
   /*Sidebar and wrapper*/
-.page-wrapper {
+  .page-wrapper {
     margin-left: 0px;
     padding-top: 70px;
   }

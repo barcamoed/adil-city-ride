@@ -9,22 +9,20 @@ import React, { useState, useEffect } from 'react';
 // import styled from 'styled-components';
 import Header from '../Header';
 import Footer from '../Footer';
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
 
 const OrderSummary = () => {
   const [orderData, setOrderData] = useState({});
   useEffect(() => {
     if (localStorage.getItem('order_detail')) {
-      console.log(
-        'Local Storage Dataaaaa.',
-        JSON.parse(localStorage.getItem('order_detail')),
-      );
+      // console.log(
+      //   'Local Storage Dataaaaa.',
+      //   JSON.parse(localStorage.getItem('order_detail')),
+      // );
       setOrderData(JSON.parse(localStorage.getItem('order_detail')));
     }
   }, [orderData.length]);
 
-  console.log('order_Dataaaa', orderData);
+  // console.log('order_Dataaaa', orderData);
   return (
     <div>
       <Header />
@@ -51,7 +49,7 @@ const OrderSummary = () => {
           <div className="row">
             {JSON.parse(localStorage.getItem('order_detail')).transfers.length >
             1 ? (
-              <div>
+              <React.Fragment>
                 <div className="col-md-6">
                   <div className="ordersummarywrap">
                     <h2>Arrival Details</h2>
@@ -212,7 +210,7 @@ const OrderSummary = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </React.Fragment>
             ) : (
               <div className="col-md-6">
                 <div className="ordersummarywrap">

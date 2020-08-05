@@ -8,17 +8,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Route, withRouter } from 'react-router-dom';
 import Modal from 'react-modal';
 import car1Img from '../../assets/images/car1.png';
-
 import { IDENTIFIER, GETVEHICLESKEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 import ReactGMap from '../ReactGMap/index';
-// import '../../assets/css/style.css';
-import request from '../../utils/apiWrappers';
-import { FormattedMessage } from 'react-intl';
+import LoadingOverlay from 'react-loading-overlay';
 import messages from './messages';
 import { Router, browserHistory } from 'react-router';
-// import { createHashHistory } from 'history';
-// export const history = createHashHistory();
+
 Modal.setAppElement('#app'); // For Modal used below
 const customStyles = {
   content: {
@@ -43,18 +39,16 @@ const AvailableCars = props => {
   var [selectTripTypeError, setSelectTripTypeError] = useState(null);
   var [myObj, setMyObj] = useState({});
   var [vehiclesCount, setVehiclesCount] = useState('');
+  const [isActive, setLodaerIsActive] = useState(false);
 
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     // Update the document title using the browser API
     let unmounted = false;
-    console.log('Data coming inside props from HomeFilters:', props);
-
     var i = 0;
     const airports = JSON.parse(localStorage.getItem('CityAirports'));
     for (i = 0; i < airports.length; i++) {
       if (airports[i].ap_name == props.myData.From) {
-        console.log('Matcheddddddddddd');
         setAp_iata(airports[i].ap_iata);
       }
     }
@@ -89,30 +83,32 @@ const AvailableCars = props => {
           formData.append(dataKey, data[dataKey]);
         }
       }
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
-
+      // for (var pair of formData.entries()) {
+      //   console.log(pair[0] + ', ' + pair[1]);
+      // }
+      setLodaerIsActive(true);
       postRequest(formData, headers).then(data => {
         if (data.status == 'ok') {
-          console.log('Data Status:', data.status);
+          // console.log('Data Status:', data.status);
           const vehiclesData = data.vehicles;
           setAvailableCars(vehiclesData);
           setVehiclesCount(vehiclesData.length);
+          setLodaerIsActive(false);
           // window.dispatchEvent(new Event('resize'));
 
           // setFormData(myObj);
         } else if (data.status == 'no_results') {
           const noResultFound = 'No Result Found';
           setNoResultFound(noResultFound);
+          setLodaerIsActive(false);
           // setFormData(myObj);
         }
       });
     } else if (myObj.isAdvanced == false && myObj.switched == true) {
-      console.log(
-        'Switcheddddd and Not Advancedddddddddd asdfsadfsdfasdfsdf',
-        myObj,
-      );
+      // console.log(
+      //   'Switcheddddd and Not Advancedddddddddd asdfsadfsdfasdfsdf',
+      //   myObj,
+      // );
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
       };
@@ -139,17 +135,18 @@ const AvailableCars = props => {
           formData.append(dataKey, data[dataKey]);
         }
       }
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
-
+      // for (var pair of formData.entries()) {
+      //   console.log(pair[0] + ', ' + pair[1]);
+      // }
+      setLodaerIsActive(true);
       postRequest(formData, headers).then(data => {
         if (data.status == 'ok') {
-          console.log('Data Status:', data.status);
+          // console.log('Data Status:', data.status);
           const vehiclesData = data.vehicles;
           setAvailableCars(vehiclesData);
           setVehiclesCount(vehiclesData.length);
           // window.dispatchEvent(new Event('resize'));
+          setLodaerIsActive(false);
 
           // setFormData(myObj);
         } else if (data.status == 'no_results') {
@@ -159,13 +156,13 @@ const AvailableCars = props => {
         }
       });
     } else if (myObj.isAdvanced == true && myObj.switched == true) {
-      console.log(
-        'Switcheddddd and Advancedddddddddd In Available Cars Comp',
-        myObj,
-      );
+      // console.log(
+      //   'Switcheddddd and Advancedddddddddd In Available Cars Comp',
+      //   myObj,
+      // );
       const destinationLatLng =
         '(' + myObj.Destination.lat + ', ' + myObj.Destination.lng + ')';
-      console.log('myStructured Destination:', destinationLatLng);
+      // console.log('myStructured Destination:', destinationLatLng);
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
       };
@@ -193,10 +190,10 @@ const AvailableCars = props => {
           formData.append(dataKey, data[dataKey]);
         }
       }
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
-
+      // for (var pair of formData.entries()) {
+      //   console.log(pair[0] + ', ' + pair[1]);
+      // }
+      setLodaerIsActive(true);
       postRequest(formData, headers).then(data => {
         if (data.status == 'ok') {
           // console.log('Data Status ok:', data);
@@ -204,11 +201,12 @@ const AvailableCars = props => {
           setAvailableCars(vehiclesData);
           setVehiclesCount(vehiclesData.length);
           // window.dispatchEvent(new Event('resize'));
-
+          setLodaerIsActive(false);
           // setFormData(myObj);
         } else if (data.status == 'no_results') {
           const noResultFound = 'No Result Found';
           setNoResultFound(noResultFound);
+          setLodaerIsActive(false);
           // setFormData(myObj);
         }
       });
@@ -216,7 +214,7 @@ const AvailableCars = props => {
       // console.log('Advanceddddd....', myObj);
       const destinationLatLng =
         '(' + myObj.Destination.lat + ', ' + myObj.Destination.lng + ')';
-      console.log('myStructured Destination:', destinationLatLng);
+      // console.log('myStructured Destination:', destinationLatLng);
 
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
@@ -245,23 +243,23 @@ const AvailableCars = props => {
           formData.append(dataKey, data[dataKey]);
         }
       }
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
-
+      // for (var pair of formData.entries()) {
+      //   console.log(pair[0] + ', ' + pair[1]);
+      // }
+      setLodaerIsActive(true);
       postRequest(formData, headers).then(data => {
-        console.log('Data Status:', data);
+        // console.log('Data Status:', data);
         if (data.status == 'ok') {
-          console.log('Data Status:', data.status);
+          // console.log('Data Status:', data.status);
           const vehiclesData = data.vehicles;
           setAvailableCars(vehiclesData);
           setVehiclesCount(vehiclesData.length);
-          // window.dispatchEvent(new Event('resize'));
 
-          // setFormData(myObj);
+          setLodaerIsActive(false);
         } else if (data.status == 'no_results') {
           const noResultFound = 'No Result Found';
           setNoResultFound(noResultFound);
+          setLodaerIsActive(false);
           // setFormData(myObj);
         }
       });
@@ -290,21 +288,12 @@ const AvailableCars = props => {
         },
       },
     });
-
-    console.log('After Cars Slider');
-    // return () => {
-    //   unmounted = true;
-    // };
   }, [
     props.myData.ap_iata,
     availableCars.length,
     props.myData.From,
     vehiclesCount,
   ]);
-
-  // if (availableCars && availableCars.length > 0) {
-  //   $('.carslider').trigger('refresh.owl.carousel');
-  // }
 
   function openModal() {
     setIsOpen(true);
@@ -341,7 +330,7 @@ const AvailableCars = props => {
     }
     setRoundTrip(vehicle_id);
     localStorage.setItem('vehicleObj', JSON.stringify(vehicleObj));
-    console.log('VehicleObject.. .. ..', localStorage.getItem('vehicleObj'));
+    // console.log('VehicleObject.. .. ..', localStorage.getItem('vehicleObj'));
   };
 
   const onOneWayChecked = (
@@ -371,7 +360,7 @@ const AvailableCars = props => {
   };
 
   const goToBookingForm = item => {
-    console.log('Inisde function goToBookingForm');
+    // console.log('Inisde function goToBookingForm');
     if (!roundTrip && !oneWayTrip) {
       localStorage.setItem('myGeneralObj', JSON.stringify(props));
       const route = 'rt';
@@ -384,22 +373,30 @@ const AvailableCars = props => {
         max_pax: item.max_pax,
         release_hours: item.release_hours,
       };
-      // setSelectTripTypeError(null);
-      console.log('OBJECTTTTTT', vehicleObj);
+      if (vehicleObj.route == 'rt') {
+        localStorage.setItem('flightType', 'both');
+      } else if (vehicleObj.route == 'ow' && props.myData.switched != true) {
+        localStorage.setItem('flightType', 'justArrival');
+      } else if (vehicleObj.route == 'ow' && props.myData.switched == true) {
+        localStorage.setItem('flightType', 'justDeparture');
+      }
+      // console.log('OBJECTTTTTT', vehicleObj);
       localStorage.setItem('vehicleObj', JSON.stringify(vehicleObj));
-      console.log(
-        'Storage OBJECTTTTTT',
-        JSON.parse(localStorage.getItem('vehicleObj')),
-      );
+      // console.log(
+      //   'Storage OBJECTTTTTT',
+      //   JSON.parse(localStorage.getItem('vehicleObj')),
+      // );
       window.location.href = 'http://localhost:3000/booking';
-      // browserHistory.push('/booking');
-      // console.log('Historyyyyyyyyyyyyyy:', props.router);
-      // history.push('/booking');
-      // context.history.push('/booking');
     } else {
-      // setSelectTripTypeError('Select one of the following');
+      if (roundTrip) {
+        localStorage.setItem('flightType', 'both');
+      } else if (oneWayTrip && props.myData.switched != true) {
+        localStorage.setItem('flightType', 'justArrival');
+      } else if (oneWayTrip && props.myData.switched == true) {
+        localStorage.setItem('flightType', 'justDeparture');
+      }
       localStorage.setItem('myGeneralObj', JSON.stringify(props));
-      console.log('ELSEEEEEEEEEE');
+      // console.log('ELSEEEEEEEEEE');
       window.location.href = 'http://localhost:3000/booking';
     }
   };
@@ -481,7 +478,12 @@ const AvailableCars = props => {
                         style={customStyles}
                         contentLabel="Map Modal"
                       >
-                        <h2 className="mb-4" ref={_subtitle => (subtitle = _subtitle)}>Map</h2>
+                        <h2
+                          className="mb-4"
+                          ref={_subtitle => (subtitle = _subtitle)}
+                        >
+                          Map
+                        </h2>
                         {typeof props.myData.Destination == 'string' ? (
                           <ReactGMap
                             containerElement={
@@ -617,7 +619,34 @@ const AvailableCars = props => {
                         ))
                       : noResultVehicles}
                   </div>
-                ) : null}
+                ) : (
+                  <LoadingOverlay
+                    styles={{
+                      overlay: {
+                        position: 'absolute',
+                        height: '100%',
+                        width: '100%',
+                        top: '0px',
+                        left: '0px',
+                        display: '-webkit - box',
+                        display: '-webkit - flex',
+                        display: '-ms - flexbox',
+                        display: 'flex',
+                        'text-align': 'center',
+                        'font-size': '1.2em',
+                        color: '#000',
+                        background: 'rgba(0, 0, 0, 0)',
+                        zIndex: 800,
+                        // -webkit-transition: opacity 500ms ease-in;
+                        // transition: opacity 500ms ease-in;
+                        opacity: 1,
+                      },
+                    }}
+                    active={isActive}
+                    spinner
+                    text="Loading..."
+                  />
+                )}
               </div>
             </div>
           </div>

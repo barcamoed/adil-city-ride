@@ -6,26 +6,22 @@
 
 import React, { useState, useEffect } from 'react';
 // import PropTypes from 'prop-types';
-// import styled from 'styled-components';
+import moment from 'moment';
 
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
+import { useCookies } from 'react-cookie';
 import arrowrightImg from '../../assets/images/arrowright.png';
-import destination1Img from '../../assets/images/destination1.jpg';
+import LoadingOverlay from 'react-loading-overlay';
 import { IDENTIFIER, GETKEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
-// import '../../assets/js/custom';
-const ChooseDestination = props => {
+
+const ChooseDestination = (props, { prop }) => {
+  const [cookies, setCookie, removeCookie] = useCookies(['cookie_days']);
+  const [isActive, setIsActive] = useState(false);
+
   var aloop = [];
   const [myloop, setArray] = useState(aloop);
-  const [fakeLoop, setFArray] = useState(aloop);
-  console.log('myLoop', myloop);
-
-  var outerLoopSize = 0;
   var newAirportsArray = [];
-  var i = 0;
   function customJS() {
-    console.log('Inside customJS function');
     $(window).scroll(function() {
       let sticky = $('#site-header');
       var scroll = $(window).scrollTop();
@@ -53,7 +49,6 @@ const ChooseDestination = props => {
     });
 
     // /* choose slider */
-    console.log('Desktop Slider');
     $('.choosedesktopslider').owlCarousel({
       loop: false,
       margin: 0,
@@ -75,7 +70,6 @@ const ChooseDestination = props => {
       },
     });
     /* choose slider mobile */
-    console.log('Mobile Slider');
     $('.choosemobileslider').owlCarousel({
       loop: false,
       margin: 0,
@@ -129,32 +123,9 @@ const ChooseDestination = props => {
         },
       },
     });
-    /* car slider */
-    // $('.carslider').owlCarousel({
-    //   loop: false,
-    //   margin: 0,
-    //   nav: true,
-    //   dots: false,
-    //   dotsContainer: '.rightdots',
-    //   dotsSpeed: 1000,
-
-    //   responsive: {
-    //     0: {
-    //       items: 1,
-    //     },
-    //     600: {
-    //       items: 1,
-    //     },
-    //     991: {
-    //       items: 2,
-    //     },
-    //     1000: {
-    //       items: 3,
-    //     },
-    //   },
-    // });
   }
   useEffect(() => {
+    // console.log('My pppppppp', props);
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
     };
@@ -162,84 +133,87 @@ const ChooseDestination = props => {
     params.append('command', 'get_cities');
     params.append('identifier', IDENTIFIER);
     params.append('key', GETKEY());
-    params.append('data', []);
-
-    //
-
-    console.log(
-      'AP Request Time LocalStorage:',
-      localStorage.getItem('apRequestTime'),
-    );
-    if (!localStorage.getItem('CityAirports')) {
-      console.log('No AP Data In Local Storage');
-      postRequest(params, headers).then(data => {
-        console.log('City Dataaaaaaaa:', data.cities.length);
-        for (var j = 0; j < data.cities.length; ) {
-          data['cities'][j]['airports'].forEach(element => {
-            // console.log('elementMMMM', element);
-            newAirportsArray[j] = element;
-            newAirportsArray[j].city = data['cities'][j]['city'];
-          });
-          j++;
-        }
-        console.log('newAirportsArray:', newAirportsArray);
-        localStorage.setItem('CityAirports', JSON.stringify(newAirportsArray));
-        localStorage.setItem('apRequestTime', JSON.stringify(new Date()));
-        setArray(newAirportsArray);
-        customJS();
-      });
-    } else if (JSON.parse(localStorage.getItem('apRequestTime'))) {
-      console.log(
-        'AP Request Time LocalStorage:',
-        JSON.parse(localStorage.getItem('CityAirports')),
-      );
-      var hours =
-        Math.abs(
-          new Date(JSON.parse(localStorage.getItem('apRequestTime'))) -
-            new Date(),
-        ) / 36e5;
-      console.log('AP Data In Local Storage Exists', hours);
-      if (hours > 2) {
-        console.log('More Then 2 HOURSSSSSSSSSSSS');
-        // const interval = setInterval(() => {
-        //   console.log('This will run every 3 second!');
-        var myNewAirportsArray = [];
-        // setArray([]);
-        // postRequest(params, headers).then(data => {
-        //   data.forEach(element => {
-        //     outerLoopSize = outerLoopSize + element.airports.length;
-        //     element.airports.forEach(airport => {
-        //       myNewAirportsArray[i] = airport;
-        //       myNewAirportsArray[i].city = element.city;
-        //       i++;
-        //     });
-        //   });
-        //   localStorage.clear();
-        //   var filteredArray = myNewAirportsArray.filter(function(el) {
-        //     return el != null;
-        //   });
-
-        //   console.log('Interval Before setArray', filteredArray);
-        //   localStorage.setItem('CityAirports', JSON.stringify(filteredArray));
-
-        //   setArray(filteredArray);
-        //   // newAirportsArray = [];
-        //   console.log('newAirportsArray after setting empty', filteredArray);
-        //   customJS();
-        // });
-
+    const ref_id = localStorage.getItem('ref_id');
+    // console.log('Ref ID', ref_id);
+    // console.log('COOKIEEEEE', cookies);
+    if (
+      props.prop.match.params.id &&
+      props.prop.match.url == '/ref/' + props.prop.match.params.id
+    ) {
+      // console.log(
+      //   'Dateeeeeeeeeee',
+      //   new Date(
+      //     moment()
+      //       .add(5, 'days')
+      //       .format('DD-MM-YY')
+      //       .toString(),
+      //   ),
+      // );
+      if (ref_id != null && props.prop.match.params.id == ref_id) {
+        localStorageData();
+      } else {
+        localStorage.setItem('ref_id', props.prop.match.params.id);
+        params.append('data[referral_id]', props.prop.match.params.id);
+        // for (const [key, value] of params) {
+        //   console.log('key:', key, 'value:', value);
+        // }
+        // console.log('Url is /ref/id && id exists');
+        setIsActive(true);
         postRequest(params, headers).then(data => {
-          console.log('City Dataaaaaaaa:', data.cities.length);
+          // console.log('Cookie Days from request:', data.referral.cookie_days);
+
+          setCookie('cookie_days', data.referral.cookie_days, {
+            path: '/',
+            expires: new Date(
+              moment()
+                .add(data.referral.cookie_days, 'days')
+                .format('DD-MM-YY')
+                .toString(),
+            ),
+          });
+
+          var i = 0;
           for (var j = 0; j < data.cities.length; ) {
-            console.log('City Dataaaaaaaammmmmmmm');
             data['cities'][j]['airports'].forEach(element => {
-              // console.log('elementMMMM', element);
-              newAirportsArray[j] = element;
-              newAirportsArray[j].city = data['cities'][j]['city'];
+              newAirportsArray[i] = element;
+              newAirportsArray[i].city = data['cities'][j]['city'];
+              i++;
             });
             j++;
           }
-          console.log('newAirportsArray:', newAirportsArray);
+
+          localStorage.setItem(
+            'CityAirports',
+            JSON.stringify(newAirportsArray),
+          );
+          localStorage.setItem('ref_id', props.prop.match.params.id);
+
+          localStorage.setItem('apRequestTime', JSON.stringify(new Date()));
+          setArray(newAirportsArray);
+          customJS();
+          setIsActive(false);
+        });
+      }
+    } else if (!props.prop.match.params.id) {
+      // console.log('No ID IN URLL So No Cookie', cookies);
+      // localStorage.removeItem('ref_id');
+      // removeCookie('cookie_days');
+      if (!localStorage.getItem('CityAirports')) {
+        params.append('data', []);
+
+        setIsActive(true);
+        postRequest(params, headers).then(data => {
+          console.log('City Data mmm nnn kkk lll:', data.cities.length);
+          var i = 0;
+          for (var j = 0; j < data.cities.length; ) {
+            data['cities'][j]['airports'].forEach(element => {
+              newAirportsArray[i] = element;
+              newAirportsArray[i].city = data['cities'][j]['city'];
+              i++;
+            });
+            j++;
+          }
+
           localStorage.setItem(
             'CityAirports',
             JSON.stringify(newAirportsArray),
@@ -247,29 +221,58 @@ const ChooseDestination = props => {
           localStorage.setItem('apRequestTime', JSON.stringify(new Date()));
           setArray(newAirportsArray);
           customJS();
+          setIsActive(false);
         });
+      } else if (JSON.parse(localStorage.getItem('apRequestTime'))) {
+        // console.log(
+        //   'AP Request Time LocalStorage:',
+        //   JSON.parse(localStorage.getItem('CityAirports')),
+        // );
+        var hours =
+          Math.abs(
+            new Date(JSON.parse(localStorage.getItem('apRequestTime'))) -
+              new Date(),
+          ) / 36e5;
 
-        console.log('Herzzzzzzzzzzzzzzzzzzzzzzzzz');
-        // }, 30000000);
-        // return () => clearInterval(interval);
-      } else {
-        // localStorage.removeItem('CityAirports');
-        console.log(
-          'Get Local Storage Time',
-          localStorage.getItem('apRequestTime'),
-        );
-        localStorageData();
-        console.log('Less than 2 hrs Inside Else');
+        if (hours > 2) {
+          setIsActive(true);
+          postRequest(params, headers).then(data => {
+            var i = 0;
+            console.log('City Data abc def ghi:', data.cities.length);
+            for (var j = 0; j < data.cities.length; ) {
+              console.log('City Dataa');
+              data['cities'][j]['airports'].forEach(element => {
+                // console.log('elementMMMM', element);
+                newAirportsArray[i] = element;
+                newAirportsArray[i].city = data['cities'][j]['city'];
+                i++;
+              });
+              j++;
+            }
+            // console.log('newAirportsArray:', newAirportsArray);
+            localStorage.setItem(
+              'CityAirports',
+              JSON.stringify(newAirportsArray),
+            );
+            localStorage.setItem('apRequestTime', JSON.stringify(new Date()));
+            setArray(newAirportsArray);
+            customJS();
+            setIsActive(false);
+          });
+        } else {
+          localStorageData();
+          // console.log('Less than 2 hrs Inside Else');
+        }
       }
     }
   }, []);
 
   async function localStorageData() {
     let CityAirports = JSON.parse(localStorage.getItem('CityAirports'));
-    console.log(
-      'LocalStorage inside async Func',
-      JSON.parse(localStorage.getItem('CityAirports')),
-    );
+    // console.log(
+    //   'LocalStorage inside async Func',
+    //   JSON.parse(localStorage.getItem('CityAirports')),
+    // );
     await setArray(CityAirports);
     customJS();
   }
@@ -279,8 +282,8 @@ const ChooseDestination = props => {
   const outerLoopLimit = Math.ceil(loopLength / 8);
   var innerLoopEnd = 8;
   const onAirportClick = (searchField, passengers) => {
-    console.log('Airport Clickeddddddddddd', searchField, passengers);
-    console.log('Chose Desination Propsssssssssssssssssss', props);
+    // console.log('Airport Clicked', searchField, passengers);
+    // console.log('Chose Desination Props', props);
     props.onAirportValues({ searchField, passengers });
   };
   // for (var i = 0; i < cityAndAirports.length; i++) {}
@@ -289,91 +292,145 @@ const ChooseDestination = props => {
       <section className="choose">
         <div className="container ">
           <div className="col-md-12 p-0">
-            <h2 className="bb">Choose the Destintation </h2>
+            <h2 className="bb">Choose City </h2>
           </div>
         </div>
         <div className="container max1080">
           <div className="row">
             <div className="col-md-12">
               <div className="owl-carousel owl-theme chooseslider choosedesktopslider">
-                {myloop && myloop.length > 0
-                  ? myloop.slice(0, outerLoopLimit).map((item1, key1) => {
-                      return (
-                        <div className="item">
-                          <span class="d-none">
+                {myloop && myloop.length > 0 ? (
+                  myloop.slice(0, outerLoopLimit).map((item1, key1) => {
+                    return (
+                      <div className="item">
+                        <span class="d-none">
                           {loopLength - innerLoopStart < 8
                             ? (innerLoopEnd = loopLength)
                             : (innerLoopEnd = innerLoopStart + 8)}
-                          </span>
-                          {myloop
-                            .slice(innerLoopStart, innerLoopEnd)
-                            .map((airport, key) => {
-                              return (
-                                <a
-                                  onClick={() =>
-                                    onAirportClick(airport.city, '2')
-                                  }
-                                >
-                                  <div className="choosebox">
-                                    <img
-                                      src={airport.ap_image}
-                                      alt="Destintation"
-                                    />
-                                    <div className="choosedesc">
-                                      <p className="cityname">
-                                        {airport.ap_iata}
-                                      </p>
-                                      <h3>{airport.ap_name} </h3>
-                                      <div className="d-flex align-items-center justify-content-between">
-                                        <p className="state">{airport.city}</p>
-                                        <img
-                                          src={arrowrightImg}
-                                          className="arrowright"
-                                          alt="arrow"
-                                        />
-                                        {/* {key} */}
-                                      </div>
+                        </span>
+                        {myloop
+                          .slice(innerLoopStart, innerLoopEnd)
+                          .map((airport, key) => {
+                            return (
+                              <a
+                                onClick={() =>
+                                  onAirportClick(airport.city, '2')
+                                }
+                              >
+                                <div className="choosebox">
+                                  <img
+                                    src={airport.ap_image}
+                                    alt="Destintation"
+                                  />
+                                  <div className="choosedesc">
+                                    <p className="cityname">
+                                      {airport.ap_iata}
+                                    </p>
+                                    <h3>{airport.ap_name} </h3>
+                                    <div className="d-flex align-items-center justify-content-between">
+                                      <p className="state">{airport.city}</p>
+                                      <img
+                                        src={arrowrightImg}
+                                        className="arrowright"
+                                        alt="arrow"
+                                      />
+                                      {/* {key} */}
                                     </div>
                                   </div>
-                                  <span class="d-none">
+                                </div>
+                                <span class="d-none">
                                   {key == 7
                                     ? (innerLoopStart = innerLoopStart + 8)
                                     : null}
-                                  </span>  
-                                </a>
-                              );
-                            })}
-                        </div>
-                      );
-                    })
-                  : 'Loading...'}
+                                </span>
+                              </a>
+                            );
+                          })}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <LoadingOverlay
+                    styles={{
+                      overlay: {
+                        position: 'absolute',
+                        height: '100%',
+                        width: '100%',
+                        top: '0px',
+                        left: '0px',
+                        display: '-webkit - box',
+                        display: '-webkit - flex',
+                        display: '-ms - flexbox',
+                        display: 'flex',
+                        'text-align': 'center',
+                        'font-size': '1.2em',
+                        color: '#000',
+                        background: 'rgba(0, 0, 0, 0)',
+                        zIndex: 800,
+                        // -webkit-transition: opacity 500ms ease-in;
+                        // transition: opacity 500ms ease-in;
+                        opacity: 1,
+                      },
+                    }}
+                    active={isActive}
+                    spinner
+                    text="Loading..."
+                  />
+                )}
               </div>
               <div className="owl-carousel owl-theme chooseslider choosemobileslider">
-                {myloop && myloop.length > 0
-                  ? myloop.slice(0, loopLength).map((item, key) => {
-                      return (
-                        <div className="item">
-                          <a onClick={() => onAirportClick(airport.city, '2')}>
-                            <div className="choosebox">
-                              <img src={item.ap_image} alt="Destintation" />
-                              <div className="choosedesc">
-                                <p className="cityname">{item.ap_iata}</p>
-                                <h3>{item.ap_name}</h3>
-                                <div className="d-flex align-items-center justify-content-between">
-                                  <p className="state">{item.city}</p>
-                                  <img
-                                    src={arrowrightImg}
-                                    className="arrowright"
-                                    alt="arrow"
-                                  />
-                                </div>
+                {myloop && myloop.length > 0 ? (
+                  myloop.slice(0, loopLength).map((item, key) => {
+                    return (
+                      <div className="item">
+                        <a onClick={() => onAirportClick(airport.city, '2')}>
+                          <div className="choosebox">
+                            <img src={item.ap_image} alt="Destintation" />
+                            <div className="choosedesc">
+                              <p className="cityname">{item.ap_iata}</p>
+                              <h3>{item.ap_name}</h3>
+                              <div className="d-flex align-items-center justify-content-between">
+                                <p className="state">{item.city}</p>
+                                <img
+                                  src={arrowrightImg}
+                                  className="arrowright"
+                                  alt="arrow"
+                                />
                               </div>
                             </div>
-                          </a>
-                        </div>
-                      );
-                    })
-                  : 'Loading...'}
+                          </div>
+                        </a>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <LoadingOverlay
+                    styles={{
+                      overlay: {
+                        position: 'absolute',
+                        height: '100%',
+                        width: '100%',
+                        top: '0px',
+                        left: '0px',
+                        display: '-webkit - box',
+                        display: '-webkit - flex',
+                        display: '-ms - flexbox',
+                        display: 'flex',
+                        'text-align': 'center',
+                        'font-size': '1.2em',
+                        color: '#000',
+                        background: 'rgba(0, 0, 0, 0)',
+                        zIndex: 800,
+                        // -webkit-transition: opacity 500ms ease-in;
+                        // transition: opacity 500ms ease-in;
+                        opacity: 1,
+                      },
+                    }}
+                    active={isActive}
+                    spinner
+                    text="Loading..."
+                  />
+                )}
                 {/* <div className="item">
                   <a href="#">
                     <div className="choosebox">

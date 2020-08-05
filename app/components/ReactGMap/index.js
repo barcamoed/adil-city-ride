@@ -12,7 +12,7 @@ class ReactGMap extends Component {
 
   componentDidMount() {
     const directionsService = new google.maps.DirectionsService();
-    console.log('PropssssZZZZZZZZZZZZZZZ', this.props);
+    // console.log('PropssssZZZZZZZZZZZZZZZ', this.props);
     const origin = this.props.origin;
     const destination = this.props.destination;
 
@@ -47,7 +47,7 @@ class ReactGMap extends Component {
         },
         (result, status) => {
           if (status === google.maps.DirectionsStatus.OK) {
-            console.log('Component props Changed', result);
+            // console.log('Component props Changed', result);
             this.setState({
               directions: result,
             });

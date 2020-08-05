@@ -23,10 +23,10 @@ import NotFoundPage from '../containers/NotFoundPage';
 import { Router, browserHistory } from 'react-router';
 
 const Routes = () => (
-  <Suspense fallback="Loading......">
+  <Suspense fallback="Loading...">
     <Switch>
       {/* <Router history={browserHistory}> */}
-      <Route exact path="/" component={Home} />
+      <Route exact path={['/', '/ref/:id']} component={Home} />
       <Route exact path="/order-number" component={OrderNumber} />
       <Route exact path="/booking" component={Booking} />
       <Route exact path="/about" component={About} />

@@ -11,8 +11,7 @@ import Header from '../Header';
 import Footer from '../Footer';
 import ChooseDestination from '../ChooseDestination';
 import HomeFilters from '../HomeFilters';
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
+
 import searchImg from '../../assets/images/search.png';
 import whatsappImg from '../../assets/images/whatsapp.png';
 import book1Img from '../../assets/images/book1.png';
@@ -28,38 +27,26 @@ import { Link } from 'react-router-dom';
 // import '../../assets/css/style.css';
 import MyAutosuggest from '../ReactAutoSuggest';
 const Home = props => {
-  // console.log('Historyyyyyyyyyyyyy:', history);
   const [showFilter, setShowFilters] = useState(false);
   const [showAPFilter, setShowAirportFilters] = useState(false);
-
   const [searchValAndPassengers, setSearchValAndPassengers] = useState({});
   const [airportSelectedValues, setAirportSelectValues] = useState({});
   const [paxVal, setPaxVal] = useState('2');
   const [searchVal, setSearchField] = useState('');
 
-  // console.log('sssssssssssssssssssssss', searchVal);
-  console.log(
-    'Airport Selected Values Coming from Choose Destination',
-    airportSelectedValues && airportSelectedValues,
-  );
   function handleSearch(values) {
-    console.log('City Search Clicked.a.a.a.a', values);
     setSearchValAndPassengers(values);
     setShowFilters(true);
     setShowAirportFilters(false);
     setPaxVal(values.passengers);
   }
-  console.log(
-    'searchValAndPassengers',
-    searchValAndPassengers && searchValAndPassengers,
-  );
+
   useEffect(() => {
-    console.log('airportSelectedValues', airportSelectedValues);
+    // console.log('airportSelectedValues', airportSelectedValues);
     if (
       Object.keys(airportSelectedValues).length != 0 &&
       airportSelectedValues.constructor === Object
     ) {
-      console.log('aaaaaaaaa', airportSelectedValues);
       setPaxVal('2');
       setSearchValAndPassengers({
         searchField: airportSelectedValues.searchField,
@@ -68,10 +55,6 @@ const Home = props => {
       setShowAirportFilters(true);
       setShowFilters(false);
     }
-    // if (searchValAndPassengers && searchValAndPassengers) {
-    //   console.log('Yessssssss searchValAndPassengers', searchValAndPassengers);
-
-    // }
 
     var date = new Date().toISOString().slice(0, 10);
     $(window).scroll(function() {
@@ -155,29 +138,18 @@ const Home = props => {
     });
   }, [searchValAndPassengers.length, airportSelectedValues]);
 
-  function selectPax(e, setFieldValue) {
-    console.log('Selected Val', e.target.value);
-    console.log(
-      'airportSelectedValues.searchField',
-      airportSelectedValues.searchField,
-    );
+  function selectPax(e) {
     setPaxVal(e.target.value);
-
+    // setFieldValue('passengers', e.target.value);
     // setAirportSelectValues({
     //   searchField: searchVal,
     //   passengers: e.target.value,
     // });
   }
-  function setDefaultPaxVal(setFieldValue) {
-    setPaxVal('2');
-    setFieldValue('passengers', '2');
-    console.log('Default Pax Val');
-    // return paxVal;
-  }
 
   return (
     <div>
-      <Header />
+      <Header props={props} />
 
       <div>
         <section className="banner">
@@ -200,18 +172,17 @@ const Home = props => {
                 <Formik
                   initialValues={{
                     searchField: '',
+                    passengers: paxVal,
                   }}
                   validationSchema={searchSchema}
                   onSubmit={values => {
                     handleSearch(values);
-                    console.log('Moeeddddd:', values);
+                    // console.log('Moeed Values:', values);
                   }}
                 >
                   {({ errors, touched, isSubmitting, setFieldValue }) => (
                     <Form disabled={isSubmitting} noValidate>
                       <div className="input-group">
-                        
-
                         <Field
                           type="text"
                           name="searchField"
@@ -221,18 +192,17 @@ const Home = props => {
                           onGetSearchVal={value => setSearchField(value)}
                           component={MyAutosuggest}
                         />
-                        
 
                         <div className="input-group-append">
-                          
                           <Field
                             as="select"
                             name="passengers"
                             className="form-control"
-                            // defaultValue={showAPFilter ? '2' : paxVal}
                             value={showAPFilter ? paxVal : paxVal}
+                            //defaultValue={showAPFilter ? paxVal : paxVal}
                             onChange={e => {
                               selectPax(e);
+                              // setPaxVal(e.target.value);
                               setFieldValue('passengers', e.target.value);
                             }}
                           >
@@ -259,11 +229,11 @@ const Home = props => {
                         </div>
                       </div>
                       {errors.passengers && touched.passengers ? (
-                            <div className="errorMsg">{errors.passengers}</div>
-                          ) : null}
+                        <div className="errorMsg">{errors.passengers}</div>
+                      ) : null}
                       {errors.searchField && touched.searchField ? (
-                          <div className="errorMsg">{errors.searchField}</div>
-                        ) : null}
+                        <div className="errorMsg">{errors.searchField}</div>
+                      ) : null}
                     </Form>
                   )}
                 </Formik>
@@ -285,6 +255,7 @@ const Home = props => {
         ) : !showFilter && !showAPFilter ? (
           <ChooseDestination
             onAirportValues={value => setAirportSelectValues(value)}
+            prop={props}
           />
         ) : showAPFilter && !showFilter ? (
           <HomeFilters searchData={searchValAndPassengers} />

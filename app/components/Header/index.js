@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 // import PropTypes from 'prop-types';
 // import styled from 'styled-components';
 import logoImage from '../../assets/images/logo.png';
+import logoWhite from '../../assets/images/logo.svg';
 import carImg from '../../assets/images/car.png';
 import carWImg from '../../assets/images/carw.png';
 import { FormattedMessage } from 'react-intl';
@@ -20,7 +21,10 @@ function Header() {
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <div className="container bb">
           <a className="logo" href="./">
-            <img src={logoImage} alt="logo" />
+            <img
+              src={props.props.match.path == '/booking' ? logoWhite : logoImage}
+              alt="logo"
+            />
           </a>
           <button
             className="navbar-toggler"
@@ -66,12 +70,12 @@ function Header() {
                 </Link>
               </li>
               <li className="nav-item btn-order ">
-                <a className="nav-link " href="#">
+                <Link className="nav-link " to="/order-number">
                   <img src={carImg} alt />
                   <img src={carWImg} alt /> My Order
-                </a>
+                </Link>
               </li>
-              <li className="nav-item dropdown">
+              {/* <li className="nav-item dropdown">
                 <a
                   className="nav-link dropdown-toggle"
                   id="dropdownmenubutton"
@@ -96,7 +100,7 @@ function Header() {
                     Something else here
                   </a>
                 </div>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>

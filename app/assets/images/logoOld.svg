@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 106 40">
     <defs>
         <style>.logo-a{font-size: 18px;text-transform: uppercase;font-family:'Rubik',
-            Helvetica;font-weight:700;}.logo-c{fill:none;} .logo-total {fill:#3c84bb;}
+            Helvetica;font-weight:700;}.logo-c{fill:none;} .logo-total {fill:white;}
         </style>
     </defs>
     <g transform="translate(-1142 -19)" class="logo-total">

@@ -5,14 +5,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-// import PropTypes from 'prop-types';
-// import styled from 'styled-components';
+
 import LogoImg from '../../assets/images/logo.png';
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
+import Logo from '../../assets/images/logo.svg';
 import { Link } from 'react-router-dom';
 
-function AdminHeader() {
+const AdminHeader = props => {
+  const [userData, setUserData] = useState({});
   useEffect(() => {
     if ($(window).width() < 767) {
       $('#main-wrapper').addClass('mini-sidebar');
@@ -26,6 +25,12 @@ function AdminHeader() {
     }
   }, []);
 
+  const onLogout = () => {
+    // console.log('Props', props);
+    localStorage.removeItem('ref_user_details');
+    props.props.history.push('/admin/login');
+  };
+
   return (
     <div>
       <div id="main-wrapper">
@@ -35,8 +40,8 @@ function AdminHeader() {
               <a className="navbar-brand" href="./">
                 {/* Logo icon */}
                 <b>
-                  <img src={LogoImg} alt="logo" className="dark-logo" />
-                  <img src={LogoImg} alt="logo" className="mobile-logo" />
+                  <img src={Logo} alt="logo" className="dark-logo" />
+                  <img src={Logo} alt="logo" className="mobile-logo" />
                 </b>
               </a>
             </div>
@@ -81,7 +86,7 @@ function AdminHeader() {
                       </li>
                       <li role="separator" className="divider" />
                       <li className="logout">
-                        <a href="#">
+                        <a onClick={onLogout}>
                           <i className="fa fa-power-off" /> Logout
                         </a>
                       </li>
@@ -256,7 +261,7 @@ function AdminHeader() {
       </div>
     </div>
   );
-}
+};
 
 AdminHeader.propTypes = {};
 

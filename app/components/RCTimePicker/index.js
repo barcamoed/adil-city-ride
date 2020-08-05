@@ -21,49 +21,42 @@ const RCTimePicker = props => {
       .hour(0)
       .minute(0),
   );
-  function onTimeChange(myVal) {
-    // setApiArrivalTime('');
-    props.form.setFieldValue(props.field.name, '');
-    console.log('My Val', myVal);
-    if (props.at_value) {
-      console.log('Insideeeeeee', props.field.value);
 
-      setApiArrivalTime(meTime);
-      console.log('Selected Time:', myVal);
+  // function onTimeChange(myVal) {
+  //   // setApiArrivalTime('');
+  //   props.form.setFieldValue(props.field.name, '');
+  //   console.log('My Val', myVal);
+  //   if (props.at_value) {
+  //     console.log('Insideeeeeee', props.field.value);
 
-      // props.form.setFieldValue(props.field.name, '');
-    }
-    // if (props.sec_before_value) {
-    //   console.log('props vaaaaaaaaaaaa:', props.sec_before_value);
-    //   setApiArrivalTime('');
-    // }
+  //     setApiArrivalTime(meTime);
+  //     console.log('Selected Time:', myVal);
 
-    // console.log('Time Picker Propssss....:', props);
-    // props.form.setFieldValue(props.field.name, value);
-  }
+  //     // props.form.setFieldValue(props.field.name, '');
+  //   }
+  //   // if (props.sec_before_value) {
+  //   //   console.log('props vaaaaaaaaaaaa:', props.sec_before_value);
+  //   //   setApiArrivalTime('');
+  //   // }
+
+  //   // console.log('Time Picker Propssss....:', props);
+  //   // props.form.setFieldValue(props.field.name, value);
+  // }
 
   function onChange(value) {
     // console.log(value && value.format('h:mm'));
     // console.log('Just Time ', value.format('h:mm'));
 
-    const timeIs = value.format('h:mm');
-    console.log('String TimeIs', timeIs.toString());
+    const timeIs = value.format('hh:mm');
+    // console.log('String TimeIs', timeIs.toString());
     setApiArrivalTime(value);
     console.log('Propsxxxxxx', props);
     var convertTimeObject = null;
     if (props.form.values.arrival_date) {
-      console.log(
-        'props.form.values.arrival_date AAAAAA',
-        props.form.values.arrival_date,
-      );
       convertTimeObject = new Date(
         props.form.values.arrival_date + ' ' + timeIs.toString(),
       );
     } else if (props.form.values.departure_date) {
-      console.log(
-        'props.form.values.arrival_date ddddddddddd',
-        props.form.values.departure_date,
-      );
       convertTimeObject = new Date(
         props.form.values.departure_date + ' ' + timeIs.toString(),
       );
@@ -83,12 +76,8 @@ const RCTimePicker = props => {
   }
 
   useEffect(() => {
-    console.log('Heree123123', props);
+    // console.log('Heree123123', props);
     if (props.at_value) {
-      console.log(
-        'props.forms.value.departure_date:',
-        props.form.values.departure_date,
-      );
       var convertTimeObject = null;
       if (props.form.values.arrival_date) {
         convertTimeObject = new Date(
@@ -106,7 +95,7 @@ const RCTimePicker = props => {
 
       var myTime = moment(convertTimeObject);
       setApiArrivalTime(myTime);
-      console.log('props:', props);
+      // console.log('props:', props);
       props.form.setFieldValue(props.field.name, moment(convertTimeObject));
     }
   }, [props.at_value, meTime.length]);

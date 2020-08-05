@@ -26,17 +26,17 @@ const Ordernumber = () => {
   function handleOrder(e) {
     const value = e.target.value;
     if (e.target.name == 'order_number') {
-      console.log('Order no.', value);
+      // console.log('Order no.', value);
       setOrderNumber(value);
     } else if (e.target.name == 'last_name') {
-      console.log('Last ANme', value);
+      // console.log('Last ANme', value);
       setLastName(value);
     }
   }
   function handleClick() {
-    console.log('Insodeeeeeeeeeeeee', orderNumber, lastName);
+    // console.log('Insodeeeeeeeeeeeee', orderNumber, lastName);
     if (orderNumber && lastName) {
-      console.log('Insodeeeeeeeeeeeee2');
+      // console.log('Insodeeeeeeeeeeeee2');
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
       };
@@ -63,14 +63,14 @@ const Ordernumber = () => {
           formData.append(dataKey, data[dataKey]);
         }
       }
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
+      // for (var pair of formData.entries()) {
+      //   console.log(pair[0] + ', ' + pair[1]);
+      // }
       postRequest(formData, headers).then(data => {
         if (data.result == 'ok') {
-          console.log('Data Status:', data);
+          // console.log('Data Status:', data);
           const reservation_details = data.reservation_details;
-          console.log('Details...', reservation_details);
+          // console.log('Details...', reservation_details);
           localStorage.setItem(
             'order_detail',
             JSON.stringify(reservation_details),
@@ -106,7 +106,7 @@ const Ordernumber = () => {
                 validationSchema={OrderNumberSchema}
                 onSubmit={values => {
                   // orderRequest(values);
-                  console.log('My Valuessssss:', values);
+                  // console.log('My Valuessssss:', values);
                 }}
               >
                 {({ errors, touched }) => (
@@ -119,7 +119,6 @@ const Ordernumber = () => {
                         placeholder="6 Digits"
                         onChange={handleOrder}
                       />
-                      
 
                       <Field
                         type="text"
@@ -128,7 +127,6 @@ const Ordernumber = () => {
                         placeholder="Last name"
                         onChange={handleOrder}
                       />
-                      
 
                       <div className="input-group-append">
                         <button
@@ -145,13 +143,13 @@ const Ordernumber = () => {
                         </button>
                       </div>
                     </div>
-                      {errors.order_number && touched.order_number ? (
-                        <div className="errorMsg">{errors.order_number}</div>
-                      ) : null}
+                    {errors.order_number && touched.order_number ? (
+                      <div className="errorMsg">{errors.order_number}</div>
+                    ) : null}
 
-                      {errors.last_name && touched.last_name ? (
-                        <div className="errorMsg">{errors.last_name}</div>
-                      ) : null}
+                    {errors.last_name && touched.last_name ? (
+                      <div className="errorMsg">{errors.last_name}</div>
+                    ) : null}
                   </Form>
                 )}
               </Formik>

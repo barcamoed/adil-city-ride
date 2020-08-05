@@ -4,8 +4,8 @@ import PlacesAutocomplete, {
   getLatLng,
 } from 'react-places-autocomplete';
 
-import { faEdit } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faEdit } from '@fortawesome/free-solid-svg-icons';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Formik, Form, Field, getIn } from 'formik';
 import { mapSchema } from '../Login/schema';
 var myClick = 0;
@@ -24,23 +24,23 @@ class LocationSearchInput extends React.Component {
   }
 
   handleChange = address => {
-    console.log('This.Propssssssssssssssssssssss', this.props.field.name);
+    // console.log('This.Propssssssssssssssssssssss', this.props.field.name);
     if (this.props.field.name == 'destination') {
-      console.log('Advance 123123123 Seeeeeee', address);
+      // console.log('Advance 123123123 Seeeeeee', address);
       this.props.form.setFieldValue('destination', address);
       this.setState({ address });
       this.props.onSetFeildText(address);
-      console.log('State Address', address);
+      // console.log('State Address', address);
     } else if (this.props.field.name == 'address_search') {
       this.props.form.setFieldValue('address_search', address);
       this.setState({ address });
       this.props.onSetFeildText(address);
-      console.log('State Address', address);
+      // console.log('State Address', address);
     }
   };
 
   handleSelect = address => {
-    console.log('Address geocode:', geocodeByAddress(address));
+    // console.log('Address geocode:', geocodeByAddress(address));
     geocodeByAddress(address)
       .then(results => getLatLng(results[0]))
       .then(latLng => this.props.onSetAbc(latLng))
@@ -50,14 +50,14 @@ class LocationSearchInput extends React.Component {
     this.onBlur();
   };
   componentDidMount() {
-    console.log('localStorage address', localStorage.getItem('address'));
-    console.log('Propsssssssssszzzzzzzzzzzzz', this.props);
+    // console.log('localStorage address', localStorage.getItem('address'));
+    // console.log('Propsssssssssszzzzzzzzzzzzz', this.props);
 
     if (
       this.props.field.name == 'address_search' &&
       this.props.myProp.isAdvanced == true
     ) {
-      console.log('Inside Iff props matchessssssssssss');
+      // console.log('Inside Iff props matchessssssssssss');
       var address = this.props.myProp.destination_address;
       this.setState({ address });
       this.setState({ disableField: true });
@@ -66,44 +66,18 @@ class LocationSearchInput extends React.Component {
       this.setState({ disableField: false });
       this.setState({ enableField: true });
     }
-    // if (
-    //   localStorage.getItem('address') &&
-    //   localStorage.getItem('address') != undefined
-    // ) {
-    //   this.props.form.setFieldValue(
-    //     'destination',
-    //     localStorage.getItem('address'),
-    //   );
-    //   var address = localStorage.getItem('address');
-    //   this.setState({ address });
-    //   console.log('Inside LocationSearch Input Iffff:', this.state.address);
-    //   localStorage.removeItem('address');
-    // }
   }
   componentDidUpdate(prevProps, prevState, snapShot) {
     // console.log('Value Selected...state updated....');
     // if (localStorage.getItem('address')) {
     // }
     if (prevState.myClick != this.state.myClick) {
-      console.log('Component Updated');
+      // console.log('Component Updated');
     }
   }
 
-  // shouldComponentUpdate(nextProps) {
-  //   // const differentTitle = this.state.myClick !== nextProps.myClick;
-  //   // const differentDone = this.props.done !== nextProps.done
-  //   if (this.state.myClick == 0 || this.state.myClick == 1) {
-  //     return true;
-  //   }
-  // }
-
-  // editField = () => {
-  //   console.log('Edit Field Calledddddddddd');
-  //   this.setState({ disableField: false, enableField: true });
-  // };
-
   handleClick() {
-    console.log('Indieeeeeeeeeeeeeeeemmmmmmmmmmmmmmmmm');
+    // console.log('Indieeeeeeeeeeeeeeeemmmmmmmmmmmmmmmmm');
     // this.setState({ myClick: 1 });
     // console.log('dhfgfhf', this.state.myClick);
     // myClick = 1;
@@ -129,16 +103,6 @@ class LocationSearchInput extends React.Component {
       >
         {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
           <div>
-            {/* <Formik
-              initialValues={{
-                destination: '',
-              }}
-              validationSchema={bookingSchema}
-              onSubmit={values => {
-                // orderRequest(values);
-                console.log('Moeed:', values);
-              }}
-            > */}
             {/* {({ errors, touched }) => ( */}
             <Formik
               initialValues={{
@@ -147,7 +111,7 @@ class LocationSearchInput extends React.Component {
               validationSchema={mapSchema}
               onSubmit={values => {
                 // orderRequest(values);
-                console.log('Moeed Valuessssss:', values);
+                // console.log('Moeed Valuessssss:', values);
               }}
             >
               {({ errors, touched }) => (

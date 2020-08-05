@@ -5,14 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-// import PropTypes from 'prop-types';
-// import styled from 'styled-components';
-
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
 import AdminHeader from '../AdminHeader';
-// import '../../assets/css/dashboard.css';
-// import '../../assets/css/dashboardcore.css';
 
 function AdminAccount(props) {
   const [userData, setUserData] = useState({});
@@ -41,7 +34,7 @@ function AdminAccount(props) {
   return (
     <div>
       {/* </div> */}
-      <AdminHeader />
+      <AdminHeader props={props} />
 
       <div>
         <div className="page-wrapper">
@@ -65,7 +58,7 @@ function AdminAccount(props) {
                   <ul className="nav nav-tabs customtab" role="tablist">
                     <li className="nav-item">
                       <a className="nav-link">
-                        <span className="order-txt">Your Accounts</span>
+                        <span className="order-txt">Your Account</span>
                       </a>
                     </li>
                   </ul>
@@ -112,14 +105,16 @@ function AdminAccount(props) {
                                       />
                                     </div>
                                     {/* <div className="form-group">
-                                      <label>City</label>
+                                      <label>20%</label>
                                       <input
-                                        type="password"
+                                        type="text"
                                         className="form-control"
                                         id="exampleInputPassword1"
-                                        placeholder="Password"
+                                        value={userData.commission}
+                                        readOnly={true}
                                       />
-                                    </div>
+                                    </div> */}
+                                    {/* 
                                     <div className="form-group">
                                       <label>Password</label>
                                       <input

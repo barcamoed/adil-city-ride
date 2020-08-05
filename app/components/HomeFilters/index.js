@@ -9,14 +9,11 @@ import React, { useState, useEffect, useRef } from 'react';
 // import styled from 'styled-components';
 import { Formik, Form, Field, FormikConsumer } from 'formik';
 import { FormattedMessage } from 'react-intl';
-import messages from './messages';
-import airport1Img from '../../assets/images/airport1.jpg';
+
 import switchImg from '../../assets/images/switch.png';
 import LocationSearchInput from '../LocationSearchInput/index';
 import AvailableCars from '../AvailableCars/index';
 import { mapSchema } from '../Login/schema';
-import { func } from 'prop-types';
-import { Link } from 'react-router-dom';
 import ReactGMap from '../ReactGMap/index';
 
 var filteredAirports = [];
@@ -33,31 +30,23 @@ const HomeFilters = props => {
   );
   var first = (
     <div className="form-group">
-        <Field name="from" className="form-control form-control-sm" />
+      <Field name="from" className="form-control form-control-sm" />
     </div>
   );
   var second = (
     <div>
-      {/* <label>Destination</label> */}
-
       {selectOptions ? (
         <Field
           as="select"
           name="destination"
           className="form-control form-control-sm"
-          // defaultValue="2"
           onChange={getOnChangeVal}
         >
           <option value="">Select</option>
           {selecetdApDestinations && selecetdApDestinations.length > 0
             ? selecetdApDestinations.map((destination, key) => {
                 return (
-                  <option
-                    value={destination.id}
-                    // onClick={getOnChangeDestinationObjec(destination)}
-                  >
-                    {destination.name}
-                  </option>
+                  <option value={destination.id}>{destination.name}</option>
                 );
               })
             : 'Loading...'}
@@ -75,35 +64,25 @@ const HomeFilters = props => {
   var [airportsArray, setAirportsArray] = useState([]);
   const [selecetdApFromValue, setFromValue] = useState('');
   const [selecetdApDestinations, setDestinations] = useState([]);
-  const [selecetdApDestinationIdValue, setDestinationIDValue] = useState(0);
+  const [selecetdApDestinationIdValue, setDestinationIDValue] = useState(null);
   const [showCarsSection, setCarsSection] = useState(false);
   const [myData, setmyData] = useState({});
   const [advnacedSearchVal, setAdvnacedSearchVal] = useState(null);
   const [advnacedSearchFieldText, setAdvnacedSearchFieldText] = useState(null);
   var [switchCheck, setSwitchCheck] = useState(0);
-  const [propsSearchData, setPropsSearchData] = useState(null);
   const [apLatLong, setApLatLong] = useState({});
   const [destLatLng, setDestinationLatLng] = useState({});
   const [dropDownDestinationText, setDropDownDestinationText] = useState('');
 
-  const [, updateState] = React.useState();
-  const forceUpdate = React.useCallback(() => updateState({}), []);
-  console.log(
-    'Advanced Search Field Text..... . ... .. .',
-    advnacedSearchFieldText,
-  );
-  console.log('Advanced Search Val...', advnacedSearchVal);
-  console.log('Propss Searc', props.searchData);
   function changePosition() {
-    console.log('Before Switch Val:', switchCheck);
     if (switchCheck == 0) {
       setSwitchCheck(1);
-      console.log('Switched');
+      // console.log('Switched');
     } else if (switchCheck == 1) {
       setSwitchCheck(0);
-      console.log('Not Switched');
+      // console.log('Not Switched');
     }
-    console.log('After Switch Val:', switchCheck);
+    // console.log('After Switch Val:', switchCheck);
 
     var mfirst = showFromFirst[0];
     showFromFirst[0] = showFromFirst[1];
@@ -112,8 +91,6 @@ const HomeFilters = props => {
     setSwitch(newArr);
   }
   function apSelected(airport) {
-    console.log('Airport Lat Long', parseFloat(airport.ap_latitude));
-
     setApLatLong({
       lat: parseFloat(airport.ap_latitude),
       lng: parseFloat(airport.ap_longitude),
@@ -125,31 +102,25 @@ const HomeFilters = props => {
     setDestinations(airport.destinations);
     second = (
       <div className="form-group">
-        {/* <label>Destination</label> */}
-
         {selectOptions == true ? (
           <div class="select">
-          <Field
-            as="select"
-            name="destination"
-            className="form-control form-control-sm"
-            onChange={getOnChangeVal}
-          >
-            <option value="">Select</option>
-            {airport.destinations && airport.destinations.length > 0
-              ? airport.destinations.map((destination, key) => {
-                  return (
-                    <option
-                      key={key}
-                      value={destination.id}
-                      // onClick={getOnChangeDestinationObjec(destination)}
-                    >
-                      {destination.name}
-                    </option>
-                  );
-                })
-              : 'Loading...'}
-          </Field>
+            <Field
+              as="select"
+              name="destination"
+              className="form-control form-control-sm"
+              onChange={getOnChangeVal}
+            >
+              <option value="">Select</option>
+              {airport.destinations && airport.destinations.length > 0
+                ? airport.destinations.map((destination, key) => {
+                    return (
+                      <option key={key} value={destination.id}>
+                        {destination.name}
+                      </option>
+                    );
+                  })
+                : 'Loading...'}
+            </Field>
           </div>
         ) : (
           LocationSeacrh
@@ -161,19 +132,16 @@ const HomeFilters = props => {
 
     const newArr = [first, second];
     setSwitch(newArr);
-    console.log(
-      'selectedApDestinationsssssssssssssss:',
-      selecetdApDestinations,
-    );
+    // console.log('selectedApDestinationss:', selecetdApDestinations);
   }
   function getOnChangeVal(e) {
-    console.log('Selected Dest ID hereeeeee', e.target.value);
+    // console.log('Selected Dest ID hereeeeee', e.target.value);
     setDestinationIDValue(e.target.value);
   }
 
   const myArray = JSON.parse(localStorage.getItem('CityAirports'));
   var myAirports = [];
-  console.log('airportsArray bahirrrrr', airportsArray);
+  // console.log('airportsArray bahirrrrr', airportsArray);
   for (var i = 0; i < myArray.length; i++) {
     if (myArray[i].city == props.searchData.searchField) {
       myAirports[i] = myArray[i];
@@ -184,7 +152,7 @@ const HomeFilters = props => {
   }
 
   useEffect(() => {
-    console.log('filteredAirports.length:', filteredAirports.length);
+    // console.log('filteredAirports.length:', filteredAirports.length);
     if (filteredAirports.length > 0) {
       setAirportsArray(filteredAirports);
       if (filteredAirports.length == 1) {
@@ -199,20 +167,20 @@ const HomeFilters = props => {
     }
 
     if (switchCheck == 1) {
-      console.log('Switcheddddd');
+      // console.log('Switcheddddd');
     }
     if (switchCheck == 0) {
-      console.log(' Notttt.....Switcheddddd');
+      // console.log(' Notttt.....Switcheddddd');
     }
 
     if (
       Object.keys(destLatLng).length === 0 &&
       destLatLng.constructor === Object &&
-      selecetdApDestinationIdValue != 0
+      selecetdApDestinationIdValue != null
     ) {
       selecetdApDestinations.map((item, key) => {
         if (item.id == selecetdApDestinationIdValue) {
-          console.log('ID Matched hereeeeeeeeeOOOOOOOOOO', item);
+          // console.log('ID Matched here', item);
           setDestinationLatLng({
             lat: parseFloat(item.lat),
             lng: parseFloat(item.lng),
@@ -223,75 +191,75 @@ const HomeFilters = props => {
     }
 
     var date = new Date().toISOString().slice(0, 10);
-    function initAutocomplete() {
-      var map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: -33.8688, lng: 151.2195 },
-        zoom: 13,
-        mapTypeId: 'roadmap',
-      });
-      // Create the search box and link it to the UI element.
-      var input = document.getElementById('pac-input');
-      var searchBox = new google.maps.places.SearchBox(input);
-      map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-      // Bias the SearchBox results towards current map's viewport.
-      map.addListener('bounds_changed', function() {
-        searchBox.setBounds(map.getBounds());
-      });
+    // function initAutocomplete() {
+    //   var map = new google.maps.Map(document.getElementById('map'), {
+    //     center: { lat: -33.8688, lng: 151.2195 },
+    //     zoom: 13,
+    //     mapTypeId: 'roadmap',
+    //   });
+    //   // Create the search box and link it to the UI element.
+    //   var input = document.getElementById('pac-input');
+    //   var searchBox = new google.maps.places.SearchBox(input);
+    //   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+    //   // Bias the SearchBox results towards current map's viewport.
+    //   map.addListener('bounds_changed', function() {
+    //     searchBox.setBounds(map.getBounds());
+    //   });
 
-      var markers = [];
-      // Listen for the event fired when the user selects a prediction and retrieve
-      // more details for that place.
-      searchBox.addListener('places_changed', function() {
-        var places = searchBox.getPlaces();
+    //   var markers = [];
+    //   // Listen for the event fired when the user selects a prediction and retrieve
+    //   // more details for that place.
+    //   searchBox.addListener('places_changed', function() {
+    //     var places = searchBox.getPlaces();
 
-        if (places.length == 0) {
-          return;
-        }
+    //     if (places.length == 0) {
+    //       return;
+    //     }
 
-        // Clear out the old markers.
-        markers.forEach(function(marker) {
-          marker.setMap(null);
-        });
-        markers = [];
+    //     // Clear out the old markers.
+    //     markers.forEach(function(marker) {
+    //       marker.setMap(null);
+    //     });
+    //     markers = [];
 
-        // For each place, get the icon, name and location.
-        var bounds = new google.maps.LatLngBounds();
-        places.forEach(function(place) {
-          if (!place.geometry) {
-            console.log('Returned place contains no geometry');
-            return;
-          }
-          var icon = {
-            url: place.icon,
-            size: new google.maps.Size(71, 71),
-            origin: new google.maps.Point(0, 0),
-            anchor: new google.maps.Point(17, 34),
-            scaledSize: new google.maps.Size(25, 25),
-          };
+    //     // For each place, get the icon, name and location.
+    //     var bounds = new google.maps.LatLngBounds();
+    //     places.forEach(function(place) {
+    //       if (!place.geometry) {
+    //         console.log('Returned place contains no geometry');
+    //         return;
+    //       }
+    //       var icon = {
+    //         url: place.icon,
+    //         size: new google.maps.Size(71, 71),
+    //         origin: new google.maps.Point(0, 0),
+    //         anchor: new google.maps.Point(17, 34),
+    //         scaledSize: new google.maps.Size(25, 25),
+    //       };
 
-          // Create a marker for each place.
-          markers.push(
-            new google.maps.Marker({
-              map: map,
-              icon: icon,
-              title: place.name,
-              position: place.geometry.location,
-            }),
-          );
+    //       // Create a marker for each place.
+    //       markers.push(
+    //         new google.maps.Marker({
+    //           map: map,
+    //           icon: icon,
+    //           title: place.name,
+    //           position: place.geometry.location,
+    //         }),
+    //       );
 
-          if (place.geometry.viewport) {
-            // Only geocodes have viewport.
-            bounds.union(place.geometry.viewport);
-          } else {
-            bounds.extend(place.geometry.location);
-          }
-        });
-        map.fitBounds(bounds);
-      });
-    }
+    //       if (place.geometry.viewport) {
+    //         // Only geocodes have viewport.
+    //         bounds.union(place.geometry.viewport);
+    //       } else {
+    //         bounds.extend(place.geometry.location);
+    //       }
+    //     });
+    //     map.fitBounds(bounds);
+    //   });
+    // }
     if (apLatLong && destLatLng) {
-      console.log('apLat Long', apLatLong);
-      console.log('destLatLng mmm', destLatLng);
+      // console.log('apLat Long', apLatLong);
+      // console.log('destLatLng mmm', destLatLng);
       // forceUpdate();
       // console.log('Updateddddddddddddd', apLatLong);
     }
@@ -311,20 +279,20 @@ const HomeFilters = props => {
   var subtitle;
 
   const advancedSearchClicked = () => {
-    console.log('Before Changingggggg....', selectOptions);
+    // console.log('Before Changingggggg....', selectOptions);
     setSelectOptions(!selectOptions);
   };
 
   async function fetchCarsToSelect() {
     // setPropsSearchData(props.searchData);
-    console.log('Inside Car Fetching Method', switchCheck);
+    // console.log('Inside Car Fetching Method', switchCheck);
     if (switchCheck == 1) {
-      console.log('switchCheck is checked to 1:Switched');
+      // console.log('switchCheck is checked to 1:Switched');
       await setCarsSection(true);
       if (selectOptions) {
-        console.log(
-          'Switched and not advanced inside HomeFilterssssssssssssss',
-        );
+        // console.log(
+        //   'Switched and not advanced inside HomeFilterssssssssssssss',
+        // );
         await setmyData({
           searchField: props.searchData.searchField,
           From: selecetdApFromValue,
@@ -337,10 +305,10 @@ const HomeFilters = props => {
           dropDownDestinationText: dropDownDestinationText,
         });
       } else if (!selectOptions) {
-        console.log(
-          'Switched and Advanced inside HomeFiltersccccccccccc',
-          advnacedSearchFieldText,
-        );
+        // console.log(
+        //   'Switched and Advanced inside HomeFiltersccccccccccc',
+        //   advnacedSearchFieldText,
+        // );
         await setmyData({
           searchField: props.searchData.searchField,
           From: selecetdApFromValue,
@@ -355,7 +323,7 @@ const HomeFilters = props => {
         });
       }
     } else if (switchCheck == 0) {
-      console.log('switchCheck is checked to 0: Not Switched');
+      // console.log('switchCheck is checked to 0: Not Switched');
       await setCarsSection(true);
       if (selectOptions) {
         // console.log('Not Switched Not Advanced');
@@ -374,7 +342,7 @@ const HomeFilters = props => {
           destLatLng: destLatLng,
           dropDownDestinationText: dropDownDestinationText,
         });
-        console.log('myData:', myData);
+        // console.log('myData:', myData);
       } else if (selectOptions == false) {
         // console.log('Not Switched But Advanced');
         // console.log('From', selecetdApFromValue);
@@ -504,21 +472,23 @@ const HomeFilters = props => {
                         <Formik
                           enableReinitialize
                           initialValues={{
-                            from: selecetdApFromValue,
+                            from:
+                              activate == 'card active'
+                                ? selecetdApFromValue
+                                : '',
                             destination: selecetdApDestinationIdValue,
                           }}
                           validationSchema={mapSchema}
                           onSubmit={values => {
-                            // orderRequest(values);
-                            console.log(
-                              'Moeed Values inFormik submit:',
-                              values,
-                            );
+                            fetchCarsToSelect();
+                            // console.log(
+                            //   'Moeed Values inFormik submit:',
+                            //   values,
+                            // );
                           }}
                         >
                           {({ errors, touched }) => (
                             <Form className="form">
-                              
                               {/* {showFromFirst[0].props.children.props.children ==
                               'Destination' ? (
                                 <label>From</label>
@@ -561,7 +531,7 @@ const HomeFilters = props => {
                                   type="submit"
                                   className="btn btnstyle4"
                                   name="button"
-                                  onClick={fetchCarsToSelect}
+                                  // onClick={fetchCarsToSelect}
                                 >
                                   Continue
                                 </button>

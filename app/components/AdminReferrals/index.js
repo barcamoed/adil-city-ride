@@ -1,9 +1,3 @@
-/**
- *
- * AdminReferrals
- *
- */
-
 import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import {
@@ -16,8 +10,6 @@ import {
   GET_CLEAR_AFFILIATE_APPROVED_KEY,
 } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
-
-import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import AdminHeader from '../AdminHeader';
 import {
@@ -47,6 +39,7 @@ const AdminReferrals = props => {
   const [noUpdateDone, setNoUpdateDoneError] = useState('');
   const [missingValidParams, setMissingValidParams] = useState('');
   const [totalDonotMatch, setTotalDonotMatchError] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (
@@ -68,22 +61,13 @@ const AdminReferrals = props => {
 
       if (affiliateUsers == '') {
         postRequest(formData, headers).then(data => {
-          console.log('Response Data:', data);
+          // console.log('Response Data:', data);
           // console.log('Props:', props);
           if (data.status == 'ok') {
-            console.log('Data If Status Ok', data);
-            // alert('All Users Arrived');
+            // console.log('Data If Status Ok', data);
             setAffiliateUsers(data.users);
+            localStorage.setItem('admin_ref_users', JSON.stringify(data.users));
           }
-          // else if (data.status == 'error' && data.error_code == 1) {
-          //   setEmailAlreadyExistError(data.message);
-          //   setInvalidParamsError('');
-          //   console.log('Data Error', data);
-          // } else if (data.status == 'error' && data.error_code == 2) {
-          //   setInvalidParamsError('Make sure all fields are filled');
-          //   setEmailAlreadyExistError('');
-          //   console.log('Data Error', data);
-          // }
         });
       }
     } else {
@@ -91,8 +75,14 @@ const AdminReferrals = props => {
     }
   }, [affiliateUsers, fieldDisabled]);
 
+  const filterUsers = affiliateUsers.filter(
+    active =>
+      active.name.toLowerCase().indexOf(search) !== -1 ||
+      active.email.toLowerCase().indexOf(search) !== -1,
+  );
+
   const createUserRequest = values => {
-    console.log('Values Insode Function', values);
+    // console.log('Values Insode Function', values);
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
     };
@@ -104,35 +94,36 @@ const AdminReferrals = props => {
     formData.append(`data[name]`, values.name);
     formData.append(`data[email]`, values.email);
     formData.append(`data[commission]`, values.commission);
-    formData.append(`data[cookie]`, 7);
+    formData.append(`data[cookie]`, values.cookie_time);
     formData.append(`data[role]`, '2');
     formData.append(`data[password]`, values.password);
 
-    for (var pair of formData.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
-    }
+    // for (var pair of formData.entries()) {
+    //   console.log(pair[0] + ', ' + pair[1]);
+    // }
 
     postRequest(formData, headers).then(data => {
-      console.log('Response Data:', data);
+      // console.log('Response Data:', data);
       // console.log('Props:', props);
       if (data.status == 'ok') {
-        console.log('Data If Status Ok', data);
+        // console.log('Data If Status Ok', data);
         alert('User Created');
         $('#certificates-pop').modal('hide');
+        window.location = 'http://localhost:3000/admin/referrals';
       } else if (data.status == 'error' && data.error_code == 1) {
         setEmailAlreadyExistError(data.message);
         setInvalidParamsError('');
-        console.log('Data Error', data);
+        // console.log('Data Error', data);
       } else if (data.status == 'error' && data.error_code == 2) {
         setInvalidParamsError('Make sure all fields are filled');
         setEmailAlreadyExistError('');
-        console.log('Data Error', data);
+        // console.log('Data Error', data);
       }
     });
   };
 
   function putDataInModal(val) {
-    console.log('Data In Function', val);
+    // console.log('Data In Function', val);
     setUserId(val.id);
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
@@ -145,10 +136,10 @@ const AdminReferrals = props => {
     formData.append(`data[user_id]`, val.id);
 
     postRequest(formData, headers).then(data => {
-      console.log('get_affiliate_approved_earning response:', data);
+      // console.log('get_affiliate_approved_earning response:', data);
       // console.log('Props:', props);
       if (data.status == 'ok') {
-        console.log('Data If Status Ok', data);
+        // console.log('Data If Status Ok', data);
         val.eur_total = data.earning.eur_total;
         setModalData(val);
         setModalName(val.name);
@@ -175,38 +166,31 @@ const AdminReferrals = props => {
   }
   function handleFieldValue(e, setFieldValue) {
     if (e.target.name == 'name') {
-      console.log(e.target.name, e.target.value);
       setModalName(e.target.value);
       setFieldValue(e.target.name, e.target.value);
     } else if (e.target.name == 'email') {
-      console.log(e.target.name, e.target.value);
       setModalEmail(e.target.value);
       setFieldValue(e.target.name, e.target.value);
     } else if (e.target.name == 'commission') {
-      console.log(e.target.name, e.target.value);
       setModalCommission(e.target.value);
       setFieldValue(e.target.name, e.target.value);
     } else if (e.target.name == 'cookie') {
-      console.log(e.target.name, e.target.value);
       setModalCookie(e.target.value);
       setFieldValue(e.target.name, e.target.value);
     } else if (e.target.name == 'earning') {
-      console.log(e.target.name, e.target.value);
       setModalEarning(e.target.value);
       setFieldValue(e.target.name, e.target.value);
     } else if (e.target.name == 'active') {
-      console.log(e.target.name, e.target.value);
       setModalActiveVal(e.target.value);
       setFieldValue(e.target.name, e.target.value);
     } else if (e.target.name == 'role') {
-      console.log(e.target.name, e.target.value);
       setModalRole(e.target.value);
       setFieldValue(e.target.name, e.target.value);
     }
   }
 
   function editUserRequest(values) {
-    console.log('Hereeeeeee', values);
+    // console.log('Hereeeeeee', values);
 
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
@@ -224,14 +208,14 @@ const AdminReferrals = props => {
     formData.append(`data[role]`, parseInt(values.role));
     formData.append(`data[active]`, parseInt(values.active));
 
-    for (var pair of formData.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
-    }
+    // for (var pair of formData.entries()) {
+    //   console.log(pair[0] + ', ' + pair[1]);
+    // }
     postRequest(formData, headers).then(data => {
-      console.log('Response Data:', data);
+      // console.log('Response Data:', data);
       // console.log('Props:', props);
       if (data.status == 'ok') {
-        console.log('Data If Status is Ok', data);
+        // console.log('Data If Status is Ok', data);
         alert('User Edited');
         $('#referral-details').modal('hide');
         setOtherButtons(true);
@@ -265,40 +249,25 @@ const AdminReferrals = props => {
     formData.append(`key`, GET_DELETE_AFFILIATE_USER_KEY());
     formData.append(`data[id]`, userID);
 
-    for (var pair of formData.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
-    }
+    // for (var pair of formData.entries()) {
+    //   console.log(pair[0] + ', ' + pair[1]);
+    // }
     postRequest(formData, headers).then(data => {
       console.log('Response Data:', data);
       if (data.status == 'ok') {
-        console.log('Data If Status is Ok', data);
+        // console.log('Data If Status is Ok', data);
         alert('User Deleted');
         $('#referral-details').modal('hide');
         setOtherButtons(true);
         setFieldDisabled(true);
         window.location = 'http://localhost:3000/admin/referrals';
       } else {
-        console.log('Errorrrrrrr:', data);
+        console.log('Errorr:', data);
       }
     });
   }
 
   function clearEarningRequest() {
-    // confirmAlert({
-    //   title: 'Confirm to submit',
-    //   message: 'Are you sure to do this.',
-    //   buttons: [
-    //     {
-    //       label: 'Yes',
-    //       onClick: () => alert('Click Yes'),
-    //     },
-    //     {
-    //       label: 'No',
-    //       onClick: () => alert('Click No'),
-    //     },
-    //   ],
-    // });
-
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
     };
@@ -310,20 +279,20 @@ const AdminReferrals = props => {
     formData.append(`data[user_id]`, userID);
     formData.append(`data[total_eur_earning]`, 30);
 
-    for (var pair of formData.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
-    }
+    // for (var pair of formData.entries()) {
+    //   console.log(pair[0] + ', ' + pair[1]);
+    // }
     postRequest(formData, headers).then(data => {
-      console.log('Response Data:', data);
+      // console.log('Response Data:', data);
       if (data.status == 'ok') {
-        console.log('Data If Status is Ok', data);
+        // console.log('Data If Status is Ok', data);
         alert('User Deleted');
         $('#referral-details').modal('hide');
         setOtherButtons(true);
         setFieldDisabled(true);
         window.location = 'http://localhost:3000/admin/referrals';
       } else if (data.status == 'error') {
-        console.log('Errorrrrrrr:', data);
+        // console.log('Errorrrrrrr:', data);
         if (data.error_code == 1) {
           setMissingValidParams('');
           setTotalDonotMatchError(data.message);
@@ -337,7 +306,7 @@ const AdminReferrals = props => {
 
   return (
     <div>
-      <AdminHeader />
+      <AdminHeader props={props} />
       <div>
         <div className="page-wrapper">
           {/* ============================================================== */}
@@ -402,10 +371,14 @@ const AdminReferrals = props => {
                         name="example-input-normal"
                         className="form-control filter-input"
                         placeholder="Search"
+                        value={search}
+                        onChange={e =>
+                          setSearch(e.target.value.toLowerCase().substr(0, 20))
+                        }
                       />
-                      <button type="button" className="btn btn-primary filter">
+                      {/* <button type="button" className="btn btn-primary filter">
                         Search
-                      </button>
+                      </button> */}
                     </li>
                   </ul>
                   {/* Tab panes */}
@@ -434,36 +407,42 @@ const AdminReferrals = props => {
                                       <th>Details</th>
                                     </tr>
                                   </thead>
+
                                   <tbody>
-                                    {affiliateUsers
-                                      .slice(0, affiliateUsers.length)
-                                      .map((item, index) => (
-                                        <React.Fragment>
-                                          {item.active == '1' ? (
-                                            <tr key={index}>
-                                              <td>{item.name}</td>
-                                              <td>{item.email}</td>
-                                              <td>{item.commission}%</td>
-                                              <td>{item.cookie}</td>
-                                              <td>
-                                                <button
-                                                  data-toggle="modal"
-                                                  data-target="#referral-details"
-                                                  type="button"
-                                                  name="button"
-                                                  className="btn btn-primary"
-                                                  onClick={() =>
-                                                    putDataInModal(item)
-                                                  }
-                                                >
-                                                  Referral Detail
-                                                </button>
-                                              </td>
-                                            </tr>
-                                          ) : null}
-                                        </React.Fragment>
-                                      ))}
+                                    {filterUsers && Array.isArray(filterUsers)
+                                      ? filterUsers
+                                          .slice(0, filterUsers.length)
+                                          .map(item => {
+                                            return (
+                                              <React.Fragment>
+                                                {item.active == '1' ? (
+                                                  <tr key={item.id}>
+                                                    <td>{item.name}</td>
+                                                    <td>{item.email}</td>
+                                                    <td>{item.commission}%</td>
+                                                    <td>{item.cookie}</td>
+                                                    <td>
+                                                      <button
+                                                        data-toggle="modal"
+                                                        data-target="#referral-details"
+                                                        type="button"
+                                                        name="button"
+                                                        className="btn btn-primary"
+                                                        onClick={() =>
+                                                          putDataInModal(item)
+                                                        }
+                                                      >
+                                                        Referral Detail
+                                                      </button>
+                                                    </td>
+                                                  </tr>
+                                                ) : null}
+                                              </React.Fragment>
+                                            );
+                                          })
+                                      : null}
                                   </tbody>
+
                                   <tfoot>
                                     <tr>
                                       <td colSpan={8}>
@@ -504,35 +483,38 @@ const AdminReferrals = props => {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {affiliateUsers
-                                      .slice(0, affiliateUsers.length)
-                                      .map((item, index) => (
-                                        <React.Fragment>
-                                          {item.active == '0' ? (
-                                            <tr key={index}>
-                                              <td>{item.name}</td>
-                                              <td>{item.email}</td>
-                                              <td>{item.commission}%</td>
-                                              <td>{item.cookie}</td>
-                                              {/* <td>Chicago</td>
-                                                //  <td>28</td>
-                                                //  <td>$500</td>
-                                                //  <td>$950</td> */}
-                                              <td>
-                                                <button
-                                                  data-toggle="modal"
-                                                  data-target="#referral-details"
-                                                  type="button"
-                                                  name="button"
-                                                  className="btn btn-primary"
-                                                >
-                                                  Referral Detail
-                                                </button>
-                                              </td>
-                                            </tr>
-                                          ) : null}
-                                        </React.Fragment>
-                                      ))}
+                                    {filterUsers && Array.isArray(filterUsers)
+                                      ? filterUsers
+                                          .slice(0, filterUsers.length)
+                                          .map(item => {
+                                            return (
+                                              <React.Fragment>
+                                                {item.active == '0' ? (
+                                                  <tr key={item.id}>
+                                                    <td>{item.name}</td>
+                                                    <td>{item.email}</td>
+                                                    <td>{item.commission}%</td>
+                                                    <td>{item.cookie}</td>
+                                                    <td>
+                                                      <button
+                                                        data-toggle="modal"
+                                                        data-target="#referral-details"
+                                                        type="button"
+                                                        name="button"
+                                                        className="btn btn-primary"
+                                                        onClick={() =>
+                                                          putDataInModal(item)
+                                                        }
+                                                      >
+                                                        Referral Detail
+                                                      </button>
+                                                    </td>
+                                                  </tr>
+                                                ) : null}
+                                              </React.Fragment>
+                                            );
+                                          })
+                                      : null}
                                   </tbody>
                                   <tfoot>
                                     <tr>
@@ -587,11 +569,12 @@ const AdminReferrals = props => {
                     name: '',
                     email: '',
                     commission: '',
+                    cookie_time: '',
                     password: '',
                   }}
                   validationSchema={CreateAffiliateUserSchema}
                   onSubmit={values => {
-                    console.log('Moeeddddd:', values);
+                    // console.log('Moeeddddd:', values);
                     createUserRequest(values);
                   }}
                 >
@@ -625,7 +608,7 @@ const AdminReferrals = props => {
                           type="email"
                           name="email"
                           className="form-control form-control-line"
-                          placeholder="Enter email"
+                          placeholder="Enter Email"
                         />
                       </div>
                       <div className="form-group">
@@ -641,6 +624,22 @@ const AdminReferrals = props => {
                           name="commission"
                           className="form-control form-control-line"
                           placeholder="Enter percentage"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>
+                          Cookie
+                          <span className="help" />
+                        </label>
+                        {errors.cookie_time && touched.cookie_time ? (
+                          <div className="errorLogin">{errors.cookie_time}</div>
+                        ) : null}
+                        <Field
+                          type="number"
+                          name="cookie_time"
+                          className="form-control form-control-line"
+                          placeholder="Enter Cookie Time"
                         />
                       </div>
 

@@ -5,13 +5,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-// import PropTypes from 'prop-types';
-// import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
-
-import LogoImg from '../../assets/images/logo.png';
+import LogoImg from '../../assets/images/logo.svg';
 
 function ReferralAccount(props) {
   const [userData, setUserData] = useState({});
@@ -31,6 +27,12 @@ function ReferralAccount(props) {
       props.history.push('/referral/login');
     }
   }, []);
+
+  const onLogout = () => {
+    localStorage.removeItem('ref_user_details');
+    props.history.push('/referral/login');
+  };
+  // console.log('userDatavvvvvvvvvv', userData);
 
   return (
     <div>
@@ -80,23 +82,14 @@ function ReferralAccount(props) {
                   <div className="dropdown-menu dropdown-menu-right animated flipInY">
                     <ul className="dropdown-user">
                       <li>
-                        <a href="#">
+                        <Link to="/referral/account">
                           <i className="mdi mdi-account-box" /> Your Account
-                        </a>
+                        </Link>
                       </li>
-                      <li>
-                        <a href="#">
-                          <i className="mdi mdi-wrench" /> Setting
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <i className="mdi mdi-file-document-box" /> Billing
-                        </a>
-                      </li>
+
                       <li role="separator" className="divider" />
                       <li className="logout">
-                        <a href="#">
+                        <a onClick={onLogout}>
                           <i className="fa fa-power-off" /> Logout
                         </a>
                       </li>
@@ -116,7 +109,7 @@ function ReferralAccount(props) {
                   <ul className="nav nav-tabs customtab" role="tablist">
                     <li className="nav-item w-100 text-center">
                       <a className="nav-link">
-                        <span className="order-txt">Your Accounts</span>
+                        <span className="order-txt">Your Account</span>
                       </a>
                     </li>
                   </ul>
@@ -161,15 +154,16 @@ function ReferralAccount(props) {
                                         readOnly={true}
                                       />
                                     </div>
-                                    {/* <div className="form-group">
-                                      <label>City</label>
+                                    <div className="form-group">
+                                      <label>20%</label>
                                       <input
-                                        type="password"
+                                        type="text"
                                         className="form-control"
                                         id="exampleInputPassword1"
-                                        placeholder="Password"
+                                        value={userData.commission}
+                                        readOnly={true}
                                       />
-                                    </div> */}
+                                    </div>
                                     {/* <div className="form-group">
                                       <label>Password</label>
                                       <input

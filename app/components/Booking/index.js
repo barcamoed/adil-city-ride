@@ -5,22 +5,22 @@
  */
 
 // import DatePicker from 'react-datepicker';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
-// import PropTypes from 'prop-types';
-// import styled from 'styled-components';
+import { useCookies } from 'react-cookie';
 import car1Img from '../../assets/images/car1.png';
 import { Formik, Form, Field } from 'formik';
 import Header from '../Header';
 import Footer from '../Footer';
 import infoImg from '../../assets/images/info.png';
-import btnarrowImg from '../../assets/images/btnarrow.png';
+
 import tickImg from '../../assets/images/tick.png';
 import leftangleImg from '../../assets/images/leftangle.png';
-import whatsappImg from '../../assets/images/whatsapp.png';
+
 import { bookingSchema } from '../Login/schema';
 import RCTimePicker from '../RCTimePicker/index';
 import moment from 'moment';
+import LoadingOverlay from 'react-loading-overlay';
 import {
   IDENTIFIER,
   GET_FLIGHT_DETAILS_KEY,
@@ -47,8 +47,10 @@ const customStyles = {
   overlay: { zIndex: 1000 },
 };
 
-const Booking = () => {
+const Booking = props => {
   var subtitle;
+  const [cookies, setCookie, removeCookie] = useCookies(['cookie_days']);
+  const [type, setFlightType] = useState(localStorage.getItem('flightType'));
   const [arrival_flight_number, setArrival_flight_number] = useState('');
   const [departure_flight_number, setDeparture_flight_number] = useState('');
   const [showThis, setArrivalFlightError] = useState(false);
@@ -98,8 +100,7 @@ const Booking = () => {
   const [childObjects, setChildObjects] = useState('');
   const [differentVehicles, setDifferentVehicles] = useState([]);
   const [noMatchingVehicleError, setNoMatchingVehicleError] = useState('');
-  var [roundTrip, setRoundTrip] = useState(null);
-  var [oneWayTrip, setOneWayTrip] = useState(null);
+
   var [showPaymentArea, setShowPayment] = useState(true);
   var [status3PriceError, setStatus3PriceError] = useState(null);
   var [contactByEmail, setContactByEmail] = useState(null);
@@ -108,11 +109,12 @@ const Booking = () => {
   var [contactNumber, setContactNumber] = useState('');
   var [showContactInfoError, setShowContactInfoError] = useState('');
   var [reqStatus, setReqStatus] = useState(null);
+  const [isActive, setLodaerIsActive] = useState(false);
 
   const [showReservationIdModal, setShowReservationIdModal] = useState(false);
   const [res_ID, setReservationID] = useState(false);
   const [showDepartureTimeError, setDepartureTimeError] = useState('');
-
+  // const prevCountRef = useRef();
   const [passengers, setPassengers] = useState([
     { id: '1', val: '1' },
     { id: '2', val: '2' },
@@ -206,7 +208,19 @@ const Booking = () => {
     }
   };
 
+  function usePrevious(value) {
+    const ref = useRef();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  }
+  const prevCount = usePrevious(departure_time);
+  const prevShowPickUpTime = usePrevious(pickUpTime);
+
   useEffect(() => {
+    // console.log('cookies Data:.:.:', cookies.hasOwnProperty('cookie_days'));
+
     var date = new Date().toISOString().slice(0, 10);
     var myVehicleObj = {};
     var myGeneralObj = {};
@@ -215,9 +229,9 @@ const Booking = () => {
       localStorage.getItem('vehicleObj')
     ) {
       myGeneralObj = JSON.parse(localStorage.getItem('myGeneralObj'));
-      console.log('myGeneral Obj', myGeneralObj.myData);
+      // console.log('myGeneral Obj', myGeneralObj.myData);
       myVehicleObj = JSON.parse(localStorage.getItem('vehicleObj'));
-      console.log('vehicleObj Obj', myVehicleObj);
+      // console.log('vehicleObj Obj', myVehicleObj);
 
       // setSeconds_before_pick(myVehicleObj.seconds_before_pick);
       // JSON.parse(
@@ -230,7 +244,9 @@ const Booking = () => {
 
     if (myVehicleObj && myVehicleObj.route == 'rt') {
       setShowArrivalAndDeparture(true);
+      setFlightType('both');
       localStorage.setItem('flightType', 'both');
+      // console.log('Set FlightType as Both');
     } else if (
       myVehicleObj &&
       myVehicleObj.route == 'ow' &&
@@ -238,13 +254,17 @@ const Booking = () => {
     ) {
       setShowJustDeparture(true);
       localStorage.setItem('flightType', 'justDeparture');
+      setFlightType('justDeparture');
+      // console.log('Set FlightType as justDeparture');
     } else if (
       myVehicleObj &&
       myVehicleObj.route == 'ow' &&
       myGeneralObj.myData.switched == false
     ) {
       setShowJustArrival(true);
+      setFlightType('justArrival');
       localStorage.setItem('flightType', 'justArrival');
+      // console.log('Set FlightType as justArrival');
     }
     if (
       advnacedSearchVal &&
@@ -255,7 +275,7 @@ const Booking = () => {
       // console.log('Hhhhhhhhhhhhhhhhhhhhhh', myGeneralObj1);
       const destinationLatLng =
         '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
-      console.log('myStructured Destination:', destinationLatLng);
+      // console.log('myStructured Destination:', destinationLatLng);
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
       };
@@ -283,23 +303,33 @@ const Booking = () => {
           formData.append(dataKey, data[dataKey]);
         }
       }
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
-
+      // for (var pair of formData.entries()) {
+      //   console.log(pair[0] + ', ' + pair[1]);
+      // }
+      setLodaerIsActive(true);
       postRequest(formData, headers).then(data => {
         // console.log('Dataaaaaaaaaaa...', data);
+        setLodaerIsActive(false);
         if (data.status == '1') {
-          console.log('Status==1', data);
+          // console.log('Status==1', data);
+
           setShowPayment(true);
           setNoMatchingVehicleError('');
         } else if (data.status == '2') {
           const status2WithVehicles = data.vehicles;
-          console.log('Status==2', data);
-          setShowPayment(false);
-          setDifferentVehicles(status2WithVehicles);
+          // console.log('Status==2', data);
+          // setShowPayment(false);
           setReqStatus(2);
-          setIsOpen(true);
+          setDifferentVehicles(status2WithVehicles);
+
+          if (prevCount != undefined && prevCount != departure_time) {
+            setIsOpen(false);
+            // setShowPayment(true);
+          } else {
+            setIsOpen(true);
+            // setShowPayment(true);
+          }
+
           $('.carslider').owlCarousel({
             loop: false,
             margin: 0,
@@ -326,7 +356,7 @@ const Booking = () => {
           setNoMatchingVehicleError('');
         } else if (data.status == '3') {
           setReqStatus(3);
-          console.log('Status==3', data.message);
+          // console.log('Status==3', data.message);
           // setNoMatchingVehicleError(data.message);
           setShowPayment(false);
           setStatus3PriceError(3);
@@ -334,65 +364,27 @@ const Booking = () => {
       });
     }
 
-    // If is Advanced is changed(Edited) in the booking form by user (iss mayn destination_id nai ja raha)
-    // if (
-    //   advnacedSearchVal &&
-    //   advnacedSearchVal &&
-    //   myGeneralObj.myData.isAdvanced == true
-    // ) {
-    //   const myGeneralObj1 = JSON.parse(localStorage.getItem('myGeneralObj'));
-    //   // console.log('Hhhhhhhhhhhhhhhhhhhhhh', myGeneralObj1);
-    //   const destinationLatLng =
-    //     '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
-    //   console.log('myStructured Destination:', destinationLatLng);
-    //   const headers = {
-    //     'Content-type': 'application/x-www-form-urlencoded',
-    //   };
+    if (myVehicleObj.seconds_before_pick != 'null' && departure_time) {
+      var myPickUpTime = null;
+      var myString = (myVehicleObj.seconds_before_pick / 3600).toFixed(2);
+      // console.log('My String:', myString);
+      var myStringParts = myString.split('.');
+      var hourDelta = myStringParts[0];
+      var minuteDelta = myStringParts[1];
+      var abc1 = moment(departure_date + ' ' + departure_time);
+      myPickUpTime = abc1
+        .subtract({ hours: hourDelta, minutes: minuteDelta })
+        .toString();
+      setSeconds_before_pick(moment(myPickUpTime).format('hh:mm')); // To Show in the Rc Time Picker
 
-    //   let formData = new FormData();
-    //   let data = {
-    //     command: 'check_location',
-    //     identifier: IDENTIFIER,
-    //     key: GET_CHECK_LOCATION_KEY(),
-    //     data: {
-    //       ap_code: myGeneralObj1.myData.ap_iata,
-    //       destination_point: destinationLatLng,
-    //       pax_num: myGeneralObj1.myData.pax_num,
-    //     },
-    //   };
-
-    //   for (let dataKey in data) {
-    //     if (dataKey === 'data') {
-    //       // append nested object
-    //       for (let previewKey in data[dataKey]) {
-    //         formData.append(`data[${previewKey}]`, data[dataKey][previewKey]);
-    //       }
-    //     } else {
-    //       formData.append(dataKey, data[dataKey]);
-    //     }
-    //   }
-    //   for (var pair of formData.entries()) {
-    //     console.log(pair[0] + ', ' + pair[1]);
-    //   }
-
-    //   postRequest(formData, headers).then(data => {
-    //     // console.log('Dataaaaaaaaaaa...', data);
-    //     if (data.status == '1') {
-    //       console.log('Status==1', data);
-    //       // setIsOpen(false);
-    //     } else if (data.status == '2') {
-    //       const status2WithVehicles = data.vehicles;
-    //       console.log('Status==2', data);
-    //       setDifferentVehicles(status2WithVehicles);
-    //       // setIsOpen(true);
-    //     } else if (data.status == '3') {
-    //       const notValid = 'Invalid';
-    //       console.log('Status==3', data);
-    //     }
-    //   });
-    // }
-
-    console.log('After Cars Slider');
+      // console.log('Seconds Before Not NULLLL', myVehicleObj);
+      setPickUpTime(
+        moment(myPickUpTime)
+          .format('hh:mm')
+          .toString(),
+      ); // To use in request
+      // setIsOpen(false);
+    }
 
     //To restrict past date
     $('#exp_date').attr('min', date);
@@ -400,10 +392,13 @@ const Booking = () => {
     $('#departuredate').attr('min', date);
   }, [
     vehicleObj.length,
+    // myGeneralObj.myData,
     arrival_time,
     flight_Airport_Match_Error,
     advnacedSearchVal,
     differentVehicles.length,
+    departure_time,
+    // pickUpTime
     // showPaymentArea,
     // myGeneralObj.isAdvanced,
     // modalIsOpen,
@@ -481,15 +476,17 @@ const Booking = () => {
             formData.append(dataKey, data[dataKey]);
           }
         }
-        for (var pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]);
-        }
+        // for (var pair of formData.entries()) {
+        //   console.log(pair[0] + ', ' + pair[1]);
+        // }
+        setLodaerIsActive(true);
         postRequest(formData, headers).then(data => {
-          console.log('Response Status:', data);
+          // console.log('Response Status:', data);
           if (data.status == 'ok') {
-            console.log('data.asdfasdfasdf :', data.data);
+            setLodaerIsActive(false);
+            // console.log('data.asdfasdfasdf :', data.data);
             if (data.data.arrival_airport == myGeneralObj.myData.ap_iata) {
-              console.log('Airport Matches');
+              // console.log('Airport Matches');
               if (data.data.arrival_time) {
                 const arrivalTime = data.data.arrival_time;
                 if (showArrivalAndDeparture || showJustArrival) {
@@ -504,7 +501,7 @@ const Booking = () => {
               data.data.arrival_airport != myGeneralObj.myData.ap_iata
             ) {
               if (showArrivalAndDeparture) {
-                console.log('Set Flight and Airport Match Errorrrrrrrr');
+                // console.log('Set Flight and Airport Match Errorrrrrrrr');
                 set_Arrival_Flight_Airport_Match_Error(
                   'Flight Number and the Airport you selected donot match.',
                 );
@@ -529,16 +526,16 @@ const Booking = () => {
               const diffTime = Math.abs(nowDatePlusReleaseHours - myDate);
               const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
               // console.log(diffTime + ' milliseconds');
-              console.log(diffDays + ' days');
+              // console.log(diffDays + ' days');
               if (diffDays > 0) {
-                console.log(
-                  'Show Payment Area and Continue normal reservation',
-                );
+                // console.log(
+                //   'Show Payment Area and Continue normal reservation',
+                // );
                 setShowPayment(true);
               } else {
-                console.log(
-                  'Show Errors Area and Do create_booking_request on Subbmit',
-                );
+                // console.log(
+                //   'Show Errors Area and Do create_booking_request on Subbmit',
+                // );
                 setShowPayment(false);
               }
             }
@@ -551,17 +548,17 @@ const Booking = () => {
                 (arrival_date && arrival_time)) &&
               JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt'
             ) {
-              console.log(
-                'Both Arrival And Departure Set Inside Arrival Function',
-              );
+              // console.log(
+              //   'Both Arrival And Departure Set Inside Arrival Function',
+              // );
               var myArrivalDate = new Date(
                 arrival_date + ' ' + data.data.arrival_time,
               );
-              console.log('Arrival Date:', myArrivalDate);
+              // console.log('Arrival Date:', myArrivalDate);
               var myDepartureDate = new Date(departure_date + ' ' + pickUpTime);
-              console.log('Departure Date:', myDepartureDate);
+              // console.log('Departure Date:', myDepartureDate);
               if (myDepartureDate > myArrivalDate) {
-                console.log('myDepartureDate is Greater');
+                // console.log('myDepartureDate is Greater');
                 var nowDatePlusReleaseHours = new Date(Date.now());
                 nowDatePlusReleaseHours.setHours(
                   nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
@@ -571,20 +568,20 @@ const Booking = () => {
                 );
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 // console.log(diffTime + ' milliseconds');
-                console.log(diffDays + ' days');
+                // console.log(diffDays + ' days');
                 if (diffDays > 0) {
-                  console.log(
-                    'Show Payment Area and Continue normal reservation',
-                  );
+                  // console.log(
+                  //   'Show Payment Area and Continue normal reservation',
+                  // );
                   setShowPayment(true);
                 } else {
-                  console.log(
-                    'Show Errors Area and Do create_booking_request on Subbmit',
-                  );
+                  // console.log(
+                  //   'Show Errors Area and Do create_booking_request on Subbmit',
+                  // );
                   setShowPayment(false);
                 }
               } else {
-                console.log('myArrivalDate is Greater');
+                // console.log('myArrivalDate is Greater');
                 var nowDatePlusReleaseHours = new Date(Date.now());
                 nowDatePlusReleaseHours.setHours(
                   nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
@@ -593,17 +590,16 @@ const Booking = () => {
                   nowDatePlusReleaseHours - myDepartureDate,
                 );
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                // console.log(diffTime + ' milliseconds');
-                console.log(diffDays + ' days');
+
                 if (diffDays > 0) {
-                  console.log(
-                    'Show Payment Area and Continue normal reservation',
-                  );
+                  // console.log(
+                  //   'Show Payment Area and Continue normal reservation',
+                  // );
                   setShowPayment(true);
                 } else {
-                  console.log(
-                    'Show Errors Area and Do create_booking_request on Subbmit',
-                  );
+                  // console.log(
+                  //   'Show Errors Area and Do create_booking_request on Subbmit',
+                  // );
                   setShowPayment(false);
                 }
               }
@@ -611,6 +607,7 @@ const Booking = () => {
 
             // setFormData(myObj);
           } else if (data.status == 'error') {
+            setLodaerIsActive(false);
             set_Arrival_Flight_Airport_Match_Error(data.data.message);
             // setFormData(myObj);
           }
@@ -631,7 +628,7 @@ const Booking = () => {
       flight_num,
     );
 
-    console.log('Old PickUp Time........;;;;;;;;;........', pickUpTime);
+    // console.log('Old PickUp Time........;;;;;;;;;........', pickUpTime);
     if (regex != null) {
       setDeparture_flight_number(
         regex[1] +
@@ -684,20 +681,18 @@ const Booking = () => {
             formData.append(dataKey, data[dataKey]);
           }
         }
-        for (var pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]);
-        }
+        // for (var pair of formData.entries()) {
+        //   console.log(pair[0] + ', ' + pair[1]);
+        // }
+        setLodaerIsActive(true);
         postRequest(formData, headers).then(data => {
-          console.log('Response Status:', data);
+          // console.log('Response Status:', data);
           if (data.status == 'ok') {
-            console.log(
-              'myGeneralObj.myData.ap_iata :',
-              myGeneralObj.myData.ap_iata,
-            );
-            console.log('Departure Date and Time Selected:', data.data);
+            setLodaerIsActive(false);
+            // console.log('Departure Date and Time Selected:', data.data);
             var myPickUpTime = null;
             if (data.data.departure_airport == myGeneralObj.myData.ap_iata) {
-              console.log('Airport Matches:My Vehicles:');
+              // console.log('Airport Matches:My Vehicles:');
               if (data.data.departure_time) {
                 const departureTime = data.data.departure_time;
                 if (showArrivalAndDeparture) {
@@ -706,14 +701,14 @@ const Booking = () => {
                 set_Flight_Airport_Match_Error('');
                 set_Departure_Flight_Airport_Match_Error('');
                 setDeparture_Time(departureTime);
-                console.log('Departure date', departure_date);
+                // console.log('Departure date', departure_date);
                 var dep_Date = new Date(departure_date);
-                console.log('dep_Date', dep_Date);
+                // console.log('dep_Date', dep_Date);
 
                 var myString = (vehicleObj.seconds_before_pick / 3600).toFixed(
                   2,
                 );
-                console.log('My String:', myString);
+                // console.log('My String:', myString);
                 var myStringParts = myString.split('.');
                 var hourDelta = myStringParts[0];
                 var minuteDelta = myStringParts[1];
@@ -723,11 +718,11 @@ const Booking = () => {
                 myPickUpTime = abc1
                   .subtract({ hours: hourDelta, minutes: minuteDelta })
                   .toString();
-                console.log('Vehicle Obj', vehicleObj);
+                // console.log('Vehicle Obj', vehicleObj);
                 setSeconds_before_pick(moment(myPickUpTime).format('hh:mm')); // To Show in the Rc Time Picker
 
                 if (vehicleObj.seconds_before_pick != 'null') {
-                  console.log('Seconds Before Not NULLLL', vehicleObj);
+                  // console.log('Seconds Before Not NULLLL', vehicleObj);
                   setPickUpTime(
                     moment(myPickUpTime)
                       .format('hh:mm')
@@ -740,11 +735,11 @@ const Booking = () => {
             } else if (
               data.data.departure_airport != myGeneralObj.myData.ap_iata
             ) {
-              console.log(
-                'Flight Number and the Airport you selected do not match.',
-              );
+              // console.log(
+              //   'Flight Number and the Airport you selected do not match.',
+              // );
               if (showArrivalAndDeparture) {
-                console.log('Set Flight and Airport Match Errorrrrrrrr');
+                // console.log('Set Flight and Airport Match Errorrrrrrrr');
                 set_Departure_Flight_Airport_Match_Error(
                   'Flight Number and the Airport you selected do not match.',
                 );
@@ -763,7 +758,6 @@ const Booking = () => {
                 (departure_date && pickUpTime)) &&
               JSON.parse(localStorage.getItem('vehicleObj')).route == 'ow'
             ) {
-              console.log('Departureeeeeeeee Innnn ');
               var myDate = new Date(
                 departure_date +
                   ' ' +
@@ -778,16 +772,16 @@ const Booking = () => {
               const diffTime = Math.abs(nowDatePlusReleaseHours - myDate);
               const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
               // console.log(diffTime + ' milliseconds');
-              console.log(diffDays + ' days');
+              // console.log(diffDays + ' days');
               if (diffDays > 0) {
-                console.log(
-                  'Show Payment Area and Continue normal reservation',
-                );
+                // console.log(
+                //   'Show Payment Area and Continue normal reservation',
+                // );
                 setShowPayment(true);
               } else {
-                console.log(
-                  'Show Errors Area and Do create_booking_request on Subbmit',
-                );
+                // console.log(
+                //   'Show Errors Area and Do create_booking_request on Subbmit',
+                // );
                 setShowPayment(false);
               }
             }
@@ -802,9 +796,9 @@ const Booking = () => {
                 (arrival_date && arrival_time)) &&
                 JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt')
             ) {
-              console.log('Both Arrival And Departure Set Hereeee');
+              // console.log('Both Arrival And Departure Set Hereeee');
               var myArrivalDate = new Date(arrival_date + ' ' + arrival_time);
-              console.log('Arrival Date:', myArrivalDate);
+              // console.log('Arrival Date:', myArrivalDate);
               var myDepartureDate = new Date(
                 departure_date +
                   ' ' +
@@ -812,9 +806,9 @@ const Booking = () => {
                     .format('hh:mm')
                     .toString(),
               );
-              console.log('Departure Date:', myDepartureDate);
+              // console.log('Departure Date:', myDepartureDate);
               if (myDepartureDate > myArrivalDate) {
-                console.log('myDepartureDate is Greater');
+                // console.log('myDepartureDate is Greater');
                 var nowDatePlusReleaseHours = new Date(Date.now());
                 nowDatePlusReleaseHours.setHours(
                   nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
@@ -824,20 +818,20 @@ const Booking = () => {
                 );
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 // console.log(diffTime + ' milliseconds');
-                console.log(diffDays + ' days');
+                // console.log(diffDays + ' days');
                 if (diffDays > 0) {
-                  console.log(
-                    'Show Payment Area and Continue normal reservation',
-                  );
+                  // console.log(
+                  //   'Show Payment Area and Continue normal reservation',
+                  // );
                   setShowPayment(true);
                 } else {
-                  console.log(
-                    'Show Errors Area and Do create_booking_request on Subbmit',
-                  );
+                  // console.log(
+                  //   'Show Errors Area and Do create_booking_request on Subbmit',
+                  // );
                   setShowPayment(false);
                 }
               } else {
-                console.log('myArrivalDate is Greater');
+                // console.log('myArrivalDate is Greater');
                 var nowDatePlusReleaseHours = new Date(Date.now());
                 nowDatePlusReleaseHours.setHours(
                   nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
@@ -847,36 +841,35 @@ const Booking = () => {
                 );
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 // console.log(diffTime + ' milliseconds');
-                console.log(diffDays + ' days');
+                // console.log(diffDays + ' days');
                 if (diffDays > 0) {
-                  console.log(
-                    'Show Payment Area and Continue normal reservation',
-                  );
+                  // console.log(
+                  //   'Show Payment Area and Continue normal reservation',
+                  // );
                   setShowPayment(true);
                 } else {
-                  console.log(
-                    'Show Errors Area and Do create_booking_request on Subbmit',
-                  );
+                  // console.log(
+                  //   'Show Errors Area and Do create_booking_request on Subbmit',
+                  // );
                   setShowPayment(false);
                 }
               }
             }
           } else if (data.status == 'error') {
-            console.log('Data Status Message', data.data.message);
+            // console.log('Data Status Message', data.data.message);
+            setLodaerIsActive(false);
             set_Departure_Flight_Airport_Match_Error(data.data.message);
             // setFormData(myObj);
           }
         });
       }
       setDepartureFlightError(false);
-      console.log('Value at end', e.target.value);
       // console.log('departure_flight_number end', departure_flight_number);
     } else {
       setDepartureFlightError(true);
     }
   }
   function handleChange(event) {
-    console.log('Event Value', event.target.value);
     const someValue = event.target.value;
     if (event.target.name == 'first_name') {
       setFirst_name(someValue);
@@ -895,7 +888,6 @@ const Booking = () => {
         email: email,
         phone_number: phone_number,
       };
-      console.log('Passengersssss:', Passenger);
     }
   }
 
@@ -915,20 +907,16 @@ const Booking = () => {
   }
 
   function handleBabyAgeSelect(e) {
-    console.log('Baby ageeee', e.target.value);
     setBabyAge(e.target.value);
   }
 
   function handleBabyAge2Select(e) {
-    console.log('Baby', e.target.value);
     // setBabyAge('');
     // setBabyAge1('');
     if (!babySelectedAge) {
-      console.log('Firstttttttt', e.target.value);
       setBabyAge(e.target.value);
     } else if (babySelectedAge) {
       setBabyAge1(e.target.value);
-      console.log('Secondddddddd', e.target.value);
     }
   }
 
@@ -938,65 +926,27 @@ const Booking = () => {
   }
 
   function handleChildAge2Select(e) {
-    console.log('Child Event Val', e.target.value);
     if (!childSelectedAge) {
-      console.log('Firstttttttt', e.target.value);
       setChildAge(e.target.value);
     } else if (childSelectedAge) {
       setChildAge2(e.target.value);
-      console.log('Second', e.target.value);
     }
   }
 
   function onWheelChairSelect(e) {
-    console.log('Child Event Val', e.target.value);
     setWheelChairVal(e.target.value);
   }
 
   function remarkEntered(e) {
-    console.log('Child Event Val', e.target.value);
     setRemark(e.target.value);
   }
 
-  const submitValues = values => {
-    console.log('Valuessssssss', values);
-  };
-
   const passengersValChange = e => {
-    console.log('e.t.Valllllll:', e.target.value);
     setPaxSelected(e.target.value);
   };
 
-  // const onRoundTripChecked = (
-  //   priceVal,
-  //   vehicle_id,
-  //   currency,
-  //   sec_bef_pick,
-  //   max_pax,
-  // ) => {
-  //   const route = 'rt';
-  //   const vehicleObj = {
-  //     vehicle_id: vehicle_id,
-  //     route: route,
-  //     price: priceVal,
-  //     currency: currency,
-  //     seconds_before_pick: sec_bef_pick,
-  //     max_pax: max_pax,
-  //   };
-  //   if (oneWayTrip) {
-  //     setOneWayTrip(null);
-  //   }
-  //   setRoundTrip(priceVal);
-  //   console.log('Vehicle Obbbbbbbjjjjjjj:', vehicleObj);
-  //   localStorage.setItem('vehicleObj', JSON.stringify(vehicleObj));
-  //   console.log(
-  //     'New VehicleObject.. .. ..',
-  //     localStorage.getItem('vehicleObj'),
-  //   );
-  // };
-
   function saveNewVehicle(item) {
-    console.log('Newwwww Item', item);
+    // console.log('Newwwww Item', item);
     if (JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt') {
       const myVehicleObj = {
         vehicle_id: item.vehicle_id,
@@ -1019,8 +969,8 @@ const Booking = () => {
       setMyGeneralObj({ myData });
       setVehicleObj(myVehicleObj);
       localStorage.setItem('vehicleObj', JSON.stringify(myVehicleObj));
-      // localStorage.setItem('myGeneralObj', JSON.stringify(myNewGeneralObj));
-      console.log('My New General Obj', myGeneralObj);
+      localStorage.setItem('myGeneralObj', JSON.stringify({ myData }));
+
       setIsOpen(false);
     } else if (JSON.parse(localStorage.getItem('vehicleObj')).route == 'ow') {
       // Default route=rt
@@ -1045,10 +995,10 @@ const Booking = () => {
       setMyGeneralObj({ myData });
       setVehicleObj(myVehicleObj);
       localStorage.setItem('vehicleObj', JSON.stringify(myVehicleObj));
-      // localStorage.setItem('myGeneralObj', JSON.stringify(myNewGeneralObj));
+      localStorage.setItem('myGeneralObj', JSON.stringify({ myData }));
       setIsOpen(false);
     }
-    console.log('Arrival Data and Time', arrival_date, arrival_time);
+    // console.log('Arrival Data and Time', arrival_date, arrival_time);
     if (arrival_date && arrival_time) {
       console.log('InsideM MMMMMMMMMMMm');
       var myDate = new Date(arrival_date + ' ' + arrival_time);
@@ -1058,20 +1008,56 @@ const Booking = () => {
       );
       const diffTime = Math.abs(nowDatePlusReleaseHours - myDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      // console.log(diffTime + ' milliseconds');
-      console.log(diffDays + ' days');
+      // console.log(diffDays + ' days');
       if (diffDays > 0) {
-        console.log('Show Payment Area and Continue normal reservation');
+        // console.log('Show Payment Area and Continue normal reservation');
         setShowPayment(true);
       } else {
-        console.log(
-          'Show Errors Area and Do create_booking_request on Subbmit',
-        );
+        // console.log(
+        //   'Show Errors Area and Do create_booking_request on Subbmit',
+        // );
         setShowPayment(false);
       }
-    } else if (departure_date && pickUpTime) {
-      console.log('InsideM Departureeeee', pickUpTime);
-      var myDate = new Date(departure_date + ' ' + pickUpTime);
+    } else if (
+      departure_date &&
+      JSON.parse(localStorage.getItem('vehicleObj')).seconds_before_pick !=
+        'null'
+    ) {
+      var myPickUpTime = null;
+      var myString = (
+        JSON.parse(localStorage.getItem('vehicleObj')).seconds_before_pick /
+        3600
+      ).toFixed(2);
+      // console.log('My Stringssssssssssssss:', myString);
+      var myStringParts = myString.split('.');
+      var hourDelta = myStringParts[0];
+      var minuteDelta = myStringParts[1];
+      var abc1 = moment(departure_date + ' ' + departure_time);
+      // console.log('My abc1:', abc1);
+      myPickUpTime = abc1
+        .subtract({ hours: hourDelta, minutes: minuteDelta })
+        .toString();
+      setSeconds_before_pick(moment(myPickUpTime).format('hh:mm')); // To Show in the Rc Time Picker
+      setPickUpTime(
+        moment(myPickUpTime)
+          .format('hh:mm')
+          .toString(),
+      ); // To use in request
+
+      // console.log(
+      //   'MyPTTTTTTTT:',
+      //   moment(myPickUpTime)
+      //     .format('hh:mm')
+      //     .toString(),
+      // );
+      var myDate = new Date(
+        departure_date +
+          ' ' +
+          moment(myPickUpTime)
+            .format('hh:mm')
+            .toString(),
+      );
+      // console.log('my Dateeee', myDate);
       var nowDatePlusReleaseHours = new Date(Date.now());
       nowDatePlusReleaseHours.setHours(
         nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
@@ -1079,16 +1065,41 @@ const Booking = () => {
       const diffTime = Math.abs(nowDatePlusReleaseHours - myDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       // console.log(diffTime + ' milliseconds');
-      console.log(diffDays + ' days');
+      // console.log(diffDays + ' days');
       if (diffDays > 0) {
-        console.log('Show Payment Area and Continue normal reservation');
+        // console.log('Show Payment Area and Continue normal reservation');
         setShowPayment(true);
       } else {
-        console.log(
-          'Show Errors Area and Do create_booking_request on Subbmit',
-        );
+        // console.log(
+        //   'Show Errors Area and Do create_booking_request on Subbmit',
+        // );
         setShowPayment(false);
       }
+    }
+
+    if (departure_time && departure_date && pickUpTime) {
+      // console.log('setPickup time Here Againnnnnnnnnnnnnnnn');
+
+      var myPickUpTime = null;
+      var myString = (
+        JSON.parse(localStorage.getItem('vehicleObj')).seconds_before_pick /
+        3600
+      ).toFixed(2);
+      // console.log('My String:', myString);
+      var myStringParts = myString.split('.');
+      var hourDelta = myStringParts[0];
+      var minuteDelta = myStringParts[1];
+      var abc1 = moment(departure_date + ' ' + departure_time);
+      myPickUpTime = abc1
+        .subtract({ hours: hourDelta, minutes: minuteDelta })
+        .toString();
+      setSeconds_before_pick(moment(myPickUpTime).format('hh:mm')); // To Show in the Rc Time Picker
+
+      setPickUpTime(
+        moment(myPickUpTime)
+          .format('hh:mm')
+          .toString(),
+      ); // To use in request
     }
   }
 
@@ -1098,8 +1109,6 @@ const Booking = () => {
       'Content-type': 'application/x-www-form-urlencoded',
     };
 
-    // console.log('Vehicle Objecttt', vehicleObj.route);
-    // console.log('myGeneralObj.myData', myGeneralObj);
     // isAdvanced
 
     let formData = new FormData();
@@ -1111,7 +1120,6 @@ const Booking = () => {
       const destinationLatLng =
         '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
       // console.log('My Keyyyyy', GET_CREATE_RESERVATION_KEY());
-      console.log('My Vehicle', vehicleObj);
       var myStringNumbers = departure_flight_number.replace(/\D/g, '').trim();
       var withNoDigits = departure_flight_number.replace(/[0-9]/g, '').trim();
       var babyObj1 = null;
@@ -1120,7 +1128,6 @@ const Booking = () => {
       var childObj2 = null;
       var wheelChairObj = null;
       if (babySelectedAge) {
-        console.log('1 baby Object');
         babyObj1 = {
           type: 'baby_seat',
           val: babySelectedAge,
@@ -1220,6 +1227,17 @@ const Booking = () => {
             }
 
             if (previewKey == 'general') {
+              if (
+                cookies.hasOwnProperty('cookie_days') &&
+                localStorage.getItem('ref_id')
+              ) {
+                // console.log('INSIDE');
+                formData.append(
+                  'data[general][referral_id]',
+                  localStorage.getItem('ref_id'),
+                );
+              }
+
               for (let ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
@@ -1273,25 +1291,15 @@ const Booking = () => {
                   );
                 }
               } else if (data[dataKey][previewKey].length > 1) {
-                console.log(
-                  'More than 1 Equipments',
-                  data[dataKey][previewKey],
-                );
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
                   for (let ipk in data[dataKey][previewKey][a]) {
-                    console.log('Object1', data[dataKey][previewKey][a]);
-                    console.log('Object2', data[dataKey][previewKey][a + 1]);
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
                     );
                   }
                   if (data[dataKey][previewKey][a + 1]) {
-                    console.log(
-                      'Next Exists 1',
-                      data[dataKey][previewKey][a + 1],
-                    );
                   }
                 }
               }
@@ -1302,18 +1310,21 @@ const Booking = () => {
 
       if (showPaymentArea) {
         // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
-        for (var pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]);
-        }
-        // console.log('Showing Payment Area:::::::::',pickUpTime);
+        // for (var pair of formData.entries()) {
+        //   console.log(pair[0] + ', ' + pair[1]);
+        // }
+
+        setLodaerIsActive(true);
         postRequest(formData, headers).then(data => {
-          console.log('Data Status:', data);
+          // console.log('Data Status:', data);
           if (data.status == 'ok') {
-            console.log('Data Status:', data.status);
+            setLodaerIsActive(false);
+            // console.log('Data Status:', data.status);
             setReservationID(data.res_id);
             setShowReservationIdModal(true);
             setDepartureTimeError('');
           } else if (data.status == 'error') {
+            setLodaerIsActive(false);
             if (data.message[0] == 'flight_time') {
               setDepartureTimeError('Wrong Departure Time');
             }
@@ -1324,7 +1335,7 @@ const Booking = () => {
           (contactByEmail == 1 && contactEmail) ||
           (contactByWa == 1 && contactNumber)
         ) {
-          console.log('Not showPaymentArea');
+          // console.log('Not showPaymentArea');
           if (reqStatus == 3) {
             formData.append(`data[rejects][address]`, 1);
           } else {
@@ -1340,13 +1351,15 @@ const Booking = () => {
           }
           formData.set('command', 'create_booking_request');
           formData.set('key', GET_CREATE_BOOKING_KEY());
-          for (var pair of formData.entries()) {
-            console.log(pair[0] + ', ' + pair[1]);
-          }
+          // for (var pair of formData.entries()) {
+          //   console.log(pair[0] + ', ' + pair[1]);
+          // }
+          setLodaerIsActive(true);
           postRequest(formData, headers).then(data => {
-            console.log('Data Status:', data);
+            // console.log('Data Status:', data);
+            setLodaerIsActive(false);
             if (data.status == 'ok') {
-              console.log('Data Status:', data.status);
+              // console.log('Data Status:', data.status);
               setShowContactInfoError('');
               setStatus3PriceError(null);
               // setReservationID(data.res_id);
@@ -1354,7 +1367,7 @@ const Booking = () => {
             }
           });
         } else {
-          console.log('Show Error To Select One');
+          // console.log('Show Error To Select One');
           setShowContactInfoError('Select One of the following');
         }
       }
@@ -1388,7 +1401,6 @@ const Booking = () => {
       var childObj2 = null;
       var wheelChairObj = null;
       if (babySelectedAge) {
-        console.log('1 baby Object');
         babyObj1 = {
           type: 'baby_seat',
           val: babySelectedAge,
@@ -1485,6 +1497,17 @@ const Booking = () => {
             }
 
             if (previewKey == 'general') {
+              if (
+                cookies.hasOwnProperty('cookie_days') &&
+                localStorage.getItem('ref_id')
+              ) {
+                // console.log('INSIDE');
+                formData.append(
+                  'data[general][referral_id]',
+                  localStorage.getItem('ref_id'),
+                );
+              }
+
               for (let ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
@@ -1538,25 +1561,19 @@ const Booking = () => {
                   );
                 }
               } else if (data[dataKey][previewKey].length > 1) {
-                console.log(
-                  'More than 1 Equipments',
-                  data[dataKey][previewKey],
-                );
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
                   for (let ipk in data[dataKey][previewKey][a]) {
-                    console.log('Object1', data[dataKey][previewKey][a]);
-                    console.log('Object2', data[dataKey][previewKey][a + 1]);
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
                     );
                   }
                   if (data[dataKey][previewKey][a + 1]) {
-                    console.log(
-                      'Next Exists 1',
-                      data[dataKey][previewKey][a + 1],
-                    );
+                    // console.log(
+                    //   'Next Exists 1',
+                    //   data[dataKey][previewKey][a + 1],
+                    // );
                   }
                 }
               }
@@ -1567,16 +1584,18 @@ const Booking = () => {
 
       if (showPaymentArea) {
         // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
-        for (var pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]);
-        }
-        console.log('Showing Payment Area');
+        // for (var pair of formData.entries()) {
+        //   console.log(pair[0] + ', ' + pair[1]);
+        // }
+        // console.log('Showing Payment Area');
+        setLodaerIsActive(true);
         postRequest(formData, headers).then(data => {
-          console.log('Data Status:', data);
+          setLodaerIsActive(false);
+          // console.log('Data Status:', data);
           if (data.status == 'ok') {
             setReservationID(data.res_id);
             setShowReservationIdModal(true);
-            console.log('Data Status:', data.status);
+            // console.log('Data Status:', data.status);
           }
         });
       } else if (!showPaymentArea) {
@@ -1584,7 +1603,7 @@ const Booking = () => {
           (contactByEmail == 1 && contactEmail) ||
           (contactByWa == 1 && contactNumber)
         ) {
-          console.log('Not showPaymentArea');
+          // console.log('Not showPaymentArea');
           if (reqStatus == 3) {
             formData.append(`data[rejects][address]`, 1);
           } else {
@@ -1600,13 +1619,15 @@ const Booking = () => {
           }
           formData.set('command', 'create_booking_request');
           formData.set('key', GET_CREATE_BOOKING_KEY());
-          for (var pair of formData.entries()) {
-            console.log(pair[0] + ', ' + pair[1]);
-          }
+          // for (var pair of formData.entries()) {
+          //   console.log(pair[0] + ', ' + pair[1]);
+          // }
+          setLodaerIsActive(true);
           postRequest(formData, headers).then(data => {
-            console.log('Data Status:', data);
+            // console.log('Data Status:', data);
+            setLodaerIsActive(false);
             if (data.status == 'ok') {
-              console.log('Data Status:', data.status);
+              // console.log('Data Status:', data.status);
               setShowContactInfoError('');
               setStatus3PriceError(null);
               //   setReservationID(data.res_id);
@@ -1614,7 +1635,7 @@ const Booking = () => {
             }
           });
         } else {
-          console.log('Show Error To Select One');
+          // console.log('Show Error To Select One');
           setShowContactInfoError('Select One of the following');
         }
       }
@@ -1624,7 +1645,7 @@ const Booking = () => {
       myGeneralObj.myData.switched == true &&
       vehicleObj.route == 'ow'
     ) {
-      console.log('Loggedddd', myGeneralObj.myData.destination_address);
+      // console.log('Loggedddd', myGeneralObj.myData.destination_address);
       var myDestinationLatLng = null;
       var previousDestAddress = null;
       if (
@@ -1639,7 +1660,7 @@ const Booking = () => {
           ')';
         previousDestAddress = myGeneralObj.myData.destination_address;
       } else {
-        console.log('Objeeeeeeeeee', advnacedSearchVal);
+        // console.log('Objeeeeeeeeee', advnacedSearchVal);
         myDestinationLatLng =
           '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
         previousDestAddress = advnacedSearchFieldText;
@@ -1652,7 +1673,7 @@ const Booking = () => {
       var childObj2 = null;
       var wheelChairObj = null;
       if (babySelectedAge) {
-        console.log('1 baby Object');
+        // console.log('1 baby Object');
         babyObj1 = {
           type: 'baby_seat',
           val: babySelectedAge,
@@ -1749,6 +1770,16 @@ const Booking = () => {
             }
 
             if (previewKey == 'general') {
+              if (
+                cookies.hasOwnProperty('cookie_days') &&
+                localStorage.getItem('ref_id')
+              ) {
+                formData.append(
+                  'data[general][referral_id]',
+                  localStorage.getItem('ref_id'),
+                );
+              }
+
               for (let ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
@@ -1802,25 +1833,23 @@ const Booking = () => {
                   );
                 }
               } else if (data[dataKey][previewKey].length > 1) {
-                console.log(
-                  'More than 1 Equipments',
-                  data[dataKey][previewKey],
-                );
+                // console.log(
+                //   'More than 1 Equipments',
+                //   data[dataKey][previewKey],
+                // );
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
                   for (let ipk in data[dataKey][previewKey][a]) {
-                    console.log('Object1', data[dataKey][previewKey][a]);
-                    console.log('Object2', data[dataKey][previewKey][a + 1]);
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
                     );
                   }
                   if (data[dataKey][previewKey][a + 1]) {
-                    console.log(
-                      'Next Exists 1',
-                      data[dataKey][previewKey][a + 1],
-                    );
+                    // console.log(
+                    //   'Next Exists 1',
+                    //   data[dataKey][previewKey][a + 1],
+                    // );
                   }
                 }
               }
@@ -1831,14 +1860,16 @@ const Booking = () => {
 
       if (showPaymentArea) {
         // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
-        for (var pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]);
-        }
-        console.log('Showing Payment Area');
+        // for (var pair of formData.entries()) {
+        //   console.log(pair[0] + ', ' + pair[1]);
+        // }
+        // console.log('Showing Payment Area');
+        setLodaerIsActive(true);
         postRequest(formData, headers).then(data => {
-          console.log('Data Status:', data);
+          // console.log('Data Status:', data);
+          setLodaerIsActive(false);
           if (data.status == 'ok') {
-            console.log('Data Status:', data.status);
+            // console.log('Data Status:', data.status);
             setReservationID(data.res_id);
             setShowReservationIdModal(true);
           }
@@ -1853,7 +1884,7 @@ const Booking = () => {
           } else {
             formData.append(`data[rejects][release_time]`, 1);
           }
-          console.log('Not showPaymentArea');
+          // console.log('Not showPaymentArea');
           formData.append(`data[rejects][release_time]`, 1);
           if (contactByEmail) {
             formData.append(`data[contact][contact_by_mail]`, 1);
@@ -1865,16 +1896,18 @@ const Booking = () => {
           }
           formData.set('command', 'create_booking_request');
           formData.set('key', GET_CREATE_BOOKING_KEY());
+          setLodaerIsActive(true);
           postRequest(formData, headers).then(data => {
-            console.log('Data Status:', data);
+            setLodaerIsActive(false);
+            // console.log('Data Status:', data);
             if (data.status == 'ok') {
-              console.log('Data Status:', data.status);
+              // console.log('Data Status:', data.status);
               // setReservationID(data.res_id);
               // setShowReservationIdModal(true);
             }
           });
         } else {
-          console.log('Show Error To Select One');
+          // console.log('Show Error To Select One');
           setShowContactInfoError('Select One of the following');
         }
       }
@@ -1884,7 +1917,7 @@ const Booking = () => {
       myGeneralObj.myData.switched == false &&
       vehicleObj.route == 'ow'
     ) {
-      console.log('Hehe Hoho Haha', myGeneralObj.myData);
+      // console.log('myGObj.data', myGeneralObj.myData);
       const destinationLatLng =
         '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
       var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
@@ -1895,7 +1928,7 @@ const Booking = () => {
       var childObj2 = null;
       var wheelChairObj = null;
       if (babySelectedAge) {
-        console.log('1 baby Object');
+        // console.log('1 baby Object');
         babyObj1 = {
           type: 'baby_seat',
           val: babySelectedAge,
@@ -1992,6 +2025,16 @@ const Booking = () => {
             }
 
             if (previewKey == 'general') {
+              if (
+                cookies.hasOwnProperty('cookie_days') &&
+                localStorage.getItem('ref_id')
+              ) {
+                // console.log('INSIDEEEEEEEEEEEEEEE');
+                formData.append(
+                  'data[general][referral_id]',
+                  localStorage.getItem('ref_id'),
+                );
+              }
               for (let ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
@@ -2045,25 +2088,19 @@ const Booking = () => {
                   );
                 }
               } else if (data[dataKey][previewKey].length > 1) {
-                console.log(
-                  'More than 1 Equipments',
-                  data[dataKey][previewKey],
-                );
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
                   for (let ipk in data[dataKey][previewKey][a]) {
-                    console.log('Object1', data[dataKey][previewKey][a]);
-                    console.log('Object2', data[dataKey][previewKey][a + 1]);
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
                     );
                   }
                   if (data[dataKey][previewKey][a + 1]) {
-                    console.log(
-                      'Next Exists 1',
-                      data[dataKey][previewKey][a + 1],
-                    );
+                    // console.log(
+                    //   'Next Exists 1',
+                    //   data[dataKey][previewKey][a + 1],
+                    // );
                   }
                 }
               }
@@ -2074,20 +2111,22 @@ const Booking = () => {
 
       if (showPaymentArea) {
         // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
-        for (var pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]);
-        }
-        console.log('Showing Payment Area');
+        // for (var pair of formData.entries()) {
+        //   console.log(pair[0] + ', ' + pair[1]);
+        // }
+
+        setLodaerIsActive(true);
         postRequest(formData, headers).then(data => {
-          console.log('Data Status:', data);
+          // console.log('Data Status:', data);
+          setLodaerIsActive(false);
           if (data.status == 'ok') {
-            console.log('Data Status:', data.status);
+            // console.log('Data Status:', data.status);
             setReservationID(data.res_id);
             setShowReservationIdModal(true);
           }
         });
       } else if (!showPaymentArea) {
-        console.log('Not showPaymentArea');
+        // console.log('Not showPaymentArea');
         if (
           (contactByEmail == 1 && contactEmail) ||
           (contactByWa == 1 && contactNumber)
@@ -2107,10 +2146,12 @@ const Booking = () => {
           }
           formData.set('command', 'create_booking_request');
           formData.set('key', GET_CREATE_BOOKING_KEY());
+          setLodaerIsActive(true);
           postRequest(formData, headers).then(data => {
-            console.log('Data Status:', data);
+            setLodaerIsActive(false);
+            // console.log('Data Status:', data);
             if (data.status == 'ok') {
-              console.log('Data Status:', data.status);
+              // console.log('Data Status:', data.status);
             }
           });
         }
@@ -2122,18 +2163,8 @@ const Booking = () => {
       //myGeneralObj.myData.switched == false &&
     ) {
       //
-      console.log(
-        'Local Storage Vehicle Obj',
-        JSON.parse(localStorage.getItem('vehicleObj')),
-      );
       const destinationLatLng =
         '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
-      console.log(
-        'Round Trip with Newwwwwwwwwwwwww destinationLatLng',
-        destinationLatLng,
-      );
-      // console.log('My Keyyyyy', GET_CREATE_RESERVATION_KEY());
-      console.log('My Vehicle State Object', typeof vehicleObj.price);
       var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
       var withNoDigits = arrival_flight_number.replace(/[0-9]/g, '').trim();
       var myStringNumbersDeparting = departure_flight_number
@@ -2148,7 +2179,7 @@ const Booking = () => {
       var childObj2 = null;
       var wheelChairObj = null;
       if (babySelectedAge) {
-        console.log('1 baby Object');
+        // console.log('1 baby Object');
         babyObj1 = {
           type: 'baby_seat',
           val: babySelectedAge,
@@ -2253,6 +2284,16 @@ const Booking = () => {
             }
 
             if (previewKey == 'general') {
+              if (
+                cookies.hasOwnProperty('cookie_days') &&
+                localStorage.getItem('ref_id')
+              ) {
+                // console.log('INSIDE');
+                formData.append(
+                  'data[general][referral_id]',
+                  localStorage.getItem('ref_id'),
+                );
+              }
               for (let ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
@@ -2294,10 +2335,10 @@ const Booking = () => {
                     );
                   }
                   if (data[dataKey][previewKey][a + 1]) {
-                    console.log(
-                      'Next Exists 1',
-                      data[dataKey][previewKey][a + 1],
-                    );
+                    // console.log(
+                    //   'Next Exists 1',
+                    //   data[dataKey][previewKey][a + 1],
+                    // );
                   }
                 }
               }
@@ -2314,18 +2355,12 @@ const Booking = () => {
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
                   for (let ipk in data[dataKey][previewKey][a]) {
-                    console.log('Object1', data[dataKey][previewKey][a]);
-                    console.log('Object2', data[dataKey][previewKey][a + 1]);
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
                     );
                   }
                   if (data[dataKey][previewKey][a + 1]) {
-                    console.log(
-                      'Next Exists 1',
-                      data[dataKey][previewKey][a + 1],
-                    );
                   }
                 }
               }
@@ -2334,26 +2369,17 @@ const Booking = () => {
         }
       }
 
-      // for (var pair of formData.entries()) {
-      //   console.log(pair[0] + ', ' + pair[1]);
-      // }
-      // postRequest(formData, headers).then(data => {
-      //   console.log('Data Status:', data);
-      //   if (data.status == 'ok') {
-      //     console.log('Data Status:', data.status);
-      //   }
-      // });
-
       if (showPaymentArea) {
-        // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
-        for (var pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]);
-        }
-        console.log('Showing Payment Area');
+        // for (var pair of formData.entries()) {
+        //   console.log(pair[0] + ', ' + pair[1]);
+        // }
+
+        setLodaerIsActive(true);
         postRequest(formData, headers).then(data => {
-          console.log('Data Status:', data);
+          // console.log('Data Status:', data);
+          setLodaerIsActive(false);
           if (data.status == 'ok') {
-            console.log('Data Status:', data.status);
+            // console.log('Data Status:', data.status);
             setReservationID(data.res_id);
             setShowReservationIdModal(true);
           }
@@ -2363,7 +2389,7 @@ const Booking = () => {
           (contactByEmail == 1 && contactEmail) ||
           (contactByWa == 1 && contactNumber)
         ) {
-          console.log('Not showPaymentArea');
+          // console.log('Not showPaymentArea');
           if (reqStatus == 3) {
             formData.append(`data[rejects][address]`, 1);
           } else {
@@ -2379,19 +2405,21 @@ const Booking = () => {
           }
           formData.set('command', 'create_booking_request');
           formData.set('key', GET_CREATE_BOOKING_KEY());
-          for (var pair of formData.entries()) {
-            console.log(pair[0] + ', ' + pair[1]);
-          }
+          // for (var pair of formData.entries()) {
+          //   console.log(pair[0] + ', ' + pair[1]);
+          // }
+          setLodaerIsActive(true);
           postRequest(formData, headers).then(data => {
-            console.log('Data Status:', data);
+            setLodaerIsActive(false);
+            // console.log('Data Status:', data);
             if (data.status == 'ok') {
-              console.log('Data Status:', data.status);
+              // console.log('Data Status:', data.status);
               setShowContactInfoError('');
               setStatus3PriceError(null);
             }
           });
         } else {
-          console.log('Show Error To Select One');
+          // console.log('Show Error To Select One');
           setShowContactInfoError('Select One of the following');
         }
       }
@@ -2402,10 +2430,7 @@ const Booking = () => {
       //myGeneralObj.myData.switched == false &&
     ) {
       //
-      console.log(
-        'IsAdvanced is TRUEEEEEEEEEEEEEE Hereeeeeeeeeeeeeeeeeee',
-        myGeneralObj,
-      );
+      // console.log('IsAdvanced is TRUEEEE Heree', myGeneralObj);
       var destinationLatLng = null;
       if (
         myGeneralObj.myData.Destination.lat != undefined &&
@@ -2422,11 +2447,6 @@ const Booking = () => {
           '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
       }
 
-      console.log('advnacedSearchFieldText', advnacedSearchFieldText);
-      console.log(
-        'myGeneralObj.myData.Destination',
-        myGeneralObj.myData.destination_address,
-      );
       var myAdvnacedSearchFieldText = advnacedSearchFieldText;
       if (myAdvnacedSearchFieldText == null) {
         myAdvnacedSearchFieldText = myGeneralObj.myData.destination_address;
@@ -2445,7 +2465,7 @@ const Booking = () => {
       var childObj2 = null;
       var wheelChairObj = null;
       if (babySelectedAge) {
-        console.log('1 baby Object');
+        // console.log('1 baby Object');
         babyObj1 = {
           type: 'baby_seat',
           val: babySelectedAge,
@@ -2550,6 +2570,15 @@ const Booking = () => {
             }
 
             if (previewKey == 'general') {
+              if (
+                cookies.hasOwnProperty('cookie_days') &&
+                localStorage.getItem('ref_id')
+              ) {
+                formData.append(
+                  'data[general][referral_id]',
+                  localStorage.getItem('ref_id'),
+                );
+              }
               for (let ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
@@ -2591,10 +2620,6 @@ const Booking = () => {
                     );
                   }
                   if (data[dataKey][previewKey][a + 1]) {
-                    console.log(
-                      'Next Exists 1',
-                      data[dataKey][previewKey][a + 1],
-                    );
                   }
                 }
               }
@@ -2611,18 +2636,12 @@ const Booking = () => {
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
                   for (let ipk in data[dataKey][previewKey][a]) {
-                    console.log('Object1', data[dataKey][previewKey][a]);
-                    console.log('Object2', data[dataKey][previewKey][a + 1]);
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
                     );
                   }
                   if (data[dataKey][previewKey][a + 1]) {
-                    console.log(
-                      'Next Exists 1',
-                      data[dataKey][previewKey][a + 1],
-                    );
                   }
                 }
               }
@@ -2631,19 +2650,17 @@ const Booking = () => {
         }
       }
 
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
       if (showPaymentArea) {
-        // console.log('showPaymentArea is TrueeeeEEEEE', formData.append());
-        for (var pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]);
-        }
-        console.log('Showing Payment Area');
+        // for (var pair of formData.entries()) {
+        //   console.log(pair[0] + ', ' + pair[1]);
+        // }
+        // console.log('Showing Payment Area');
+        setLodaerIsActive(true);
         postRequest(formData, headers).then(data => {
-          console.log('Data Status:', data);
+          setLodaerIsActive(false);
+          // console.log('Data Status:', data);
           if (data.status == 'ok') {
-            console.log('Data Status:', data.status);
+            // console.log('Data Status:', data.status);
             setReservationID(data.res_id);
             setShowReservationIdModal(true);
           }
@@ -2653,7 +2670,7 @@ const Booking = () => {
           (contactByEmail == 1 && contactEmail) ||
           (contactByWa == 1 && contactNumber)
         ) {
-          console.log('Not showPaymentArea');
+          // console.log('Not showPaymentArea');
           if (reqStatus == 3) {
             formData.append(`data[rejects][address]`, 1);
           } else {
@@ -2669,19 +2686,21 @@ const Booking = () => {
           }
           formData.set('command', 'create_booking_request');
           formData.set('key', GET_CREATE_BOOKING_KEY());
-          for (var pair of formData.entries()) {
-            console.log(pair[0] + ', ' + pair[1]);
-          }
+          // for (var pair of formData.entries()) {
+          //   console.log(pair[0] + ', ' + pair[1]);
+          // }
+          setLodaerIsActive(true);
           postRequest(formData, headers).then(data => {
-            console.log('Data Status:', data);
+            // console.log('Data Status:', data);
+            setLodaerIsActive(false);
             if (data.status == 'ok') {
-              console.log('Data Status:', data.status);
+              // console.log('Data Status:', data.status);
               setShowContactInfoError('');
               setStatus3PriceError(null);
             }
           });
         } else {
-          console.log('Show Error To Select One');
+          // console.log('Show Error To Select One');
           setShowContactInfoError('Select One of the following');
         }
       }
@@ -2691,422 +2710,310 @@ const Booking = () => {
   function handleContactCheck(e) {
     if (e.currentTarget.name == 'checkboxG1') {
       setContactByEmail(1);
-      console.log('checkboxG1', e.currentTarget.value);
+      // console.log('checkboxG1', e.currentTarget.value);
     } else if (e.currentTarget.name == 'checkboxG2') {
       setContactByWa(1);
-      console.log('checkboxG2');
     }
   }
   function handleInputValue(e) {
     if (e.currentTarget.name == 'contact_email') {
-      console.log('contact_email', e.currentTarget.value);
       setContactEmail(e.currentTarget.value);
     } else if (e.currentTarget.name == 'wa_number') {
-      console.log('wa_number', e.currentTarget.value);
       setContactNumber(e.currentTarget.value);
     }
   }
 
   return (
     <div>
-      <Header />
+      <LoadingOverlay active={isActive} spinner text="Loading...">
+        <Header props={props} />
 
-      <div>
-        <section className="banner innerbanner booking" />
-        <section className="bookingcontent">
-          <div className="container">
-            <div className="row">
-              <div className="col-md-12">
-                <div className="bookingwrap">
-                  <p className="text-center blue text-decoration-underline backsearch">
-                    <img src={leftangleImg} alt /> Back to search options
-                  </p>
-                  <Formik
-                    initialValues={{
-                      // ordernumber: '',
-                      first_name: first_name,
-                      last_name: last_name,
-                      phone_number: phone_number,
-                      email: email,
-                      arrival_date: arrival_date,
-                      arrival_flight_number: arrival_flight_number,
-                      arrival_time: arrival_time,
-                      departure_date: departure_date,
-                      departure_flight_number: departure_flight_number,
-                      departure_time: departure_time,
-                      destination: destination,
-                      remark: remark,
-                      // card_holder_name: '',
-                      // card_number: '',
-                      // exp_date: '',
-                      // cvv: '',
-                    }}
-                    validationSchema={bookingSchema}
-                    onSubmit={values => {
-                      // submitValues(values);
-                      console.log('Moeed Booking Values:', values);
-                      // submitRequest();
-                    }}
-                    // validator={() => ({})}
-                  >
-                    {({ errors, touched, setFieldValue }) => (
-                      <Form className="bookingform">
-                        <h2>
-                          Lead Passenger Details{' '}
-                          <span
-                            data-toggle="tooltip"
-                            data-placement="top"
-                            title="Tooltip on top"
-                          >
-                            <img src={infoImg} />
-                          </span>
-                        </h2>
-                        <hr />
-                        <div className="form-row ">
-                          <div className="form-group col-md-6 mw-470">
-                            <label>Passenger first name</label>
-                            <Field
-                              type="text"
-                              name="first_name"
-                              className="form-control"
-                              id="fname"
-                              value={first_name}
-                              onChange={e => {
-                                // call the built-in handleChange for formik
-                                handleChange(e);
-                                let someValue = e.currentTarget.value;
-                                setFieldValue('first_name', someValue);
-                              }}
-                            />
+        <div>
+          <section className="banner innerbanner booking" />
+          <section className="bookingcontent">
+            <div className="container">
+              <div className="row">
+                <div className="col-md-12">
+                  <div className="bookingwrap">
+                    <p className="text-center blue text-decoration-underline backsearch">
+                      <img src={leftangleImg} alt /> Back to search options
+                    </p>
+                    <Formik
+                      initialValues={{
+                        // ordernumber: '',
+                        first_name: first_name,
+                        last_name: last_name,
+                        phone_number: phone_number,
+                        email: email,
+                        arrival_date: arrival_date,
+                        arrival_flight_number: arrival_flight_number,
+                        arrival_time: arrival_time,
+                        departure_date: departure_date,
+                        departure_flight_number: departure_flight_number,
+                        departure_time: departure_time,
+                        destination: destination,
+                        remark: remark,
+                        type: type,
+                        // card_holder_name: '',
+                        // card_number: '',
+                        // exp_date: '',
+                        // cvv: '',
+                      }}
+                      validationSchema={bookingSchema}
+                      onSubmit={values => {
+                        // console.log('Moeed Booking Values:', values);
+                        submitRequest();
+                      }}
+                      // validator={() => ({})}
+                    >
+                      {({ errors, touched, setFieldValue }) => (
+                        <Form className="bookingform">
+                          <h2>
+                            Lead Passenger Details{' '}
+                            <span
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="Tooltip on top"
+                            >
+                              <img src={infoImg} />
+                            </span>
+                          </h2>
+                          <hr />
+                          <div className="form-row ">
+                            <div className="form-group col-md-6 mw-470">
+                              <label>Passenger first name</label>
+                              <Field
+                                type="text"
+                                name="first_name"
+                                className="form-control"
+                                id="fname"
+                                value={first_name}
+                                onChange={e => {
+                                  // call the built-in handleChange for formik
+                                  handleChange(e);
+                                  let someValue = e.currentTarget.value;
+                                  setFieldValue('first_name', someValue);
+                                }}
+                              />
 
-                            {errors.first_name && touched.first_name ? (
-                              <div className="errorMsg">
-                                {errors.first_name}
-                              </div>
-                            ) : null}
-                          </div>
-                          <div className="form-group col-md-6 mw-470">
-                            <label>Passenger last name</label>
-                            <Field
-                              type="text"
-                              name="last_name"
-                              className="form-control"
-                              id="lname"
-                              value={last_name}
-                              onChange={e => {
-                                // call the built-in handleChange for formik
-                                handleChange(e);
-                                let someValue = e.currentTarget.value;
-                                setFieldValue('last_name', someValue);
-                              }}
-                            />
-
-                            {errors.last_name && touched.last_name ? (
-                              <div className="errorMsg">{errors.last_name}</div>
-                            ) : null}
-                          </div>
-                        </div>
-                        <div className="form-row">
-                          <div className="form-group col-md-6 mw-470">
-                            <label>Mobile phone</label>
-                            <Field
-                              type="tel"
-                              name="phone_number"
-                              className="form-control"
-                              id="phone"
-                              value={phone_number}
-                              onChange={e => {
-                                // call the built-in handleChange for formik
-                                handleChange(e);
-                                let someValue = e.currentTarget.value;
-                                setFieldValue('phone_number', someValue);
-                              }}
-                            />
-
-                            {errors.phone_number && touched.phone_number ? (
-                              <div className="errorMsg">
-                                {errors.phone_number}
-                              </div>
-                            ) : null}
-                          </div>
-                          <div className="form-group col-md-6 mw-470">
-                            <label>Email</label>
-                            <Field
-                              type="email"
-                              name="email"
-                              className="form-control"
-                              id="email"
-                              value={email}
-                              onChange={e => {
-                                // call the built-in handleChange for formik
-                                handleChange(e);
-                                let someValue = e.currentTarget.value;
-                                setFieldValue('email', someValue);
-                              }}
-                            />
-                            {errors.email && touched.email ? (
-                              <div className="errorMsg">{errors.email}</div>
-                            ) : null}
-                          </div>
-                        </div>
-                        {showArrivalAndDeparture ? (
-                          <div>
-                            <h2>Arrival Flight Details</h2>
-                            <hr />
-                            <div className="form-row">
-                              <div className="form-group col-md-4 mw-300">
-                                <label>Arrival date</label>
-                                <Field
-                                  type="date"
-                                  className="form-control"
-                                  id="arrivaldate"
-                                  value={arrival_date}
-                                  name="arrival_date"
-                                  onChange={e => {
-                                    // call the built-in handleChange for formik
-                                    handleFlightInputsChange(e);
-                                    let someValue = e.currentTarget.value;
-                                    setFieldValue('arrival_date', someValue);
-                                    if (arrival_flight_number) {
-                                      setArrival_flight_number('');
-                                      setFieldValue(
-                                        'arrival_flight_number',
-                                        '',
-                                      );
-                                    }
-                                  }}
-                                />
-                                {errors.arrival_date && touched.arrival_date ? (
-                                  <div className="errorMsg">
-                                    {errors.arrival_date}
-                                  </div>
-                                ) : null}
-                              </div>
-                              <div className="form-group col-md-4 mw-360">
-                                <label>Flight number</label>
-                                <Field
-                                  type="text"
-                                  className="form-control"
-                                  id="fnumber"
-                                  name="arrival_flight_number"
-                                  onKeyUp={e => handleKeyUp(e, setFieldValue)}
-                                />
-                                {(errors.arrival_flight_number &&
-                                  touched.arrival_flight_number) ||
-                                showThis ? (
-                                  <div className="errorMsg">
-                                    {errors.arrival_flight_number
-                                      ? errors.arrival_flight_number
-                                      : 'Invalid flight number'}
-                                  </div>
-                                ) : null}
-                              </div>
-
-                              {!arrival_flight_Airport_Match_Error ? (
-                                <div className="form-group col-md-4 mw-200">
-                                  <label>
-                                    Arrival time{' '}
-                                    <span>
-                                      <img src={infoImg} />
-                                    </span>
-                                  </label>
-                                  <Field
-                                    type="time"
-                                    className="form-control"
-                                    id="arrivaltime"
-                                    name="arrival_time"
-                                    at_value={arrival_time}
-                                    component={RCTimePicker}
-                                  />
-
-                                  {errors.arrival_time &&
-                                  touched.arrival_time ? (
-                                    <div className="errorMsg">
-                                      {errors.arrival_time}
-                                    </div>
-                                  ) : null}
-                                </div>
-                              ) : null}
-
-                              {arrival_flight_Airport_Match_Error &&
-                              arrival_flight_Airport_Match_Error ? (
+                              {errors.first_name && touched.first_name ? (
                                 <div className="errorMsg">
-                                  {arrival_flight_Airport_Match_Error}
+                                  {errors.first_name}
                                 </div>
                               ) : null}
                             </div>
+                            <div className="form-group col-md-6 mw-470">
+                              <label>Passenger last name</label>
+                              <Field
+                                type="text"
+                                name="last_name"
+                                className="form-control"
+                                id="lname"
+                                value={last_name}
+                                onChange={e => {
+                                  // call the built-in handleChange for formik
+                                  handleChange(e);
+                                  let someValue = e.currentTarget.value;
+                                  setFieldValue('last_name', someValue);
+                                }}
+                              />
 
-                            <h2>Departure Flight Details</h2>
-                            <hr />
-                            <div className="form-row">
-                              <div className="form-group col-md-4 mw-300">
-                                <label>Departure date</label>
-                                <Field
-                                  type="date"
-                                  className="form-control"
-                                  id="departuredate"
-                                  name="departure_date"
-                                  onChange={e => {
-                                    // call the built-in handleChange for formik
-                                    handleFlightInputsChange(e);
-                                    let someValue = e.currentTarget.value;
-                                    setFieldValue('departure_date', someValue);
-                                    if (departure_flight_number) {
-                                      setDeparture_flight_number('');
-                                      setFieldValue(
-                                        'departure_flight_number',
-                                        '',
-                                      );
-                                    }
-                                  }}
-                                />
-                                {errors.departure_date &&
-                                touched.departure_date ? (
-                                  <div className="errorMsg">
-                                    {errors.departure_date}
-                                  </div>
-                                ) : null}
-                              </div>
-                              <div className="form-group col-md-4 mw-360">
-                                <label>Flight number</label>
-                                <Field
-                                  type="text"
-                                  className="form-control"
-                                  id="fnumber"
-                                  name="departure_flight_number"
-                                  // onBlur={e => handleChange(e, setFieldValue)}
-                                  onKeyUp={e => handleKeyUp1(e, setFieldValue)}
-                                />
-                                {(errors.departure_flight_number &&
-                                  touched.departure_flight_number) ||
-                                showThis2 ? (
-                                  <div className="errorMsg">
-                                    {errors.departure_flight_number
-                                      ? errors.departure_flight_number
-                                      : 'Invalid flight number'}
-                                  </div>
-                                ) : null}
-                              </div>
-                              {!departure_flight_Airport_Match_Error ? (
-                                <div className="form-group col-md-4 mw-200">
-                                  <label>
-                                    Departure time{' '}
-                                    <span>
-                                      <img src={infoImg} />
-                                    </span>
-                                  </label>
-
-                                  <Field
-                                    className="form-control"
-                                    id="arrivaltime"
-                                    name="departure_time"
-                                    at_value={departure_time}
-                                    component={RCTimePicker}
-                                  />
-                                  {errors.departure_time &&
-                                  touched.departure_time ? (
-                                    <div className="errorMsg">
-                                      {errors.departure_time}
-                                    </div>
-                                  ) : null}
-                                </div>
-                              ) : null}
-
-                              {departure_flight_Airport_Match_Error &&
-                              departure_flight_Airport_Match_Error ? (
+                              {errors.last_name && touched.last_name ? (
                                 <div className="errorMsg">
-                                  {departure_flight_Airport_Match_Error}
+                                  {errors.last_name}
                                 </div>
                               ) : null}
                             </div>
-
-                            {JSON.parse(localStorage.getItem('vehicleObj'))
-                              .seconds_before_pick != 'null' &&
-                            !departure_flight_Airport_Match_Error ? (
-                              <div>
-                                <label>
-                                  {/* {
-                                    JSON.parse(
-                                      localStorage.getItem('vehicleObj'),
-                                    ).seconds_before_pick
-                                  } */}
-                                  Pickup Time{' '}
-                                  <span>
-                                    <img src={infoImg} />
-                                  </span>
-                                </label>
-                                {/* {moment(departure_time, 'hh:mm')} */}
-
-                                <Field
-                                  className="form-control"
-                                  id="arrivaltime2"
-                                  name="seconds_before_pick"
-                                  at_value={seconds_before_pick}
-                                  onChange={handleTimeChange}
-                                  component={RCTimePicker}
-                                />
-                              </div>
-                            ) : null}
                           </div>
-                        ) : null}
+                          <div className="form-row">
+                            <div className="form-group col-md-6 mw-470">
+                              <label>Mobile phone</label>
+                              <Field
+                                type="tel"
+                                name="phone_number"
+                                className="form-control"
+                                id="phone"
+                                value={phone_number}
+                                onChange={e => {
+                                  // call the built-in handleChange for formik
+                                  handleChange(e);
+                                  let someValue = e.currentTarget.value;
+                                  setFieldValue('phone_number', someValue);
+                                }}
+                              />
 
-                        {showJustDeparture && !showArrivalAndDeparture ? (
-                          <div>
-                            <h2>Departure Flight Details</h2>
-                            <hr />
-                            <div className="form-row">
-                              <div className="form-group col-md-4 mw-300">
-                                <label>Departure date</label>
-                                <Field
-                                  type="date"
-                                  className="form-control"
-                                  id="departuredate"
-                                  name="departure_date"
-                                  value={departure_date}
-                                  onChange={e => {
-                                    // call the built-in handleChange for formik
-                                    handleFlightInputsChange(e);
-                                    let someValue = e.currentTarget.value;
-                                    setFieldValue('departure_date', someValue);
-                                    if (departure_flight_number) {
-                                      setDeparture_flight_number('');
+                              {errors.phone_number && touched.phone_number ? (
+                                <div className="errorMsg">
+                                  {errors.phone_number}
+                                </div>
+                              ) : null}
+                            </div>
+                            <div className="form-group col-md-6 mw-470">
+                              <label>Email</label>
+                              <Field
+                                type="email"
+                                name="email"
+                                className="form-control"
+                                id="email"
+                                value={email}
+                                onChange={e => {
+                                  // call the built-in handleChange for formik
+                                  handleChange(e);
+                                  let someValue = e.currentTarget.value;
+                                  setFieldValue('email', someValue);
+                                }}
+                              />
+                              {errors.email && touched.email ? (
+                                <div className="errorMsg">{errors.email}</div>
+                              ) : null}
+                            </div>
+                          </div>
+                          {showArrivalAndDeparture ? (
+                            <div>
+                              <h2>Arrival Flight Details</h2>
+                              <hr />
+                              <div className="form-row">
+                                <div className="form-group col-md-4 mw-300">
+                                  <label>Arrival date</label>
+                                  <Field
+                                    type="date"
+                                    className="form-control"
+                                    id="arrivaldate"
+                                    value={arrival_date}
+                                    name="arrival_date"
+                                    onChange={e => {
+                                      // call the built-in handleChange for formik
+                                      handleFlightInputsChange(e);
+                                      let someValue = e.currentTarget.value;
+                                      setFieldValue('arrival_date', someValue);
+                                      if (arrival_flight_number) {
+                                        setArrival_flight_number('');
+                                        setFieldValue(
+                                          'arrival_flight_number',
+                                          '',
+                                        );
+                                      }
+                                    }}
+                                  />
+                                  {errors.arrival_date &&
+                                  touched.arrival_date ? (
+                                    <div className="errorMsg">
+                                      {errors.arrival_date}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                <div className="form-group col-md-4 mw-360">
+                                  <label>Flight number</label>
+                                  <Field
+                                    type="text"
+                                    className="form-control"
+                                    id="fnumber"
+                                    name="arrival_flight_number"
+                                    onKeyUp={e => handleKeyUp(e, setFieldValue)}
+                                  />
+                                  {(errors.arrival_flight_number &&
+                                    touched.arrival_flight_number) ||
+                                  showThis ? (
+                                    <div className="errorMsg">
+                                      {errors.arrival_flight_number
+                                        ? errors.arrival_flight_number
+                                        : 'Invalid flight number'}
+                                    </div>
+                                  ) : null}
+                                </div>
+
+                                {!arrival_flight_Airport_Match_Error ? (
+                                  <div className="form-group col-md-4 mw-200">
+                                    <label>
+                                      Arrival time{' '}
+                                      <span>
+                                        <img src={infoImg} />
+                                      </span>
+                                    </label>
+                                    <Field
+                                      type="time"
+                                      className="form-control"
+                                      id="arrivaltime"
+                                      name="arrival_time"
+                                      at_value={arrival_time}
+                                      component={RCTimePicker}
+                                    />
+
+                                    {errors.arrival_time &&
+                                    touched.arrival_time ? (
+                                      <div className="errorMsg">
+                                        {errors.arrival_time}
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                ) : null}
+
+                                {arrival_flight_Airport_Match_Error &&
+                                arrival_flight_Airport_Match_Error ? (
+                                  <div className="errorMsg">
+                                    {arrival_flight_Airport_Match_Error}
+                                  </div>
+                                ) : null}
+                              </div>
+
+                              <h2>Departure Flight Details</h2>
+                              <hr />
+                              <div className="form-row">
+                                <div className="form-group col-md-4 mw-300">
+                                  <label>Departure date</label>
+                                  <Field
+                                    type="date"
+                                    className="form-control"
+                                    id="departuredate"
+                                    name="departure_date"
+                                    onChange={e => {
+                                      // call the built-in handleChange for formik
+                                      handleFlightInputsChange(e);
+                                      let someValue = e.currentTarget.value;
                                       setFieldValue(
-                                        'departure_flight_number',
-                                        '',
+                                        'departure_date',
+                                        someValue,
                                       );
+                                      if (departure_flight_number) {
+                                        setDeparture_flight_number('');
+                                        setFieldValue(
+                                          'departure_flight_number',
+                                          '',
+                                        );
+                                      }
+                                    }}
+                                  />
+                                  {errors.departure_date &&
+                                  touched.departure_date ? (
+                                    <div className="errorMsg">
+                                      {errors.departure_date}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                <div className="form-group col-md-4 mw-360">
+                                  <label>Flight number</label>
+                                  <Field
+                                    type="text"
+                                    className="form-control"
+                                    id="fnumber"
+                                    name="departure_flight_number"
+                                    // onBlur={e => handleChange(e, setFieldValue)}
+                                    onKeyUp={e =>
+                                      handleKeyUp1(e, setFieldValue)
                                     }
-                                  }}
-                                />
-                                {errors.departure_date &&
-                                touched.departure_date ? (
-                                  <div className="errorMsg">
-                                    {errors.departure_date}
-                                  </div>
-                                ) : null}
-                              </div>
-                              <div className="form-group col-md-4 mw-360">
-                                <label>Flight number</label>
-                                <Field
-                                  type="text"
-                                  className="form-control"
-                                  id="fnumber"
-                                  name="departure_flight_number"
-                                  // onBlur={e => handleChange(e, setFieldValue)}
-                                  onKeyUp={e => handleKeyUp1(e, setFieldValue)}
-                                />
-                                {(errors.departure_flight_number &&
-                                  touched.departure_flight_number) ||
-                                showThis2 ? (
-                                  <div className="errorMsg">
-                                    {errors.departure_flight_number
-                                      ? errors.departure_flight_number
-                                      : 'Invalid flight number'}
-                                  </div>
-                                ) : null}
-                              </div>
-                              <div className="form-group col-md-4 mw-200">
-                                {!flight_Airport_Match_Error ? (
-                                  <div>
+                                  />
+                                  {(errors.departure_flight_number &&
+                                    touched.departure_flight_number) ||
+                                  showThis2 ? (
+                                    <div className="errorMsg">
+                                      {errors.departure_flight_number
+                                        ? errors.departure_flight_number
+                                        : 'Invalid flight number'}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                {!departure_flight_Airport_Match_Error ? (
+                                  <div className="form-group col-md-4 mw-200">
                                     <label>
                                       Departure time{' '}
                                       <span>
@@ -3116,21 +3023,17 @@ const Booking = () => {
 
                                     <Field
                                       className="form-control"
-                                      id="arrivaltime1"
+                                      id="arrivaltime"
                                       name="departure_time"
                                       at_value={departure_time}
                                       component={RCTimePicker}
-                                      onSetDepartureTime={value =>
-                                        setDeparture_Time(value)
-                                      }
                                     />
-                                  </div>
-                                ) : null}
-
-                                {errors.departure_time &&
-                                touched.departure_time ? (
-                                  <div className="errorMsg">
-                                    {errors.departure_time}
+                                    {errors.departure_time &&
+                                    touched.departure_time ? (
+                                      <div className="errorMsg">
+                                        {errors.departure_time}
+                                      </div>
+                                    ) : null}
                                   </div>
                                 ) : null}
 
@@ -3144,9 +3047,14 @@ const Booking = () => {
 
                               {JSON.parse(localStorage.getItem('vehicleObj'))
                                 .seconds_before_pick != 'null' &&
-                              !flight_Airport_Match_Error ? (
+                              !departure_flight_Airport_Match_Error ? (
                                 <div>
                                   <label>
+                                    {/* {
+                                    JSON.parse(
+                                      localStorage.getItem('vehicleObj'),
+                                    ).seconds_before_pick
+                                  } */}
                                     Pickup Time{' '}
                                     <span>
                                       <img src={infoImg} />
@@ -3165,155 +3073,283 @@ const Booking = () => {
                                 </div>
                               ) : null}
                             </div>
-                          </div>
-                        ) : null}
+                          ) : null}
 
-                        {/* ///Just Arrival Time/// */}
-                        {showJustArrival &&
-                        !showJustDeparture &&
-                        !showArrivalAndDeparture ? (
-                          <div>
-                            <h2>Arrival Flight Details</h2>
-                            <hr />
-                            <div className="form-row">
-                              <div className="form-group col-md-4 mw-300">
-                                <label>Arrival date</label>
-                                <Field
-                                  type="date"
-                                  className="form-control"
-                                  id="arrivaldate"
-                                  name="arrival_date"
-                                  value={arrival_date}
-                                  onChange={e => {
-                                    // call the built-in handleChange for formik
-                                    handleFlightInputsChange(e);
-                                    let someValue = e.currentTarget.value;
-                                    setFieldValue('arrival_date', someValue);
-                                    if (arrival_flight_number) {
-                                      setArrival_flight_number('');
+                          {showJustDeparture && !showArrivalAndDeparture ? (
+                            <div>
+                              <h2>Departure Flight Details</h2>
+                              <hr />
+                              <div className="form-row">
+                                <div className="form-group col-md-4 mw-300">
+                                  <label>Departure date</label>
+                                  <Field
+                                    type="date"
+                                    className="form-control"
+                                    id="departuredate"
+                                    name="departure_date"
+                                    value={departure_date}
+                                    onChange={e => {
+                                      // call the built-in handleChange for formik
+                                      handleFlightInputsChange(e);
+                                      let someValue = e.currentTarget.value;
                                       setFieldValue(
-                                        'arrival_flight_number',
-                                        '',
+                                        'departure_date',
+                                        someValue,
                                       );
+                                      if (departure_flight_number) {
+                                        setDeparture_flight_number('');
+                                        setFieldValue(
+                                          'departure_flight_number',
+                                          '',
+                                        );
+                                      }
+                                    }}
+                                  />
+                                  {errors.departure_date &&
+                                  touched.departure_date ? (
+                                    <div className="errorMsg">
+                                      {errors.departure_date}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                <div className="form-group col-md-4 mw-360">
+                                  <label>Flight number</label>
+                                  <Field
+                                    type="text"
+                                    className="form-control"
+                                    id="fnumber"
+                                    name="departure_flight_number"
+                                    // onBlur={e => handleChange(e, setFieldValue)}
+                                    onKeyUp={e =>
+                                      handleKeyUp1(e, setFieldValue)
                                     }
-                                  }}
-                                />
-                                {errors.arrival_date && touched.arrival_date ? (
-                                  <div className="errorMsg">
-                                    {errors.arrival_date}
-                                  </div>
-                                ) : null}
-                              </div>
-                              <div className="form-group col-md-4 mw-360">
-                                <label>Flight number</label>
-                                <Field
-                                  type="text"
-                                  className="form-control"
-                                  id="fnumber"
-                                  name="arrival_flight_number"
-                                  onKeyUp={e => handleKeyUp(e, setFieldValue)}
-                                />
-                                {(errors.arrival_flight_number &&
-                                  touched.arrival_flight_number) ||
-                                showThis ? (
-                                  <div className="errorMsg">
-                                    {errors.arrival_flight_number
-                                      ? errors.arrival_flight_number
-                                      : 'Invalid flight number'}
-                                  </div>
-                                ) : null}
-                              </div>
-                              <div className="form-group col-md-4 mw-200">
-                                {!flight_Airport_Match_Error ? (
+                                  />
+                                  {(errors.departure_flight_number &&
+                                    touched.departure_flight_number) ||
+                                  showThis2 ? (
+                                    <div className="errorMsg">
+                                      {errors.departure_flight_number
+                                        ? errors.departure_flight_number
+                                        : 'Invalid flight number'}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                <div className="form-group col-md-4 mw-200">
+                                  {!flight_Airport_Match_Error ? (
+                                    <div>
+                                      <label>
+                                        Departure time{' '}
+                                        <span>
+                                          <img src={infoImg} />
+                                        </span>
+                                      </label>
+
+                                      <Field
+                                        className="form-control"
+                                        id="arrivaltime1"
+                                        name="departure_time"
+                                        at_value={departure_time}
+                                        component={RCTimePicker}
+                                        onSetDepartureTime={value =>
+                                          setDeparture_Time(value)
+                                        }
+                                      />
+                                    </div>
+                                  ) : null}
+
+                                  {errors.departure_time &&
+                                  touched.departure_time ? (
+                                    <div className="errorMsg">
+                                      {errors.departure_time}
+                                    </div>
+                                  ) : null}
+
+                                  {departure_flight_Airport_Match_Error &&
+                                  departure_flight_Airport_Match_Error ? (
+                                    <div className="errorMsg">
+                                      {departure_flight_Airport_Match_Error}
+                                    </div>
+                                  ) : null}
+                                </div>
+
+                                {JSON.parse(localStorage.getItem('vehicleObj'))
+                                  .seconds_before_pick != 'null' &&
+                                !flight_Airport_Match_Error ? (
                                   <div>
                                     <label>
-                                      Arrival time{' '}
+                                      Pickup Time{' '}
                                       <span>
                                         <img src={infoImg} />
                                       </span>
                                     </label>
+                                    {/* {moment(departure_time, 'hh:mm')} */}
 
                                     <Field
-                                      type="time"
                                       className="form-control"
-                                      id="arrivaltime"
-                                      name="arrival_time"
-                                      at_value={arrival_time}
-                                      onSetArrivalTime={value =>
-                                        setArrival_Time(value)
-                                      }
+                                      id="arrivaltime2"
+                                      name="seconds_before_pick"
+                                      at_value={seconds_before_pick}
+                                      onChange={handleTimeChange}
                                       component={RCTimePicker}
                                     />
                                   </div>
                                 ) : null}
+                              </div>
+                            </div>
+                          ) : null}
 
-                                {errors.arrival_time && touched.arrival_time ? (
+                          {/* ///Just Arrival Time/// */}
+                          {showJustArrival &&
+                          !showJustDeparture &&
+                          !showArrivalAndDeparture ? (
+                            <div>
+                              <h2>Arrival Flight Details</h2>
+                              <hr />
+                              <div className="form-row">
+                                <div className="form-group col-md-4 mw-300">
+                                  <label>Arrival date</label>
+                                  <Field
+                                    type="date"
+                                    className="form-control"
+                                    id="arrivaldate"
+                                    name="arrival_date"
+                                    value={arrival_date}
+                                    onChange={e => {
+                                      // call the built-in handleChange for formik
+                                      handleFlightInputsChange(e);
+                                      let someValue = e.currentTarget.value;
+                                      setFieldValue('arrival_date', someValue);
+                                      if (arrival_flight_number) {
+                                        setArrival_flight_number('');
+                                        setFieldValue(
+                                          'arrival_flight_number',
+                                          '',
+                                        );
+                                      }
+                                    }}
+                                  />
+                                  {errors.arrival_date &&
+                                  touched.arrival_date ? (
+                                    <div className="errorMsg">
+                                      {errors.arrival_date}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                <div className="form-group col-md-4 mw-360">
+                                  <label>Flight number</label>
+                                  <Field
+                                    type="text"
+                                    className="form-control"
+                                    id="fnumber"
+                                    name="arrival_flight_number"
+                                    onKeyUp={e => handleKeyUp(e, setFieldValue)}
+                                  />
+                                  {(errors.arrival_flight_number &&
+                                    touched.arrival_flight_number) ||
+                                  showThis ? (
+                                    <div className="errorMsg">
+                                      {errors.arrival_flight_number
+                                        ? errors.arrival_flight_number
+                                        : 'Invalid flight number'}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                <div className="form-group col-md-4 mw-200">
+                                  {!flight_Airport_Match_Error ? (
+                                    <div>
+                                      <label>
+                                        Arrival time{' '}
+                                        <span>
+                                          <img src={infoImg} />
+                                        </span>
+                                      </label>
+
+                                      <Field
+                                        type="time"
+                                        className="form-control"
+                                        id="arrivaltime"
+                                        name="arrival_time"
+                                        at_value={arrival_time}
+                                        onSetArrivalTime={value =>
+                                          setArrival_Time(value)
+                                        }
+                                        component={RCTimePicker}
+                                      />
+                                    </div>
+                                  ) : null}
+
+                                  {errors.arrival_time &&
+                                  touched.arrival_time ? (
+                                    <div className="errorMsg">
+                                      {errors.arrival_time}
+                                    </div>
+                                  ) : null}
+
+                                  {arrival_flight_Airport_Match_Error &&
+                                  arrival_flight_Airport_Match_Error ? (
+                                    <div className="errorMsg">
+                                      {arrival_flight_Airport_Match_Error}
+                                    </div>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          <h2>Transfer Details </h2>
+                          <hr />
+                          <div className="form-row">
+                            {JSON.parse(localStorage.getItem('myGeneralObj'))
+                              .myData.isAdvanced == false ? (
+                              <div className="form-group col-md-12">
+                                <label>Address / Hotel</label>
+                                <Field
+                                  name="destination"
+                                  className="form-control"
+                                  id="address"
+                                  onSetAbc={value =>
+                                    setAdvnacedSearchVal(value)
+                                  }
+                                  onSetFeildText={value =>
+                                    setAdvnacedSearchFieldText(value)
+                                  }
+                                  component={LocationSearchInput}
+                                />
+                                {errors.destination && touched.destination ? (
                                   <div className="errorMsg">
-                                    {errors.arrival_time}
+                                    {errors.destination}
                                   </div>
                                 ) : null}
 
-                                {arrival_flight_Airport_Match_Error &&
-                                arrival_flight_Airport_Match_Error ? (
+                                {noMatchingVehicleError ? (
                                   <div className="errorMsg">
-                                    {arrival_flight_Airport_Match_Error}
+                                    {noMatchingVehicleError}
                                   </div>
                                 ) : null}
                               </div>
-                            </div>
-                          </div>
-                        ) : null}
-
-                        <h2>Transfer Details </h2>
-                        <hr />
-                        <div className="form-row">
-                          {JSON.parse(localStorage.getItem('myGeneralObj'))
-                            .myData.isAdvanced == false ? (
-                            <div className="form-group col-md-12">
-                              <label>Address / Hotel</label>
-                              <Field
-                                name="destination"
-                                className="form-control"
-                                id="address"
-                                onSetAbc={value => setAdvnacedSearchVal(value)}
-                                onSetFeildText={value =>
-                                  setAdvnacedSearchFieldText(value)
-                                }
-                                component={LocationSearchInput}
-                              />
-                              {errors.destination && touched.destination ? (
-                                <div className="errorMsg">
-                                  {errors.destination}
-                                </div>
-                              ) : null}
-
-                              {noMatchingVehicleError ? (
-                                <div className="errorMsg">
-                                  {noMatchingVehicleError}
-                                </div>
-                              ) : null}
-                            </div>
-                          ) : (
-                            <div className="form-group col-md-12">
-                              <label>Address / Hotel</label>
-                              <Field
-                                name="address_search"
-                                className="form-control"
-                                id="address"
-                                onSetAbc={value => setAdvnacedSearchVal(value)}
-                                onSetFeildText={value =>
-                                  setAdvnacedSearchFieldText(value)
-                                }
-                                myProp={
-                                  JSON.parse(
-                                    localStorage.getItem('myGeneralObj'),
-                                  ).myData
-                                }
-                                component={LocationSearchInput}
-                              />
-                            </div>
-                          )}
-                          {/* <div className="form-group col-sm-12">
+                            ) : (
+                              <div className="form-group col-md-12">
+                                <label>Address / Hotel</label>
+                                <Field
+                                  name="address_search"
+                                  className="form-control"
+                                  id="address"
+                                  onSetAbc={value =>
+                                    setAdvnacedSearchVal(value)
+                                  }
+                                  onSetFeildText={value =>
+                                    setAdvnacedSearchFieldText(value)
+                                  }
+                                  myProp={
+                                    JSON.parse(
+                                      localStorage.getItem('myGeneralObj'),
+                                    ).myData
+                                  }
+                                  component={LocationSearchInput}
+                                />
+                              </div>
+                            )}
+                            {/* <div className="form-group col-sm-12">
                             <a
                               href="#"
                               className="blue text-decoration-underline ml-15"
@@ -3322,451 +3358,466 @@ const Booking = () => {
                             </a>
                           </div> */}
 
-                          <div className="form-group col-md-12">
-                            <div className="selectwrap">
-                              <label className="mb-0">Passengers numbers</label>
-                              <select
-                                className="form-control form-control-sm"
-                                // onChange={passengersValChange}
-                                onChange={e => passengersValChange(e)}
-                                // value={this.state.value}
-                                value={paxSelected}
-                              >
-                                {passengers
-                                  .slice(
-                                    0,
-                                    JSON.parse(
-                                      localStorage.getItem('vehicleObj'),
-                                    ).max_pax,
-                                  )
-                                  .map(item => (
-                                    <option key={item.id} value={item.val}>
-                                      {item.val}
-                                    </option>
-                                  ))}
-                              </select>
+                            <div className="form-group col-md-12">
+                              <div className="selectwrap">
+                                <label className="mb-0">
+                                  Passengers numbers
+                                </label>
+                                <select
+                                  className="form-control form-control-sm"
+                                  onChange={e => passengersValChange(e)}
+                                  value={paxSelected}
+                                >
+                                  {passengers
+                                    .slice(
+                                      0,
+                                      JSON.parse(
+                                        localStorage.getItem('vehicleObj'),
+                                      ).max_pax,
+                                    )
+                                    .map(item => (
+                                      <option key={item.id} value={item.val}>
+                                        {item.val}
+                                      </option>
+                                    ))}
+                                </select>
+                              </div>
                             </div>
-                          </div>
-                          <div className="form-group">
-                            {/* <button
+                            <div className="form-group">
+                              {/* <button
                               type="button"
                               className="btn btnstyle4 backbtn ml-15"
                               name="button"
                             >
                               <img src={btnarrowImg} alt /> Back to options
                             </button> */}
+                            </div>
                           </div>
-                        </div>
-                        <h2>
-                          Special Equipment{' '}
-                          <span>
-                            <img src={infoImg} />
-                          </span>
-                        </h2>
-                        <hr />
-                        <div className="form-row">
-                          <div className="form-group col-lg-4 col-md-6">
-                            <label>Request for:</label>
-                            <div className="wrapfields">
-                              <div className="selectwrap">
-                                <label className="mb-0 ml-0">Baby seat</label>
-                                <label className="mb-0 ml-0">Quantity</label>
-                                <select
-                                  onChange={event =>
-                                    selectBabyOptions(event.target.value)
-                                  }
-                                  className="form-control form-control-sm"
-                                  defaultValue=""
-                                >
-                                  <option value="">Select</option>
-                                  <option value="1">1</option>
-                                  <option value="2">2</option>
-                                </select>
-                              </div>
+                          <h2>
+                            Special Equipment{' '}
+                            <span>
+                              <img src={infoImg} />
+                            </span>
+                          </h2>
+                          <hr />
+                          <div className="form-row">
+                            <div className="form-group col-lg-4 col-md-6">
+                              <label>Request for:</label>
+                              <div className="wrapfields">
+                                <div className="selectwrap">
+                                  <label className="mb-0 ml-0">Baby seat</label>
+                                  <label className="mb-0 ml-0">Quantity</label>
+                                  <select
+                                    onChange={event =>
+                                      selectBabyOptions(event.target.value)
+                                    }
+                                    className="form-control form-control-sm"
+                                    defaultValue=""
+                                  >
+                                    <option value="">Select</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                  </select>
+                                </div>
 
-                              {showBabyAges && showBabyAges.length > 0
-                                ? showBabyAges.map((item, key) => (
-                                    <div className="selectwrap subfield">
-                                      <label className="mb-0 ml-0 mr-5">
-                                        Baby {item.title} Age
-                                      </label>
-                                      <select
-                                        onChange={
-                                          babyObjects == 1
-                                            ? handleBabyAgeSelect
-                                            : handleBabyAge2Select
-                                        }
-                                        className="form-control form-control-sm"
-                                      >
-                                        {/* <option>{item.age}</option> */}
-                                        {item.value.map(age => (
-                                          <option value={age}>{age}</option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                  ))
-                                : null}
-                              {/* <div className="selectwrap subfield border-top-0">
+                                {showBabyAges && showBabyAges.length > 0
+                                  ? showBabyAges.map((item, key) => (
+                                      <div className="selectwrap subfield">
+                                        <label className="mb-0 ml-0 mr-5">
+                                          Baby {item.title} Age
+                                        </label>
+                                        <select
+                                          onChange={
+                                            babyObjects == 1
+                                              ? handleBabyAgeSelect
+                                              : handleBabyAge2Select
+                                          }
+                                          className="form-control form-control-sm"
+                                        >
+                                          {/* <option>{item.age}</option> */}
+                                          {item.value.map(age => (
+                                            <option value={age}>{age}</option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                    ))
+                                  : null}
+                                {/* <div className="selectwrap subfield border-top-0">
                                 <label className="mb-0 ml-0 mr-5">Age 2</label>
                                 <select className="form-control form-control-sm">
                                   <option>8 months</option>
                                   <option>2</option>
                                 </select>
                               </div> */}
-                            </div>
-                          </div>
-                          <div className="form-group  col-lg-4 col-md-6">
-                            <label>Request for:</label>
-                            <div className="wrapfields">
-                              <div className="selectwrap">
-                                <label className="mb-0 ml-0">Child seat</label>
-                                <label className="mb-0 ml-0">Quantity</label>
-                                <select
-                                  onChange={event =>
-                                    selectChildOptions(event.target.value)
-                                  }
-                                  className="form-control form-control-sm"
-                                  defaultValue=""
-                                >
-                                  <option value="">Select</option>
-                                  <option value="1">1</option>
-                                  <option value="2">2</option>
-                                </select>
-                              </div>
-
-                              {showChildAges && showChildAges.length > 0
-                                ? showChildAges.map(item => (
-                                    <div className="selectwrap subfield">
-                                      <label className="mb-0 ml-0 mr-5">
-                                        Child {item.title} Age
-                                      </label>
-                                      <select
-                                        onChange={
-                                          childObjects == 1
-                                            ? handleChildAgeSelect
-                                            : handleChildAge2Select
-                                        }
-                                        className="form-control form-control-sm"
-                                      >
-                                        {item.value.map(age => (
-                                          <option value={age}>{age}</option>
-                                        ))}
-                                        {/* <option>{item.value}</option> */}
-                                      </select>
-                                    </div>
-                                  ))
-                                : null}
-                            </div>
-                          </div>
-                          <div className="form-group  col-lg-4 col-md-6">
-                            <label>Request for:</label>
-                            <div className="wrapfields">
-                              <div className="selectwrap">
-                                <label className="mb-0 ml-0 mr-5">
-                                  <span>
-                                    <img src={infoImg} />
-                                  </span>{' '}
-                                  Folding wheelchair
-                                </label>
-                                <select
-                                  onChange={onWheelChairSelect}
-                                  className="form-control form-control-sm"
-                                  value={wheelChairVal}
-                                >
-                                  {/* <option value="">Select</option> */}
-                                  <option value="folding">Yes</option>
-                                  <option value="">No</option>
-                                </select>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                        <h2>Remark</h2>
-                        <hr />
-                        <div className="form-row">
-                          <div className="form-group col-md-12">
-                            <Field
-                              // onChange={remarkEntered}
-                              onChange={e => {
-                                // call the built-in handleChange for formik
-                                remarkEntered(e);
-                                let someValue = e.currentTarget.value;
-                                setFieldValue('remark', someValue);
-                              }}
-                              type="text"
-                              className="form-control"
-                              name="remark"
-                            />
-                            {errors.remark && touched.remark ? (
-                              <div className="errorMsg">{errors.remark}</div>
-                            ) : null}
-                          </div>
-                        </div>
-                        {showPaymentArea ? (
-                          <div>
-                            <h2>Payment</h2>
-                            <hr />
-                            <div className="if_not_calc_display_none ">
-                              <div className="form-row">
-                                <div className="form-group col-md-12">
-                                  <label>Card holder name</label>
-                                  <Field
-                                    type="text"
-                                    name="card_holder_name"
-                                    className="form-control"
-                                  />
-
-                                  {errors.card_holder_name &&
-                                  touched.card_holder_name ? (
-                                    <div className="errorMsg">
-                                      {errors.card_holder_name}
-                                    </div>
-                                  ) : null}
+                            <div className="form-group  col-lg-4 col-md-6">
+                              <label>Request for:</label>
+                              <div className="wrapfields">
+                                <div className="selectwrap">
+                                  <label className="mb-0 ml-0">
+                                    Child seat
+                                  </label>
+                                  <label className="mb-0 ml-0">Quantity</label>
+                                  <select
+                                    onChange={event =>
+                                      selectChildOptions(event.target.value)
+                                    }
+                                    className="form-control form-control-sm"
+                                    defaultValue=""
+                                  >
+                                    <option value="">Select</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                  </select>
                                 </div>
-                                <div className="form-group col-md-4">
-                                  <label>Card Number</label>
-                                  <div className="isvalid">
+
+                                {showChildAges && showChildAges.length > 0
+                                  ? showChildAges.map(item => (
+                                      <div className="selectwrap subfield">
+                                        <label className="mb-0 ml-0 mr-5">
+                                          Child {item.title} Age
+                                        </label>
+                                        <select
+                                          onChange={
+                                            childObjects == 1
+                                              ? handleChildAgeSelect
+                                              : handleChildAge2Select
+                                          }
+                                          className="form-control form-control-sm"
+                                        >
+                                          {item.value.map(age => (
+                                            <option value={age}>{age}</option>
+                                          ))}
+                                          {/* <option>{item.value}</option> */}
+                                        </select>
+                                      </div>
+                                    ))
+                                  : null}
+                              </div>
+                            </div>
+                            <div className="form-group  col-lg-4 col-md-6">
+                              <label>Request for:</label>
+                              <div className="wrapfields">
+                                <div className="selectwrap">
+                                  <label className="mb-0 ml-0 mr-5">
+                                    <span>
+                                      <img src={infoImg} />
+                                    </span>{' '}
+                                    Folding wheelchair
+                                  </label>
+                                  <select
+                                    onChange={onWheelChairSelect}
+                                    className="form-control form-control-sm"
+                                    value={wheelChairVal}
+                                  >
+                                    {/* <option value="">Select</option> */}
+                                    <option value="folding">Yes</option>
+                                    <option value="">No</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <h2>Remark</h2>
+                          <hr />
+                          <div className="form-row">
+                            <div className="form-group col-md-12">
+                              <Field
+                                // onChange={remarkEntered}
+                                onChange={e => {
+                                  // call the built-in handleChange for formik
+                                  remarkEntered(e);
+                                  let someValue = e.currentTarget.value;
+                                  setFieldValue('remark', someValue);
+                                }}
+                                type="text"
+                                className="form-control"
+                                name="remark"
+                              />
+                              {errors.remark && touched.remark ? (
+                                <div className="errorMsg">{errors.remark}</div>
+                              ) : null}
+                            </div>
+                          </div>
+                          {showPaymentArea ? (
+                            <div>
+                              <h2>Payment</h2>
+                              <hr />
+                              <div className="if_not_calc_display_none ">
+                                <div className="form-row">
+                                  <div className="form-group col-md-12">
+                                    <label>Card holder name</label>
                                     <Field
                                       type="text"
+                                      name="card_holder_name"
                                       className="form-control"
-                                      id="cardnumber"
-                                      name="card_number"
                                     />
-                                    {errors.card_number &&
-                                    touched.card_number ? (
+
+                                    {errors.card_holder_name &&
+                                    touched.card_holder_name ? (
                                       <div className="errorMsg">
-                                        {errors.card_number}
+                                        {errors.card_holder_name}
                                       </div>
-                                    ) : (
-                                      <img src={tickImg} alt />
-                                    )}
+                                    ) : null}
                                   </div>
-                                </div>
-                                <div className="form-group col-md-4">
-                                  <label>Expiration Date</label>
-                                  <Field
-                                    type="date"
-                                    // min={new Date()}
-                                    max="2050-02-20"
-                                    className="form-control"
-                                    id="prev_dates"
-                                    name="exp_date"
-                                  />
-
-                                  {errors.exp_date && touched.exp_date ? (
-                                    <div className="errorMsg">
-                                      {errors.exp_date}
+                                  <div className="form-group col-md-4">
+                                    <label>Card Number</label>
+                                    <div className="isvalid">
+                                      <Field
+                                        type="text"
+                                        className="form-control"
+                                        id="cardnumber"
+                                        name="card_number"
+                                      />
+                                      {errors.card_number &&
+                                      touched.card_number ? (
+                                        <div className="errorMsg">
+                                          {errors.card_number}
+                                        </div>
+                                      ) : (
+                                        <img src={tickImg} alt />
+                                      )}
                                     </div>
-                                  ) : null}
-                                </div>
-                                <div className="form-group col-md-4">
-                                  <label>CVV</label>
-                                  <Field
-                                    type="text"
-                                    name="cvv"
-                                    className="form-control"
-                                  />
-
-                                  {errors.cvv && touched.cvv ? (
-                                    <div className="errorMsg">{errors.cvv}</div>
-                                  ) : null}
-                                </div>
-                                <div className="form-group col-md-12">
-                                  <p>
-                                    Amount: <b className="black">00.00 USD </b>
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ) : null}
-                        <div className="form-row">
-                          {!showPaymentArea ? (
-                            <div className="form-group col-md-12">
-                              <div className="bookingnotvalid">
-                                {status3PriceError == 3 ? (
-                                  <p className="invalid">
-                                    The price is not valid for your selected
-                                    address. Send Cityride a price request.
-                                  </p>
-                                ) : (
-                                  <p className="invalid">
-                                    Booking cannot be instantly confirmed for
-                                    these dates. Send Cityride a booking
-                                    request.
-                                  </p>
-                                )}
-                                <label className="ml-0">
-                                  I would like to be contact by:
-                                </label>
-                                {showContactInfoError ? (
-                                  <p>{showContactInfoError}</p>
-                                ) : null}
-                                <div className="mycheck border-top-0 pt-0">
-                                  <div className="checks">
-                                    <input
-                                      type="checkbox"
-                                      // checked={contactByEmail}
-                                      // value={values.flag}
-                                      id="checkboxG1"
-                                      name="checkboxG1"
-                                      className="css-checkbox"
-                                      onChange={handleContactCheck}
-                                    />
-                                    <label
-                                      htmlFor="checkboxG1"
-                                      className="css-label ml-0"
-                                    >
-                                      Email to{' '}
-                                    </label>
-                                    <input
-                                      type="email"
-                                      className="form-control"
-                                      id="email"
-                                      name="contact_email"
-                                      onChange={handleInputValue}
-                                    />
                                   </div>
-                                  <div className="checks">
-                                    <input
-                                      type="checkbox"
-                                      name="checkboxG2"
-                                      id="checkboxG2"
-                                      className="css-checkbox"
-                                      onChange={handleContactCheck}
-                                    />
-                                    <label
-                                      htmlFor="checkboxG2"
-                                      className="css-label"
-                                    >
-                                      WhatsApp to{' '}
-                                    </label>
-                                    <input
-                                      type="tel"
+                                  <div className="form-group col-md-4">
+                                    <label>Expiration Date</label>
+                                    <Field
+                                      type="date"
+                                      // min={new Date()}
+                                      max="2050-02-20"
                                       className="form-control"
-                                      id="whatsapp"
-                                      name="wa_number"
-                                      onChange={handleInputValue}
+                                      id="prev_dates"
+                                      name="exp_date"
                                     />
+
+                                    {errors.exp_date && touched.exp_date ? (
+                                      <div className="errorMsg">
+                                        {errors.exp_date}
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                  <div className="form-group col-md-4">
+                                    <label>CVV</label>
+                                    <Field
+                                      type="text"
+                                      name="cvv"
+                                      className="form-control"
+                                    />
+
+                                    {errors.cvv && touched.cvv ? (
+                                      <div className="errorMsg">
+                                        {errors.cvv}
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                  <div className="form-group col-md-12">
+                                    <p>
+                                      Amount:{' '}
+                                      <b className="black">00.00 USD </b>
+                                    </p>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           ) : null}
-                          <div className="form-group col-md-12">
-                            <div className="mycheck">
-                              <input
-                                type="checkbox"
-                                name="checkboxG3"
-                                id="checkboxG3"
-                                className="css-checkbox"
-                              />
-                              <label
-                                htmlFor="checkboxG3"
-                                className="css-label blue text-decoration-underline ml-0"
-                              >
-                                Confirm terms and conditions
-                              </label>
-                              <input
-                                type="checkbox"
-                                name="checkboxG4"
-                                id="checkboxG4"
-                                className="css-checkbox"
-                              />
-                              <label htmlFor="checkboxG4" className="css-label">
-                                I wish to receive promotional content
-                              </label>
+                          <div className="form-row">
+                            {!showPaymentArea ? (
+                              <div className="form-group col-md-12">
+                                <div className="bookingnotvalid">
+                                  {status3PriceError == 3 ? (
+                                    <p className="invalid">
+                                      The price is not valid for your selected
+                                      address. Send Cityride a price request.
+                                    </p>
+                                  ) : (
+                                    <p className="invalid">
+                                      Booking cannot be instantly confirmed for
+                                      these dates. Send Cityride a booking
+                                      request.
+                                    </p>
+                                  )}
+                                  <label className="ml-0">
+                                    I would like to be contact by:
+                                  </label>
+                                  {showContactInfoError ? (
+                                    <p>{showContactInfoError}</p>
+                                  ) : null}
+                                  <div className="mycheck border-top-0 pt-0">
+                                    <div className="checks">
+                                      <input
+                                        type="checkbox"
+                                        // checked={contactByEmail}
+                                        // value={values.flag}
+                                        id="checkboxG1"
+                                        name="checkboxG1"
+                                        className="css-checkbox"
+                                        onChange={handleContactCheck}
+                                      />
+                                      <label
+                                        htmlFor="checkboxG1"
+                                        className="css-label ml-0"
+                                      >
+                                        Email to{' '}
+                                      </label>
+                                      <input
+                                        type="email"
+                                        className="form-control"
+                                        id="email"
+                                        name="contact_email"
+                                        onChange={handleInputValue}
+                                      />
+                                    </div>
+                                    <div className="checks">
+                                      <input
+                                        type="checkbox"
+                                        name="checkboxG2"
+                                        id="checkboxG2"
+                                        className="css-checkbox"
+                                        onChange={handleContactCheck}
+                                      />
+                                      <label
+                                        htmlFor="checkboxG2"
+                                        className="css-label"
+                                      >
+                                        WhatsApp to{' '}
+                                      </label>
+                                      <input
+                                        type="tel"
+                                        className="form-control"
+                                        id="whatsapp"
+                                        name="wa_number"
+                                        onChange={handleInputValue}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : null}
+                            <div className="form-group col-md-12">
+                              {/* <div className="mycheck">
+                                <input
+                                  type="checkbox"
+                                  name="checkboxG3"
+                                  id="checkboxG3"
+                                  className="css-checkbox"
+                                />
+                                <label
+                                  htmlFor="checkboxG3"
+                                  className="css-label blue text-decoration-underline ml-0"
+                                >
+                                  Confirm terms and conditions
+                                </label>
+                                <input
+                                  type="checkbox"
+                                  name="checkboxG4"
+                                  id="checkboxG4"
+                                  className="css-checkbox"
+                                />
+                                <label
+                                  htmlFor="checkboxG4"
+                                  className="css-label"
+                                >
+                                  I wish to receive promotional content
+                                </label>
+                              </div> */}
                             </div>
                           </div>
-                        </div>
-                        {showDepartureTimeError ? (
-                          <div className="form-group text-center">
-                            <div className="errorMsg">
-                              {showDepartureTimeError}
+                          {showDepartureTimeError ? (
+                            <div className="form-group text-center">
+                              <div className="errorMsg">
+                                {showDepartureTimeError}
+                              </div>
                             </div>
-                          </div>
-                        ) : null}
+                          ) : null}
 
-                        <div className="form-group text-center">
-                          <button
-                            type="submit"
-                            // disabled={!_.isEmpty(errors)}
-                            // onClick={submitRequest}
-                            className="btn btnstyle4"
-                          >
-                            Continue
-                          </button>
-                        </div>
-                      </Form>
-                    )}
-                  </Formik>
+                          <div className="form-group text-center">
+                            <button
+                              type="submit"
+                              // disabled={!_.isEmpty(errors)}
+                              // onClick={submitRequest}
+                              className="btn btnstyle4"
+                            >
+                              Continue
+                            </button>
+                          </div>
+                        </Form>
+                      )}
+                    </Formik>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-      </div>
+          </section>
+        </div>
 
-      <Footer />
+        <Footer />
 
-      {showReservationIdModal ? (
-        <Modal
-          isOpen={showReservationIdModal}
-          onAfterOpen={afterOpenModal}
-          onRequestClose={closeModal}
-          style={customStyles}
-          contentLabel="Reservation"
-          shouldCloseOnOverlayClick={true}
-        >
-          <h2 ref={_subtitle => (subtitle = _subtitle)}>
-            Reservation ID: {res_ID}
-          </h2>
-          {/* <h4></h4> */}
-        </Modal>
-      ) : null}
-
-      {modalIsOpen ? (
-        <div className="selectcarslider">
+        {showReservationIdModal ? (
           <Modal
-            isOpen={modalIsOpen}
+            isOpen={showReservationIdModal}
             onAfterOpen={afterOpenModal}
             onRequestClose={closeModal}
             style={customStyles}
-            contentLabel="Vehicles"
-            shouldCloseOnOverlayClick={false}
+            contentLabel="Reservation"
+            shouldCloseOnOverlayClick={true}
           >
-            <h2 ref={_subtitle => (subtitle = _subtitle)}>Select Vehicle</h2>
+            <h2 ref={_subtitle => (subtitle = _subtitle)}>
+              Reservation ID: {res_ID}
+            </h2>
+            {/* <h4></h4> */}
+          </Modal>
+        ) : null}
 
-            <div className="row">
-              <div className="col-md-12">
-                {differentVehicles && differentVehicles.length > 0 ? (
-                  <div className="owl-carousel owl-theme carslider">
-                    {/* {'aaaaaaaaaaaaaaaaaaaaaaaaaa'} */}
-                    {differentVehicles && differentVehicles.length > 0
-                      ? differentVehicles.map(item => (
-                          <div className="item">
-                            <div className="carbox">
-                              <div className="bluebg" />
-                              <img src={car1Img} alt="cars" />
-                              <div className="choosedesc">
-                                <h4>{item.vehicle_name}</h4>
-                                <p className="grey">
-                                  Max Passengers:{' '}
-                                  <span className="blue">{item.max_pax}</span>
-                                </p>
-                                <p className="grey">
-                                  Max Luggage:{' '}
-                                  <span className="blue">
-                                    {item.max_luggage}
-                                  </span>
-                                </p>
-                                <p className="grey">
-                                  CXL Deadline:{' '}
-                                  <span className="blue">{item.cxl_days}</span>
-                                </p>
-                              </div>
-                              <div>
-                                {/* <div className="selecttrip">
+        {modalIsOpen ? (
+          <div className="">
+            <Modal
+              isOpen={modalIsOpen}
+              onAfterOpen={afterOpenModal}
+              onRequestClose={closeModal}
+              style={customStyles}
+              contentLabel="Vehicles"
+              shouldCloseOnOverlayClick={false}
+            >
+              <h2
+                ref={_subtitle => (subtitle = _subtitle)}
+                className="text-center"
+              >
+                Select Vehicle
+              </h2>
+
+              <div className="row selectcarslider">
+                <div className="col-md-12">
+                  {differentVehicles && differentVehicles.length > 0 ? (
+                    <div className="owl-carousel owl-theme carslider">
+                      {/* {'aaaaaaaaaaaaaaaaaaaaaaaaaa'} */}
+                      {differentVehicles && differentVehicles.length > 0
+                        ? differentVehicles.map(item => (
+                            <div className="item">
+                              <div className="carbox">
+                                <div className="bluebg" />
+                                <img src={car1Img} alt="cars" />
+                                <div className="choosedesc">
+                                  <h4>{item.vehicle_name}</h4>
+                                  <p className="grey">
+                                    Max Passengers:{' '}
+                                    <span className="blue">{item.max_pax}</span>
+                                  </p>
+                                  <p className="grey">
+                                    Max Luggage:{' '}
+                                    <span className="blue">
+                                      {item.max_luggage}
+                                    </span>
+                                  </p>
+                                  <p className="grey">
+                                    CXL Deadline:{' '}
+                                    <span className="blue">
+                                      {item.cxl_days}
+                                    </span>
+                                  </p>
+                                </div>
+                                <div>
+                                  {/* <div className="selecttrip">
                                   
                                   <label className="radiowrap">
                                     Round Trip{' '}
@@ -3816,30 +3867,31 @@ const Booking = () => {
                                     <span className="checkmark" />
                                   </label>
                                 </div> */}
-                                <div className="booknow">
-                                  <button
-                                    type="button"
-                                    name="button"
-                                    className="btn btnstyle4 btn-block "
-                                    onClick={() => saveNewVehicle(item)}
-                                  >
-                                    Book Now
-                                  </button>
+                                  <div className="booknow">
+                                    <button
+                                      type="button"
+                                      name="button"
+                                      className="btn btnstyle4 btn-block "
+                                      onClick={() => saveNewVehicle(item)}
+                                    >
+                                      Book Now
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))
-                      : null}
-                  </div>
-                ) : (
-                  'null'
-                )}
+                          ))
+                        : null}
+                    </div>
+                  ) : (
+                    'null'
+                  )}
+                </div>
               </div>
-            </div>
-          </Modal>
-        </div>
-      ) : null}
+            </Modal>
+          </div>
+        ) : null}
+      </LoadingOverlay>
     </div>
   );
 };

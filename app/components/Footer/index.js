@@ -8,8 +8,7 @@ import React, { useState, useEffect } from 'react';
 // import PropTypes from 'prop-types';
 // import styled from 'styled-components';
 import logoImage from '../../assets/images/logo.png';
-// import { FormattedMessage } from 'react-intl';
-// import messages from './messages';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const [showThis, handleShowThis] = useState(1);
@@ -25,27 +24,27 @@ const Footer = () => {
           <div className="footerwrap">
             <ul>
               <li>
-                <a href="#">Why Cityride</a>
+                <Link to="/">Why Cityride</Link>
               </li>
               <li>
-                <a href="#">Our Drivers</a>
+                <Link to="/">Our Drivers</Link>
               </li>
               <li>
-                <a href="#">About Us</a>
+                <Link to="/about">About Us</Link>
               </li>
               <li>
-                <a href="#">
+                <Link to="/">
                   <img src={logoImage} alt />
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#">FAQ</a>
+                <Link to="/faq">FAQ</Link>
               </li>
               <li>
-                <a href="#">Terms of use.</a>
+                <Link to="/terms-and-conditions">Terms of use.</Link>
               </li>
               <li>
-                <a href="#">Contact</a>
+                <Link to="/contact">Contact</Link>
               </li>
             </ul>
           </div>

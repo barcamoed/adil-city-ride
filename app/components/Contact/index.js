@@ -5,13 +5,10 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-// import PropTypes from 'prop-types';
-// import styled from 'styled-components';
+
 import Header from '../Header';
 import Footer from '../Footer';
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
-import whatsappImg from '../../assets/images/whatsapp.png';
+
 import { Formik, Form, Field, useField } from 'formik';
 import { ContactUsSchema } from '../Login/schema';
 import { IDENTIFIER, GET_CONTACT_US_KEY } from '../../utils/constants';
@@ -97,13 +94,7 @@ const Contact = () => {
         <section className="onlywhatsapp">
           <div className="container ">
             <div className="row">
-              <div className="col-md-12">
-                <div className="contact">
-                  <a href="#" className="btn btnstyle1">
-                    <img src={whatsappImg} alt="img-fluid" /> Contact Us
-                  </a>
-                </div>
-              </div>
+              <div className="col-md-12" />
             </div>
           </div>
         </section>
