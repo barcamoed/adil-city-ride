@@ -6,13 +6,14 @@
 
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
+import LoadingOverlay from 'react-loading-overlay';
+import HashLoader from 'react-spinners/HashLoader';
 import {
   IDENTIFIER,
   GET_AFFILIATE_ADMIN_VIEW_KEY,
 } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 import AdminHeader from '../AdminHeader';
-import LoadingOverlay from 'react-loading-overlay';
 
 function AdminBookings(props) {
   const [allBookings, setAllBookings] = useState({});
@@ -59,7 +60,7 @@ function AdminBookings(props) {
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
       };
-      let formData = new FormData();
+      const formData = new FormData();
       formData.append(`command`, 'get_affiliate_admin_view');
       formData.append(`identifier`, IDENTIFIER);
       formData.append(`key`, GET_AFFILIATE_ADMIN_VIEW_KEY());
@@ -105,7 +106,7 @@ function AdminBookings(props) {
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
     };
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append(`command`, 'get_affiliate_admin_view');
     formData.append(`identifier`, IDENTIFIER);
     formData.append(`key`, GET_AFFILIATE_ADMIN_VIEW_KEY());
@@ -178,7 +179,7 @@ function AdminBookings(props) {
         }}
         active={isActive}
         spinner
-        text="Loading..."
+        spinner={<HashLoader />}
       >
         <AdminHeader props={props} />
 

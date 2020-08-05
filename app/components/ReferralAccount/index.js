@@ -108,9 +108,10 @@ function ReferralAccount(props) {
                   {/* Nav tabs */}
                   <ul className="nav nav-tabs customtab" role="tablist">
                     <li className="nav-item w-100 text-center">
-                      <a className="nav-link">
-                        <span className="order-txt">Your Account</span>
-                      </a>
+                      <Link to="./" className="nav-link">
+                        <i className="fas fa-long-arrow-alt-left fa-2x" />{' '}
+                        <span className="order-txt"> Your Account</span>
+                      </Link>
                     </li>
                   </ul>
                   <div className="tab-content">
@@ -127,7 +128,7 @@ function ReferralAccount(props) {
                                 Referral your Account
                               </h3>
                               <p className="text-muted m-b-30 font-13">
-                                You will get 20% of every bid
+                                You will get {userData.commission} of every bid
                               </p>
                               <div className="row">
                                 <div className="col-sm-12 col-xs-12">
@@ -140,7 +141,7 @@ function ReferralAccount(props) {
                                         id="exampleInputEmail1"
                                         placeholder="Enter Username"
                                         value={userData.name}
-                                        readOnly={true}
+                                        readOnly
                                       />
                                     </div>
                                     <div className="form-group">
@@ -151,17 +152,17 @@ function ReferralAccount(props) {
                                         id="exampleInputEmail1"
                                         placeholder="Enter email"
                                         value={userData.email}
-                                        readOnly={true}
+                                        readOnly
                                       />
                                     </div>
                                     <div className="form-group">
-                                      <label>20%</label>
+                                      <label>Commision</label>
                                       <input
                                         type="text"
                                         className="form-control"
                                         id="exampleInputPassword1"
                                         value={userData.commission}
-                                        readOnly={true}
+                                        readOnly
                                       />
                                     </div>
                                     {/* <div className="form-group">

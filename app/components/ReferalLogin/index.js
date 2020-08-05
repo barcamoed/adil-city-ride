@@ -9,15 +9,16 @@ import React, { useState, useEffect } from 'react';
 // import styled from 'styled-components';
 // import '../../assets/css/dashboard.css';
 // import '../../assets/css/dashboardcore.css';
-import LogoImg from '../../assets/images/logo.png';
 import { Formik, Form, Field } from 'formik';
+import HashLoader from 'react-spinners/HashLoader';
+import LoadingOverlay from 'react-loading-overlay';
+import LogoImg from '../../assets/images/logo.png';
 import { LoginShema } from '../Login/schema';
 import {
   IDENTIFIER,
   GET_AFFILIATE_USER_LOGIN_KEY,
 } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
-import LoadingOverlay from 'react-loading-overlay';
 
 function ReferalLogin(props) {
   const [credentialError, setError] = useState('');
@@ -33,8 +34,8 @@ function ReferalLogin(props) {
       'Content-type': 'application/x-www-form-urlencoded',
     };
 
-    let formData = new FormData();
-    let data = {
+    const formData = new FormData();
+    const data = {
       command: 'affiliate_user_login',
       identifier: IDENTIFIER,
       key: GET_AFFILIATE_USER_LOGIN_KEY(),
@@ -44,7 +45,7 @@ function ReferalLogin(props) {
       },
     };
 
-    for (let dataKey in data) {
+    for (const dataKey in data) {
       if (dataKey == 'command') {
         formData.append(`command`, 'affiliate_user_login');
       } else if (dataKey == 'identifier') {
@@ -54,7 +55,7 @@ function ReferalLogin(props) {
       }
       if (dataKey === 'data') {
         // append nested object
-        for (let previewKey in data[dataKey]) {
+        for (const previewKey in data[dataKey]) {
           if (previewKey == 'email') {
             formData.append(`data[${previewKey}]`, values.email);
           } else if (previewKey == 'password') {
@@ -88,7 +89,7 @@ function ReferalLogin(props) {
 
   return (
     <div>
-      <LoadingOverlay active={isActive} spinner text="Loading...">
+      <LoadingOverlay active={isActive} spinner spinner={<HashLoader />}>
         <section className="admin-login">
           <div className="container-fluid p-0">
             <div className="row align-items-center">

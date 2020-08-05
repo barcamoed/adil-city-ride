@@ -172,6 +172,7 @@ a{
     z-index: 999;
     width: 100%;
     padding-top: 10px;
+    background: linear-gradient(to bottom,#f8f8f8 0,#ccc 100%);
     .logo img{
       width: 100px;
     }
@@ -179,7 +180,7 @@ a{
       background-color: transparent !important;
     }
     .navbar-light .navbar-nav .nav-link{
-      color: $lightwhite;
+      color: $blue;
       margin-left: 50px;
       font-size: 12px;
       padding-top: 11px;

@@ -222,7 +222,7 @@ body *{
     color: #000;
 }
 #main-wrapper .dark-logo {
-    width: 60px;
+    width: 150px;
 }
 ul#sidebarnav li img {
     width: 15px;
@@ -1936,7 +1936,6 @@ li.nav-item.search-customer button {
 
 .topbar .top-navbar .navbar-header .navbar-brand {
 
-    background: rgba(60, 132, 187, 0.76);
     width: 100%;
 }
 
@@ -1968,10 +1967,10 @@ li.nav-item.search-customer button {
         display: none;
     }
     .mobile-logo {
-        width: 50px;
+        width: 90px;
         display: block;
         position: relative;
-        top: 0;
+        top: 10px;
     }
     .sidebartoggler{
         display: block;
@@ -2136,6 +2135,7 @@ li.nav-item.search-customer button {
     }
     .my-toggle i.ti-close {
         color: rgba(0, 0, 0, 0.8);
+        margin-left: 20px;
     }
     .filters h3{
         margin-bottom: 20px !important;

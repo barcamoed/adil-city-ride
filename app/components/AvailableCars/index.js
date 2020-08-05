@@ -7,13 +7,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Route, withRouter } from 'react-router-dom';
 import Modal from 'react-modal';
+import LoadingOverlay from 'react-loading-overlay';
+import { Router, browserHistory } from 'react-router';
+import HashLoader from 'react-spinners/HashLoader';
 import car1Img from '../../assets/images/car1.png';
 import { IDENTIFIER, GETVEHICLESKEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 import ReactGMap from '../ReactGMap/index';
-import LoadingOverlay from 'react-loading-overlay';
 import messages from './messages';
-import { Router, browserHistory } from 'react-router';
 
 Modal.setAppElement('#app'); // For Modal used below
 const customStyles = {
@@ -29,23 +30,23 @@ const customStyles = {
 };
 
 const AvailableCars = props => {
-  var subtitle;
+  let subtitle;
   const [modalIsOpen, setIsOpen] = useState(false);
   const [ap_iata, setAp_iata] = useState(null);
-  var [availableCars, setAvailableCars] = useState([]);
-  var [noResultVehicles, setNoResultFound] = useState('');
-  var [roundTrip, setRoundTrip] = useState(null);
-  var [oneWayTrip, setOneWayTrip] = useState(null);
-  var [selectTripTypeError, setSelectTripTypeError] = useState(null);
-  var [myObj, setMyObj] = useState({});
-  var [vehiclesCount, setVehiclesCount] = useState('');
+  const [availableCars, setAvailableCars] = useState([]);
+  const [noResultVehicles, setNoResultFound] = useState('');
+  const [roundTrip, setRoundTrip] = useState(null);
+  const [oneWayTrip, setOneWayTrip] = useState(null);
+  const [selectTripTypeError, setSelectTripTypeError] = useState(null);
+  const [myObj, setMyObj] = useState({});
+  const [vehiclesCount, setVehiclesCount] = useState('');
   const [isActive, setLodaerIsActive] = useState(false);
 
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     // Update the document title using the browser API
-    let unmounted = false;
-    var i = 0;
+    const unmounted = false;
+    let i = 0;
     const airports = JSON.parse(localStorage.getItem('CityAirports'));
     for (i = 0; i < airports.length; i++) {
       if (airports[i].ap_name == props.myData.From) {
@@ -53,7 +54,7 @@ const AvailableCars = props => {
       }
     }
 
-    var myData1 = props.myData;
+    const myData1 = props.myData;
     myData1.ap_iata = ap_iata;
     setMyObj(myData1);
     if (myObj.isAdvanced == false && myObj.switched == false) {
@@ -61,8 +62,8 @@ const AvailableCars = props => {
         'Content-type': 'application/x-www-form-urlencoded',
       };
 
-      let formData = new FormData();
-      let data = {
+      const formData = new FormData();
+      const data = {
         command: 'get_vehicles',
         identifier: IDENTIFIER,
         key: GETVEHICLESKEY(),
@@ -73,10 +74,10 @@ const AvailableCars = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             formData.append(`data[${previewKey}]`, data[dataKey][previewKey]);
           }
         } else {
@@ -113,8 +114,8 @@ const AvailableCars = props => {
         'Content-type': 'application/x-www-form-urlencoded',
       };
 
-      let formData = new FormData();
-      let data = {
+      const formData = new FormData();
+      const data = {
         command: 'get_vehicles',
         identifier: IDENTIFIER,
         key: GETVEHICLESKEY(),
@@ -125,10 +126,10 @@ const AvailableCars = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             formData.append(`data[${previewKey}]`, data[dataKey][previewKey]);
           }
         } else {
@@ -160,15 +161,16 @@ const AvailableCars = props => {
       //   'Switcheddddd and Advancedddddddddd In Available Cars Comp',
       //   myObj,
       // );
-      const destinationLatLng =
-        '(' + myObj.Destination.lat + ', ' + myObj.Destination.lng + ')';
+      const destinationLatLng = `(${myObj.Destination.lat}, ${
+        myObj.Destination.lng
+      })`;
       // console.log('myStructured Destination:', destinationLatLng);
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
       };
 
-      let formData = new FormData();
-      let data = {
+      const formData = new FormData();
+      const data = {
         command: 'get_vehicles',
         identifier: IDENTIFIER,
         key: GETVEHICLESKEY(),
@@ -180,10 +182,10 @@ const AvailableCars = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             formData.append(`data[${previewKey}]`, data[dataKey][previewKey]);
           }
         } else {
@@ -212,16 +214,17 @@ const AvailableCars = props => {
       });
     } else if (myObj.isAdvanced == true && myObj.switched == false) {
       // console.log('Advanceddddd....', myObj);
-      const destinationLatLng =
-        '(' + myObj.Destination.lat + ', ' + myObj.Destination.lng + ')';
+      const destinationLatLng = `(${myObj.Destination.lat}, ${
+        myObj.Destination.lng
+      })`;
       // console.log('myStructured Destination:', destinationLatLng);
 
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
       };
 
-      let formData = new FormData();
-      let data = {
+      const formData = new FormData();
+      const data = {
         command: 'get_vehicles',
         identifier: IDENTIFIER,
         key: GETVEHICLESKEY(),
@@ -233,10 +236,10 @@ const AvailableCars = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             formData.append(`data[${previewKey}]`, data[dataKey][previewKey]);
           }
         } else {
@@ -317,13 +320,13 @@ const AvailableCars = props => {
   ) => {
     const route = 'rt';
     const vehicleObj = {
-      vehicle_id: vehicle_id,
-      route: route,
+      vehicle_id,
+      route,
       price: priceVal,
-      currency: currency,
+      currency,
       seconds_before_pick: sec_bef_pick,
-      max_pax: max_pax,
-      release_hours: release_hours,
+      max_pax,
+      release_hours,
     };
     if (oneWayTrip) {
       setOneWayTrip(null);
@@ -343,13 +346,13 @@ const AvailableCars = props => {
   ) => {
     const route = 'ow';
     const vehicleObj = {
-      vehicle_id: vehicle_id,
-      route: route,
+      vehicle_id,
+      route,
       price: priceVal,
-      currency: currency,
+      currency,
       seconds_before_pick: sec_bef_pick,
-      max_pax: max_pax,
-      release_hours: release_hours,
+      max_pax,
+      release_hours,
     };
 
     if (roundTrip) {
@@ -366,7 +369,7 @@ const AvailableCars = props => {
       const route = 'rt';
       const vehicleObj = {
         vehicle_id: item.vehicle_id,
-        route: route,
+        route,
         price: item.rt_price,
         currency: item.currency,
         seconds_before_pick: item.seconds_before_pick,
@@ -427,7 +430,7 @@ const AvailableCars = props => {
                       </p>
                     </div>
                     <div className="from">
-                      <i class="fas fa-plane-departure" />
+                      <i className="fas fa-plane-departure" />
                       <div className>
                         <label>From</label>
 
@@ -484,7 +487,7 @@ const AvailableCars = props => {
                         >
                           Map
                         </h2>
-                        {typeof props.myData.Destination == 'string' ? (
+                        {typeof props.myData.Destination === 'string' ? (
                           <ReactGMap
                             containerElement={
                               <div style={{ height: `100%`, width: '100%' }} />
@@ -644,7 +647,7 @@ const AvailableCars = props => {
                     }}
                     active={isActive}
                     spinner
-                    text="Loading..."
+                    spinner={<HashLoader />}
                   />
                 )}
               </div>

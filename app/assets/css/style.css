@@ -84,10 +84,8 @@ a {
 
 .btn {
   -webkit-transform: translateY(0px);
-  -ms-transform: translateY(0px);
   transform: translateY(0px);
   -webkit-transition: all 0.5s ease 0s;
-  -o-transition: all 0.5s ease 0s;
   transition: all 0.5s ease 0s;
 }
 
@@ -105,10 +103,8 @@ a {
 .btnstyle1:hover {
   color: #fff;
   -webkit-transition: 0.3s;
-  -o-transition: 0.3s;
   transition: 0.3s;
   -webkit-transform: translateY(-5px);
-  -ms-transform: translateY(-5px);
   transform: translateY(-5px);
 }
 
@@ -123,10 +119,8 @@ a {
 
 .btnstyle2:hover {
   -webkit-transition: 0.3s;
-  -o-transition: 0.3s;
   transition: 0.3s;
   -webkit-transform: translateY(-5px);
-  -ms-transform: translateY(-5px);
   transform: translateY(-5px);
 }
 
@@ -143,10 +137,8 @@ a {
 
 .btnstyle3:hover {
   -webkit-transition: 0.3s;
-  -o-transition: 0.3s;
   transition: 0.3s;
   -webkit-transform: translateY(-5px);
-  -ms-transform: translateY(-5px);
   transform: translateY(-5px);
 }
 
@@ -161,10 +153,8 @@ a {
 
 .btnstyle4:hover {
   -webkit-transition: 0.3s;
-  -o-transition: 0.3s;
   transition: 0.3s;
   -webkit-transform: translateY(-5px);
-  -ms-transform: translateY(-5px);
   transform: translateY(-5px);
 }
 
@@ -178,6 +168,8 @@ a {
   z-index: 999;
   width: 100%;
   padding-top: 10px;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #f8f8f8), to(#ccc));
+  background: linear-gradient(to bottom, #f8f8f8 0, #ccc 100%);
 }
 
 .site-header .logo img {
@@ -189,7 +181,7 @@ a {
 }
 
 .site-header .navbar-light .navbar-nav .nav-link {
-  color: #f4f7f8;
+  color: #3C84BB;
   margin-left: 50px;
   font-size: 12px;
   padding-top: 11px;
@@ -203,19 +195,15 @@ a {
   font-size: 14px;
   font-weight: 500;
   -webkit-transform: translateY(0px);
-  -ms-transform: translateY(0px);
   transform: translateY(0px);
   -webkit-transition: all 0.5s ease 0s;
-  -o-transition: all 0.5s ease 0s;
   transition: all 0.5s ease 0s;
 }
 
 .site-header .navbar-light .navbar-nav .btn-order a:hover {
   -webkit-transition: 0.3s;
-  -o-transition: 0.3s;
   transition: 0.3s;
   -webkit-transform: translateY(-5px);
-  -ms-transform: translateY(-5px);
   transform: translateY(-5px);
 }
 
@@ -245,7 +233,6 @@ a {
   z-index: 999;
   background: #fff;
   -webkit-transition: 0.5s ease all;
-  -o-transition: 0.5s ease all;
   transition: 0.5s ease all;
   -webkit-animation: slide-down 0.5s;
   animation: slide-down 0.5s;
@@ -789,7 +776,6 @@ footer li img {
   -webkit-box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.11);
   box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.11);
   -webkit-transition: all 500ms ease;
-  -o-transition: all 500ms ease;
   transition: all 500ms ease;
   cursor: pointer;
 }
@@ -811,7 +797,6 @@ footer li img {
 .cityairport .card .card-body {
   padding: 2.25rem;
   -webkit-transition: all 500ms ease;
-  -o-transition: all 500ms ease;
   transition: all 500ms ease;
   position: relative;
   z-index: 1;
@@ -825,7 +810,6 @@ footer li img {
   width: 0px;
   height: 100%;
   -webkit-transition: all 1s ease;
-  -o-transition: all 1s ease;
   transition: all 1s ease;
   z-index: -1;
   background: #3C84BB;
@@ -938,7 +922,6 @@ footer li img {
   cursor: pointer;
   pointer-events: none;
   -webkit-transition: .25s all ease;
-  -o-transition: .25s all ease;
   transition: .25s all ease;
   height: 100%;
   background-image: url(../images/downanglew.png);
@@ -1316,20 +1299,16 @@ footer li img {
 
 .accordion .card-header[aria-expanded="false"] img {
   -webkit-transform: rotate(0deg);
-  -ms-transform: rotate(0deg);
   transform: rotate(0deg);
   -webkit-transition: all 0.3s ease-in;
-  -o-transition: all 0.3s ease-in;
   transition: all 0.3s ease-in;
 }
 
 .accordion .card-header[aria-expanded="true"] img {
   -webkit-transform: rotate(180deg);
-  -ms-transform: rotate(180deg);
   transform: rotate(180deg);
   -webkit-transition: -webkit-transform 0.3s ease-in;
   transition: -webkit-transform 0.3s ease-in;
-  -o-transition: transform 0.3s ease-in;
   transition: transform 0.3s ease-in;
   transition: transform 0.3s ease-in, -webkit-transform 0.3s ease-in;
 }
@@ -1513,11 +1492,6 @@ footer li img {
 }
 
 ::-webkit-input-placeholder {
-  font-size: 18px;
-  color: #595959;
-}
-
-::-moz-placeholder {
   font-size: 18px;
   color: #595959;
 }
@@ -1822,8 +1796,12 @@ footer li img {
 
 .bookingform .backbtn {
   padding: 8px 15px;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
 }
 
 .bookingform .backbtn img {
@@ -1831,8 +1809,12 @@ footer li img {
 }
 
 .bookingform .selectwrap {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   margin-top: 15px;
 }
 
@@ -1856,7 +1838,9 @@ footer li img {
 }
 
 .bookingform .form-row {
-  justify-content: space-between;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
 }
 
 .bookingform p {
@@ -1890,7 +1874,9 @@ footer li img {
 }
 
 .selectwrap.subfield {
-  justify-content: space-between;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
   margin: 10px 15px 5px 0;
   padding: 10px 0 0 0;
   border-top: 1px solid #ccc;
@@ -1994,6 +1980,8 @@ input[type=checkbox].css-checkbox + label.css-label {
   vertical-align: middle;
   cursor: pointer;
   margin-left: 55px;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
   display: inline-flex;
 }
 
@@ -2005,7 +1993,6 @@ label.css-label {
   background-image: url(../../assets/images/checkbox.png);
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
@@ -2018,8 +2005,12 @@ label.css-label {
 }
 
 .mycheck .checks {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   float: left;
 }
 
@@ -2247,7 +2238,8 @@ label.css-label {
     padding: 20px 25px;
   }
   .search .input-group {
-    box-shadow: none;
+    -webkit-box-shadow: none;
+            box-shadow: none;
   }
   .search .input-group select {
     width: 100%;
@@ -2467,3 +2459,4 @@ label.css-label {
     top: auto;
   }
 }
+/*# sourceMappingURL=style.css.map */

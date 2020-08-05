@@ -9,8 +9,9 @@ import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 
 import { useCookies } from 'react-cookie';
-import arrowrightImg from '../../assets/images/arrowright.png';
 import LoadingOverlay from 'react-loading-overlay';
+import HashLoader from 'react-spinners/HashLoader';
+import arrowrightImg from '../../assets/images/arrowright.png';
 import { IDENTIFIER, GETKEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 
@@ -18,13 +19,13 @@ const ChooseDestination = (props, { prop }) => {
   const [cookies, setCookie, removeCookie] = useCookies(['cookie_days']);
   const [isActive, setIsActive] = useState(false);
 
-  var aloop = [];
+  const aloop = [];
   const [myloop, setArray] = useState(aloop);
-  var newAirportsArray = [];
+  const newAirportsArray = [];
   function customJS() {
     $(window).scroll(function() {
-      let sticky = $('#site-header');
-      var scroll = $(window).scrollTop();
+      const sticky = $('#site-header');
+      const scroll = $(window).scrollTop();
       if (scroll >= 400) sticky.addClass('sticky');
       else sticky.removeClass('sticky');
     });
@@ -138,7 +139,7 @@ const ChooseDestination = (props, { prop }) => {
     // console.log('COOKIEEEEE', cookies);
     if (
       props.prop.match.params.id &&
-      props.prop.match.url == '/ref/' + props.prop.match.params.id
+      props.prop.match.url == `/ref/${props.prop.match.params.id}`
     ) {
       // console.log(
       //   'Dateeeeeeeeeee',
@@ -172,11 +173,11 @@ const ChooseDestination = (props, { prop }) => {
             ),
           });
 
-          var i = 0;
+          let i = 0;
           for (var j = 0; j < data.cities.length; ) {
-            data['cities'][j]['airports'].forEach(element => {
+            data.cities[j].airports.forEach(element => {
               newAirportsArray[i] = element;
-              newAirportsArray[i].city = data['cities'][j]['city'];
+              newAirportsArray[i].city = data.cities[j].city;
               i++;
             });
             j++;
@@ -204,11 +205,11 @@ const ChooseDestination = (props, { prop }) => {
         setIsActive(true);
         postRequest(params, headers).then(data => {
           console.log('City Data mmm nnn kkk lll:', data.cities.length);
-          var i = 0;
+          let i = 0;
           for (var j = 0; j < data.cities.length; ) {
-            data['cities'][j]['airports'].forEach(element => {
+            data.cities[j].airports.forEach(element => {
               newAirportsArray[i] = element;
-              newAirportsArray[i].city = data['cities'][j]['city'];
+              newAirportsArray[i].city = data.cities[j].city;
               i++;
             });
             j++;
@@ -228,7 +229,7 @@ const ChooseDestination = (props, { prop }) => {
         //   'AP Request Time LocalStorage:',
         //   JSON.parse(localStorage.getItem('CityAirports')),
         // );
-        var hours =
+        const hours =
           Math.abs(
             new Date(JSON.parse(localStorage.getItem('apRequestTime'))) -
               new Date(),
@@ -237,14 +238,14 @@ const ChooseDestination = (props, { prop }) => {
         if (hours > 2) {
           setIsActive(true);
           postRequest(params, headers).then(data => {
-            var i = 0;
+            let i = 0;
             console.log('City Data abc def ghi:', data.cities.length);
             for (var j = 0; j < data.cities.length; ) {
               console.log('City Dataa');
-              data['cities'][j]['airports'].forEach(element => {
+              data.cities[j].airports.forEach(element => {
                 // console.log('elementMMMM', element);
                 newAirportsArray[i] = element;
-                newAirportsArray[i].city = data['cities'][j]['city'];
+                newAirportsArray[i].city = data.cities[j].city;
                 i++;
               });
               j++;
@@ -268,7 +269,7 @@ const ChooseDestination = (props, { prop }) => {
   }, []);
 
   async function localStorageData() {
-    let CityAirports = JSON.parse(localStorage.getItem('CityAirports'));
+    const CityAirports = JSON.parse(localStorage.getItem('CityAirports'));
     // console.log(
     //   'LocalStorage inside async Func',
     //   JSON.parse(localStorage.getItem('CityAirports')),
@@ -277,10 +278,10 @@ const ChooseDestination = (props, { prop }) => {
     customJS();
   }
 
-  var innerLoopStart = 0;
-  var loopLength = myloop.length;
+  let innerLoopStart = 0;
+  const loopLength = myloop.length;
   const outerLoopLimit = Math.ceil(loopLength / 8);
-  var innerLoopEnd = 8;
+  let innerLoopEnd = 8;
   const onAirportClick = (searchField, passengers) => {
     // console.log('Airport Clicked', searchField, passengers);
     // console.log('Chose Desination Props', props);
@@ -300,55 +301,40 @@ const ChooseDestination = (props, { prop }) => {
             <div className="col-md-12">
               <div className="owl-carousel owl-theme chooseslider choosedesktopslider">
                 {myloop && myloop.length > 0 ? (
-                  myloop.slice(0, outerLoopLimit).map((item1, key1) => {
-                    return (
-                      <div className="item">
-                        <span class="d-none">
-                          {loopLength - innerLoopStart < 8
-                            ? (innerLoopEnd = loopLength)
-                            : (innerLoopEnd = innerLoopStart + 8)}
-                        </span>
-                        {myloop
-                          .slice(innerLoopStart, innerLoopEnd)
-                          .map((airport, key) => {
-                            return (
-                              <a
-                                onClick={() =>
-                                  onAirportClick(airport.city, '2')
-                                }
-                              >
-                                <div className="choosebox">
+                  myloop.slice(0, outerLoopLimit).map((item1, key1) => (
+                    <div className="item">
+                      <span className="d-none">
+                        {loopLength - innerLoopStart < 8
+                          ? (innerLoopEnd = loopLength)
+                          : (innerLoopEnd = innerLoopStart + 8)}
+                      </span>
+                      {myloop
+                        .slice(innerLoopStart, innerLoopEnd)
+                        .map((airport, key) => (
+                          <a onClick={() => onAirportClick(airport.city, '2')}>
+                            <div className="choosebox">
+                              <img src={airport.ap_image} alt="Destintation" />
+                              <div className="choosedesc">
+                                <p className="cityname">{airport.ap_iata}</p>
+                                <h3>{airport.ap_name} </h3>
+                                <div className="d-flex align-items-center justify-content-between">
+                                  <p className="state">{airport.city}</p>
                                   <img
-                                    src={airport.ap_image}
-                                    alt="Destintation"
+                                    src={arrowrightImg}
+                                    className="arrowright"
+                                    alt="arrow"
                                   />
-                                  <div className="choosedesc">
-                                    <p className="cityname">
-                                      {airport.ap_iata}
-                                    </p>
-                                    <h3>{airport.ap_name} </h3>
-                                    <div className="d-flex align-items-center justify-content-between">
-                                      <p className="state">{airport.city}</p>
-                                      <img
-                                        src={arrowrightImg}
-                                        className="arrowright"
-                                        alt="arrow"
-                                      />
-                                      {/* {key} */}
-                                    </div>
-                                  </div>
+                                  {/* {key} */}
                                 </div>
-                                <span class="d-none">
-                                  {key == 7
-                                    ? (innerLoopStart = innerLoopStart + 8)
-                                    : null}
-                                </span>
-                              </a>
-                            );
-                          })}
-                      </div>
-                    );
-                  })
+                              </div>
+                            </div>
+                            <span className="d-none">
+                              {key == 7 ? (innerLoopStart += 8) : null}
+                            </span>
+                          </a>
+                        ))}
+                    </div>
+                  ))
                 ) : (
                   <LoadingOverlay
                     styles={{
@@ -374,35 +360,33 @@ const ChooseDestination = (props, { prop }) => {
                     }}
                     active={isActive}
                     spinner
-                    text="Loading..."
+                    spinner={<HashLoader />}
                   />
                 )}
               </div>
               <div className="owl-carousel owl-theme chooseslider choosemobileslider">
                 {myloop && myloop.length > 0 ? (
-                  myloop.slice(0, loopLength).map((item, key) => {
-                    return (
-                      <div className="item">
-                        <a onClick={() => onAirportClick(airport.city, '2')}>
-                          <div className="choosebox">
-                            <img src={item.ap_image} alt="Destintation" />
-                            <div className="choosedesc">
-                              <p className="cityname">{item.ap_iata}</p>
-                              <h3>{item.ap_name}</h3>
-                              <div className="d-flex align-items-center justify-content-between">
-                                <p className="state">{item.city}</p>
-                                <img
-                                  src={arrowrightImg}
-                                  className="arrowright"
-                                  alt="arrow"
-                                />
-                              </div>
+                  myloop.slice(0, loopLength).map((item, key) => (
+                    <div className="item">
+                      <a onClick={() => onAirportClick(airport.city, '2')}>
+                        <div className="choosebox">
+                          <img src={item.ap_image} alt="Destintation" />
+                          <div className="choosedesc">
+                            <p className="cityname">{item.ap_iata}</p>
+                            <h3>{item.ap_name}</h3>
+                            <div className="d-flex align-items-center justify-content-between">
+                              <p className="state">{item.city}</p>
+                              <img
+                                src={arrowrightImg}
+                                className="arrowright"
+                                alt="arrow"
+                              />
                             </div>
                           </div>
-                        </a>
-                      </div>
-                    );
-                  })
+                        </div>
+                      </a>
+                    </div>
+                  ))
                 ) : (
                   <LoadingOverlay
                     styles={{
@@ -428,7 +412,7 @@ const ChooseDestination = (props, { prop }) => {
                     }}
                     active={isActive}
                     spinner
-                    text="Loading..."
+                    spinner={<HashLoader />}
                   />
                 )}
                 {/* <div className="item">

@@ -6,13 +6,13 @@
 
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
+import { Link } from 'react-router-dom';
+import LoadingOverlay from 'react-loading-overlay';
+import HashLoader from 'react-spinners/HashLoader';
 import { IDENTIFIER, GET_AFFILIATE_USER_VIEW_KEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 // import Logo from '../../assets/images/logo.png';
 import Logo from '../../assets/images/logo.svg';
-import { Link } from 'react-router-dom';
-
-import LoadingOverlay from 'react-loading-overlay';
 
 function ReferralStats(props) {
   const [allBookings, setAllBookings] = useState({});
@@ -54,7 +54,7 @@ function ReferralStats(props) {
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
       };
-      let formData = new FormData();
+      const formData = new FormData();
       formData.append(`command`, 'get_affiliate_user_view');
       formData.append(`identifier`, IDENTIFIER);
       formData.append(`key`, GET_AFFILIATE_USER_VIEW_KEY());
@@ -102,7 +102,7 @@ function ReferralStats(props) {
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
     };
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append(`command`, 'get_affiliate_user_view');
     formData.append(`identifier`, IDENTIFIER);
     formData.append(`key`, GET_AFFILIATE_USER_VIEW_KEY());
@@ -156,13 +156,12 @@ function ReferralStats(props) {
   return (
     <div>
       <div id="main-wrapper">
-        <LoadingOverlay active={isActive} spinner text="Loading...">
+        <LoadingOverlay active={isActive} spinner spinner={<HashLoader />}>
           <header className="topbar ">
             <nav className="navbar top-navbar navbar-expand-md navbar-light">
               <div className="navbar-header">
                 <a className="navbar-brand" href="./">
                   <b>
-                    <i className="wi wi-sunset" />
                     <img src={Logo} alt="logo" className="dark-logo" />
                     <img src={Logo} alt="logo" className="mobile-logo" />
                   </b>
@@ -238,10 +237,11 @@ function ReferralStats(props) {
                         className="btn btn-primary filter mr-3"
                         onClick={() =>
                           copyToClipBoard(
-                            'http://localhost:3000/ref/' +
+                            `http://localhost:3000/ref/${
                               JSON.parse(
                                 localStorage.getItem('ref_user_details'),
-                              ).id,
+                              ).id
+                            }`,
                           )
                         }
                       >
@@ -269,9 +269,9 @@ function ReferralStats(props) {
                         placeholder="Search"
                       />
 
-                      <label htmlFor>Select</label>
+                      <label htmlFor>Book Type</label>
                       <select
-                        className=""
+                        className="form-control filter-input"
                         onChange={e => setDateTypeFunc(e)}
                         value={dateType}
                       >

@@ -6,6 +6,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
+import LoadingOverlay from 'react-loading-overlay';
+import HashLoader from 'react-spinners/HashLoader';
 import { LoginShema } from '../Login/schema';
 import LogoImg from '../../assets/images/logo.png';
 import {
@@ -13,7 +15,6 @@ import {
   GET_AFFILIATE_USER_LOGIN_KEY,
 } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
-import LoadingOverlay from 'react-loading-overlay';
 const AdminLogin = props => {
   const [credentialError, setError] = useState('');
   const [isActive, setIsModalActive] = useState(false);
@@ -24,8 +25,8 @@ const AdminLogin = props => {
       'Content-type': 'application/x-www-form-urlencoded',
     };
 
-    let formData = new FormData();
-    let data = {
+    const formData = new FormData();
+    const data = {
       command: 'affiliate_user_login',
       identifier: IDENTIFIER,
       key: GET_AFFILIATE_USER_LOGIN_KEY(),
@@ -35,7 +36,7 @@ const AdminLogin = props => {
       },
     };
 
-    for (let dataKey in data) {
+    for (const dataKey in data) {
       if (dataKey == 'command') {
         formData.append(`command`, 'affiliate_user_login');
       } else if (dataKey == 'identifier') {
@@ -45,7 +46,7 @@ const AdminLogin = props => {
       }
       if (dataKey === 'data') {
         // append nested object
-        for (let previewKey in data[dataKey]) {
+        for (const previewKey in data[dataKey]) {
           if (previewKey == 'email') {
             formData.append(`data[${previewKey}]`, values.email);
           } else if (previewKey == 'password') {
@@ -91,7 +92,7 @@ const AdminLogin = props => {
           display: 'flex',
           'text-align': 'center',
           'font-size': '1.2em',
-          color: '#000',
+          color: '#3C84BB',
           background: 'rgba(0, 0, 0, 0)',
           zIndex: 800,
           // -webkit-transition: opacity 500ms ease-in;
@@ -101,7 +102,7 @@ const AdminLogin = props => {
       }}
       active={isActive}
       spinner
-      text="Loading..."
+      spinner={<HashLoader />}
     >
       <div>
         <section className="admin-login">
@@ -135,30 +136,31 @@ const AdminLogin = props => {
                                 <label>
                                   Username <span className="help" />
                                 </label>
-                                {errors.email && touched.email ? (
-                                  <div className="errorLogin">
-                                    {errors.email}
-                                  </div>
-                                ) : null}
 
                                 <Field
                                   type="text"
                                   name="email"
                                   className="form-control form-control-line"
                                 />
+                                {errors.email && touched.email ? (
+                                  <div className="errorMsg pl-0">
+                                    {errors.email}
+                                  </div>
+                                ) : null}
                                 <label>
                                   Password <span className="help" />
                                 </label>
-                                {errors.password && touched.password ? (
-                                  <div className="errorLogin">
-                                    {errors.password}
-                                  </div>
-                                ) : null}
+
                                 <Field
                                   type="password"
                                   name="password"
                                   className="form-control form-control-line"
                                 />
+                                {errors.password && touched.password ? (
+                                  <div className="errorMsg pl-0">
+                                    {errors.password}
+                                  </div>
+                                ) : null}
                                 {/* <div className="mt-2">
                                   {' '}
                                   <a href className="text-muted ">

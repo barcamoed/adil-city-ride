@@ -8,18 +8,18 @@ import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 // import PropTypes from 'prop-types';
 // import styled from 'styled-components';
+import { FormattedMessage } from 'react-intl';
 import logoImage from '../../assets/images/logo.png';
 import logoWhite from '../../assets/images/logo.svg';
 import carImg from '../../assets/images/car.png';
 import carWImg from '../../assets/images/carw.png';
-import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 
 function Header(props) {
   return (
     <header className="site-header" id="site-header">
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
-        <div className="container bb">
+        <div className="container">
           <a className="logo" href="./">
             <img
               src={

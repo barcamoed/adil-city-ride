@@ -8,8 +8,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useCookies } from 'react-cookie';
-import car1Img from '../../assets/images/car1.png';
 import { Formik, Form, Field } from 'formik';
+import moment from 'moment';
+import LoadingOverlay from 'react-loading-overlay';
+import HashLoader from 'react-spinners/HashLoader';
+import Modal from 'react-modal';
+import car1Img from '../../assets/images/car1.png';
 import Header from '../Header';
 import Footer from '../Footer';
 import infoImg from '../../assets/images/info.png';
@@ -19,8 +23,7 @@ import leftangleImg from '../../assets/images/leftangle.png';
 
 import { bookingSchema } from '../Login/schema';
 import RCTimePicker from '../RCTimePicker/index';
-import moment from 'moment';
-import LoadingOverlay from 'react-loading-overlay';
+
 import {
   IDENTIFIER,
   GET_FLIGHT_DETAILS_KEY,
@@ -30,7 +33,6 @@ import {
 } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 import LocationSearchInput from '../LocationSearchInput/index';
-import Modal from 'react-modal';
 
 Modal.setAppElement('#app'); // For Modal used below
 const customStyles = {
@@ -41,14 +43,29 @@ const customStyles = {
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
-    width: '50%',
+    maxWidth: '560px',
+    width: '100%',
+    heigh: '50%',
+  },
+  overlay: { zIndex: 1000 },
+};
+const customStyles2 = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+    maxWidth: '1080px',
+    width: '100%',
     heigh: '50%',
   },
   overlay: { zIndex: 1000 },
 };
 
 const Booking = props => {
-  var subtitle;
+  let subtitle;
   const [cookies, setCookie, removeCookie] = useCookies(['cookie_days']);
   const [type, setFlightType] = useState(localStorage.getItem('flightType'));
   const [arrival_flight_number, setArrival_flight_number] = useState('');
@@ -101,14 +118,14 @@ const Booking = props => {
   const [differentVehicles, setDifferentVehicles] = useState([]);
   const [noMatchingVehicleError, setNoMatchingVehicleError] = useState('');
 
-  var [showPaymentArea, setShowPayment] = useState(true);
-  var [status3PriceError, setStatus3PriceError] = useState(null);
-  var [contactByEmail, setContactByEmail] = useState(null);
-  var [contactByWa, setContactByWa] = useState(null);
-  var [contactEmail, setContactEmail] = useState('');
-  var [contactNumber, setContactNumber] = useState('');
-  var [showContactInfoError, setShowContactInfoError] = useState('');
-  var [reqStatus, setReqStatus] = useState(null);
+  const [showPaymentArea, setShowPayment] = useState(true);
+  const [status3PriceError, setStatus3PriceError] = useState(null);
+  const [contactByEmail, setContactByEmail] = useState(null);
+  const [contactByWa, setContactByWa] = useState(null);
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+  const [showContactInfoError, setShowContactInfoError] = useState('');
+  const [reqStatus, setReqStatus] = useState(null);
   const [isActive, setLodaerIsActive] = useState(false);
 
   const [showReservationIdModal, setShowReservationIdModal] = useState(false);
@@ -221,9 +238,9 @@ const Booking = props => {
   useEffect(() => {
     // console.log('cookies Data:.:.:', cookies.hasOwnProperty('cookie_days'));
 
-    var date = new Date().toISOString().slice(0, 10);
-    var myVehicleObj = {};
-    var myGeneralObj = {};
+    const date = new Date().toISOString().slice(0, 10);
+    let myVehicleObj = {};
+    let myGeneralObj = {};
     if (
       localStorage.getItem('myGeneralObj') &&
       localStorage.getItem('vehicleObj')
@@ -273,15 +290,16 @@ const Booking = props => {
     ) {
       const myGeneralObj1 = JSON.parse(localStorage.getItem('myGeneralObj'));
       // console.log('Hhhhhhhhhhhhhhhhhhhhhh', myGeneralObj1);
-      const destinationLatLng =
-        '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+      const destinationLatLng = `(${advnacedSearchVal.lat}, ${
+        advnacedSearchVal.lng
+      })`;
       // console.log('myStructured Destination:', destinationLatLng);
       const headers = {
         'Content-type': 'application/x-www-form-urlencoded',
       };
 
-      let formData = new FormData();
-      let data = {
+      const formData = new FormData();
+      const data = {
         command: 'check_location',
         identifier: IDENTIFIER,
         key: GET_CHECK_LOCATION_KEY(),
@@ -293,10 +311,10 @@ const Booking = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             formData.append(`data[${previewKey}]`, data[dataKey][previewKey]);
           }
         } else {
@@ -365,13 +383,13 @@ const Booking = props => {
     }
 
     if (myVehicleObj.seconds_before_pick != 'null' && departure_time) {
-      var myPickUpTime = null;
-      var myString = (myVehicleObj.seconds_before_pick / 3600).toFixed(2);
+      let myPickUpTime = null;
+      const myString = (myVehicleObj.seconds_before_pick / 3600).toFixed(2);
       // console.log('My String:', myString);
-      var myStringParts = myString.split('.');
-      var hourDelta = myStringParts[0];
-      var minuteDelta = myStringParts[1];
-      var abc1 = moment(departure_date + ' ' + departure_time);
+      const myStringParts = myString.split('.');
+      const hourDelta = myStringParts[0];
+      const minuteDelta = myStringParts[1];
+      const abc1 = moment(`${departure_date} ${departure_time}`);
       myPickUpTime = abc1
         .subtract({ hours: hourDelta, minutes: minuteDelta })
         .toString();
@@ -386,7 +404,7 @@ const Booking = props => {
       // setIsOpen(false);
     }
 
-    //To restrict past date
+    // To restrict past date
     $('#exp_date').attr('min', date);
     $('#arrivaldate').attr('min', date);
     $('#departuredate').attr('min', date);
@@ -407,7 +425,7 @@ const Booking = props => {
   ]);
 
   function handleFlightInputsChange(event) {
-    const value = event.target.value;
+    const { value } = event.target;
     if (event.target.name == 'arrival_date') {
       setArrival_Date(value);
     } else if (event.target.name == 'departure_date') {
@@ -419,28 +437,24 @@ const Booking = props => {
     }
   }
   function handleKeyUp(e, setFieldValue) {
-    var flight_num = e.target.value;
+    let flight_num = e.target.value;
     flight_num = flight_num.toUpperCase().replace(/\s/g, '');
-    var regex = /^([A-Z][A-Z][A-Z]?|[A-Z][0-9]|[0-9][A-Z])[0-9]{1,4}$/.exec(
+    const regex = /^([A-Z][A-Z][A-Z]?|[A-Z][0-9]|[0-9][A-Z])[0-9]{1,4}$/.exec(
       flight_num,
     );
     if (regex != null) {
       setArrival_flight_number(
-        regex[1] +
-          ' ' +
-          flight_num.slice(
-            flight_num.indexOf(regex[1]) + regex[1].length,
-            flight_num.length,
-          ),
+        `${regex[1]} ${flight_num.slice(
+          flight_num.indexOf(regex[1]) + regex[1].length,
+          flight_num.length,
+        )}`,
       );
       setFieldValue(
         'arrival_flight_number',
-        regex[1] +
-          ' ' +
-          flight_num.slice(
-            flight_num.indexOf(regex[1]) + regex[1].length,
-            flight_num.length,
-          ),
+        `${regex[1]} ${flight_num.slice(
+          flight_num.indexOf(regex[1]) + regex[1].length,
+          flight_num.length,
+        )}`,
       );
 
       if (arrival_date) {
@@ -453,23 +467,23 @@ const Booking = props => {
           'Content-type': 'application/x-www-form-urlencoded',
         };
 
-        let formData = new FormData();
-        let data = {
+        const formData = new FormData();
+        const data = {
           command: 'get_flight_details',
           identifier: IDENTIFIER,
           key: GET_FLIGHT_DETAILS_KEY(),
           data: {
-            airline_iata: airline_iata,
+            airline_iata,
             flight_num: myFlight_num,
             date_type: 'arriving',
             date: arrival_date,
           },
         };
 
-        for (let dataKey in data) {
+        for (const dataKey in data) {
           if (dataKey === 'data') {
             // append nested object
-            for (let previewKey in data[dataKey]) {
+            for (const previewKey in data[dataKey]) {
               formData.append(`data[${previewKey}]`, data[dataKey][previewKey]);
             }
           } else {
@@ -516,8 +530,8 @@ const Booking = props => {
                 (arrival_date && arrival_time)) &&
               JSON.parse(localStorage.getItem('vehicleObj')).route == 'ow'
             ) {
-              var myDate = new Date(
-                arrival_date + ' ' + data.data.arrival_time,
+              const myDate = new Date(
+                `${arrival_date} ${data.data.arrival_time}`,
               );
               var nowDatePlusReleaseHours = new Date(Date.now());
               nowDatePlusReleaseHours.setHours(
@@ -540,7 +554,7 @@ const Booking = props => {
               }
             }
 
-            var myPickUpTime = null;
+            const myPickUpTime = null;
             if (
               ((departure_date &&
                 pickUpTime &&
@@ -551,11 +565,13 @@ const Booking = props => {
               // console.log(
               //   'Both Arrival And Departure Set Inside Arrival Function',
               // );
-              var myArrivalDate = new Date(
-                arrival_date + ' ' + data.data.arrival_time,
+              const myArrivalDate = new Date(
+                `${arrival_date} ${data.data.arrival_time}`,
               );
               // console.log('Arrival Date:', myArrivalDate);
-              var myDepartureDate = new Date(departure_date + ' ' + pickUpTime);
+              const myDepartureDate = new Date(
+                `${departure_date} ${pickUpTime}`,
+              );
               // console.log('Departure Date:', myDepartureDate);
               if (myDepartureDate > myArrivalDate) {
                 // console.log('myDepartureDate is Greater');
@@ -622,30 +638,26 @@ const Booking = props => {
   }
 
   function handleKeyUp1(e, setFieldValue) {
-    var flight_num = e.target.value;
+    let flight_num = e.target.value;
     flight_num = flight_num.toUpperCase().replace(/\s/g, '');
-    var regex = /^([A-Z][A-Z][A-Z]?|[A-Z][0-9]|[0-9][A-Z])[0-9]{1,4}$/.exec(
+    const regex = /^([A-Z][A-Z][A-Z]?|[A-Z][0-9]|[0-9][A-Z])[0-9]{1,4}$/.exec(
       flight_num,
     );
 
     // console.log('Old PickUp Time........;;;;;;;;;........', pickUpTime);
     if (regex != null) {
       setDeparture_flight_number(
-        regex[1] +
-          ' ' +
-          flight_num.slice(
-            flight_num.indexOf(regex[1]) + regex[1].length,
-            flight_num.length,
-          ),
+        `${regex[1]} ${flight_num.slice(
+          flight_num.indexOf(regex[1]) + regex[1].length,
+          flight_num.length,
+        )}`,
       );
       setFieldValue(
         'departure_flight_number',
-        regex[1] +
-          ' ' +
-          flight_num.slice(
-            flight_num.indexOf(regex[1]) + regex[1].length,
-            flight_num.length,
-          ),
+        `${regex[1]} ${flight_num.slice(
+          flight_num.indexOf(regex[1]) + regex[1].length,
+          flight_num.length,
+        )}`,
       );
 
       if (departure_date) {
@@ -658,23 +670,23 @@ const Booking = props => {
           'Content-type': 'application/x-www-form-urlencoded',
         };
 
-        let formData = new FormData();
-        let data = {
+        const formData = new FormData();
+        const data = {
           command: 'get_flight_details',
           identifier: IDENTIFIER,
           key: GET_FLIGHT_DETAILS_KEY(),
           data: {
-            airline_iata: airline_iata,
+            airline_iata,
             flight_num: myFlight_num,
             date_type: 'departing',
             date: departure_date,
           },
         };
 
-        for (let dataKey in data) {
+        for (const dataKey in data) {
           if (dataKey === 'data') {
             // append nested object
-            for (let previewKey in data[dataKey]) {
+            for (const previewKey in data[dataKey]) {
               formData.append(`data[${previewKey}]`, data[dataKey][previewKey]);
             }
           } else {
@@ -690,7 +702,7 @@ const Booking = props => {
           if (data.status == 'ok') {
             setLodaerIsActive(false);
             // console.log('Departure Date and Time Selected:', data.data);
-            var myPickUpTime = null;
+            let myPickUpTime = null;
             if (data.data.departure_airport == myGeneralObj.myData.ap_iata) {
               // console.log('Airport Matches:My Vehicles:');
               if (data.data.departure_time) {
@@ -702,18 +714,18 @@ const Booking = props => {
                 set_Departure_Flight_Airport_Match_Error('');
                 setDeparture_Time(departureTime);
                 // console.log('Departure date', departure_date);
-                var dep_Date = new Date(departure_date);
+                const dep_Date = new Date(departure_date);
                 // console.log('dep_Date', dep_Date);
 
-                var myString = (vehicleObj.seconds_before_pick / 3600).toFixed(
-                  2,
-                );
+                const myString = (
+                  vehicleObj.seconds_before_pick / 3600
+                ).toFixed(2);
                 // console.log('My String:', myString);
-                var myStringParts = myString.split('.');
-                var hourDelta = myStringParts[0];
-                var minuteDelta = myStringParts[1];
-                var abc1 = moment(
-                  departure_date + ' ' + data.data.departure_time,
+                const myStringParts = myString.split('.');
+                const hourDelta = myStringParts[0];
+                const minuteDelta = myStringParts[1];
+                const abc1 = moment(
+                  `${departure_date} ${data.data.departure_time}`,
                 );
                 myPickUpTime = abc1
                   .subtract({ hours: hourDelta, minutes: minuteDelta })
@@ -758,12 +770,10 @@ const Booking = props => {
                 (departure_date && pickUpTime)) &&
               JSON.parse(localStorage.getItem('vehicleObj')).route == 'ow'
             ) {
-              var myDate = new Date(
-                departure_date +
-                  ' ' +
-                  moment(myPickUpTime)
-                    .format('hh:mm')
-                    .toString(),
+              const myDate = new Date(
+                `${departure_date} ${moment(myPickUpTime)
+                  .format('hh:mm')
+                  .toString()}`,
               );
               var nowDatePlusReleaseHours = new Date(Date.now());
               nowDatePlusReleaseHours.setHours(
@@ -797,14 +807,12 @@ const Booking = props => {
                 JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt')
             ) {
               // console.log('Both Arrival And Departure Set Hereeee');
-              var myArrivalDate = new Date(arrival_date + ' ' + arrival_time);
+              const myArrivalDate = new Date(`${arrival_date} ${arrival_time}`);
               // console.log('Arrival Date:', myArrivalDate);
-              var myDepartureDate = new Date(
-                departure_date +
-                  ' ' +
-                  moment(myPickUpTime)
-                    .format('hh:mm')
-                    .toString(),
+              const myDepartureDate = new Date(
+                `${departure_date} ${moment(myPickUpTime)
+                  .format('hh:mm')
+                  .toString()}`,
               );
               // console.log('Departure Date:', myDepartureDate);
               if (myDepartureDate > myArrivalDate) {
@@ -883,10 +891,10 @@ const Booking = props => {
 
     if (first_name && last_name && email && phone_number) {
       const Passenger = {
-        first_name: first_name,
-        last_name: last_name,
-        email: email,
-        phone_number: phone_number,
+        first_name,
+        last_name,
+        email,
+        phone_number,
       };
     }
   }
@@ -1001,7 +1009,7 @@ const Booking = props => {
     // console.log('Arrival Data and Time', arrival_date, arrival_time);
     if (arrival_date && arrival_time) {
       console.log('InsideM MMMMMMMMMMMm');
-      var myDate = new Date(arrival_date + ' ' + arrival_time);
+      var myDate = new Date(`${arrival_date} ${arrival_time}`);
       var nowDatePlusReleaseHours = new Date(Date.now());
       nowDatePlusReleaseHours.setHours(
         nowDatePlusReleaseHours.getHours() + vehicleObj.release_hours,
@@ -1032,7 +1040,7 @@ const Booking = props => {
       var myStringParts = myString.split('.');
       var hourDelta = myStringParts[0];
       var minuteDelta = myStringParts[1];
-      var abc1 = moment(departure_date + ' ' + departure_time);
+      var abc1 = moment(`${departure_date} ${departure_time}`);
       // console.log('My abc1:', abc1);
       myPickUpTime = abc1
         .subtract({ hours: hourDelta, minutes: minuteDelta })
@@ -1051,11 +1059,9 @@ const Booking = props => {
       //     .toString(),
       // );
       var myDate = new Date(
-        departure_date +
-          ' ' +
-          moment(myPickUpTime)
-            .format('hh:mm')
-            .toString(),
+        `${departure_date} ${moment(myPickUpTime)
+          .format('hh:mm')
+          .toString()}`,
       );
       // console.log('my Dateeee', myDate);
       var nowDatePlusReleaseHours = new Date(Date.now());
@@ -1089,7 +1095,7 @@ const Booking = props => {
       var myStringParts = myString.split('.');
       var hourDelta = myStringParts[0];
       var minuteDelta = myStringParts[1];
-      var abc1 = moment(departure_date + ' ' + departure_time);
+      var abc1 = moment(`${departure_date} ${departure_time}`);
       myPickUpTime = abc1
         .subtract({ hours: hourDelta, minutes: minuteDelta })
         .toString();
@@ -1111,14 +1117,15 @@ const Booking = props => {
 
     // isAdvanced
 
-    let formData = new FormData();
+    const formData = new FormData();
     if (
       myGeneralObj.myData.isAdvanced == false &&
       myGeneralObj.myData.switched == true &&
       vehicleObj.route == 'ow'
     ) {
-      const destinationLatLng =
-        '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+      const destinationLatLng = `(${advnacedSearchVal.lat}, ${
+        advnacedSearchVal.lng
+      })`;
       // console.log('My Keyyyyy', GET_CREATE_RESERVATION_KEY());
       var myStringNumbers = departure_flight_number.replace(/\D/g, '').trim();
       var withNoDigits = departure_flight_number.replace(/[0-9]/g, '').trim();
@@ -1159,7 +1166,7 @@ const Booking = props => {
         };
       }
 
-      let data = {
+      const data = {
         command: 'create_reservation',
         identifier: IDENTIFIER,
         key: GET_CREATE_RESERVATION_KEY(),
@@ -1174,12 +1181,12 @@ const Booking = props => {
             destination_point: destinationLatLng,
             destination_address: advnacedSearchFieldText,
             pax_num: paxSelected,
-            remark: remark,
+            remark,
           },
           passenger: {
-            first_name: first_name,
-            last_name: last_name,
-            email: email,
+            first_name,
+            last_name,
+            email,
             phone: phone_number,
           },
           vehicle: {
@@ -1211,7 +1218,7 @@ const Booking = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey == 'command') {
           formData.append(`command`, 'create_reservation');
         } else if (dataKey == 'identifier') {
@@ -1221,7 +1228,7 @@ const Booking = props => {
         }
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             if (previewKey == 'environment') {
               formData.append(`data[${previewKey}]`, 'test');
             }
@@ -1238,7 +1245,7 @@ const Booking = props => {
                 );
               }
 
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -1246,7 +1253,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'passenger') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -1254,7 +1261,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'vehicle') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -1263,7 +1270,7 @@ const Booking = props => {
             }
             if (previewKey == 'services') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -1271,7 +1278,7 @@ const Booking = props => {
                 }
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
-                for (let ipk in data[dataKey][previewKey][i]) {
+                for (const ipk in data[dataKey][previewKey][i]) {
                   formData.append(
                     `data[${previewKey}][${i}][${ipk}]`,
                     data[dataKey][previewKey][i][ipk],
@@ -1284,7 +1291,7 @@ const Booking = props => {
             }
             if (previewKey == 'extra_equipment') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -1293,7 +1300,7 @@ const Booking = props => {
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
-                  for (let ipk in data[dataKey][previewKey][a]) {
+                  for (const ipk in data[dataKey][previewKey][a]) {
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
@@ -1382,15 +1389,13 @@ const Booking = props => {
         myGeneralObj.myData.Destination.lat &&
         myGeneralObj.myData.Destination.lng
       ) {
-        destinationLatLng =
-          '(' +
-          myGeneralObj.myData.Destination.lat +
-          ', ' +
-          myGeneralObj.myData.Destination.lng +
-          ')';
+        destinationLatLng = `(${myGeneralObj.myData.Destination.lat}, ${
+          myGeneralObj.myData.Destination.lng
+        })`;
       } else {
-        destinationLatLng =
-          '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+        destinationLatLng = `(${advnacedSearchVal.lat}, ${
+          advnacedSearchVal.lng
+        })`;
       }
 
       var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
@@ -1432,7 +1437,7 @@ const Booking = props => {
         };
       }
 
-      let data = {
+      const data = {
         command: 'create_reservation',
         identifier: IDENTIFIER,
         key: GET_CREATE_RESERVATION_KEY(),
@@ -1447,12 +1452,12 @@ const Booking = props => {
             destination_point: destinationLatLng,
             destination_address: advnacedSearchFieldText,
             pax_num: paxSelected,
-            remark: remark,
+            remark,
           },
           passenger: {
-            first_name: first_name,
-            last_name: last_name,
-            email: email,
+            first_name,
+            last_name,
+            email,
             phone: phone_number,
           },
           vehicle: {
@@ -1481,7 +1486,7 @@ const Booking = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey == 'command') {
           formData.append(`command`, 'create_reservation');
         } else if (dataKey == 'identifier') {
@@ -1491,7 +1496,7 @@ const Booking = props => {
         }
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             if (previewKey == 'environment') {
               formData.append(`data[${previewKey}]`, 'test');
             }
@@ -1508,7 +1513,7 @@ const Booking = props => {
                 );
               }
 
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -1516,7 +1521,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'passenger') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -1524,7 +1529,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'vehicle') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -1533,7 +1538,7 @@ const Booking = props => {
             }
             if (previewKey == 'services') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -1541,7 +1546,7 @@ const Booking = props => {
                 }
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
-                for (let ipk in data[dataKey][previewKey][i]) {
+                for (const ipk in data[dataKey][previewKey][i]) {
                   formData.append(
                     `data[${previewKey}][${i}][${ipk}]`,
                     data[dataKey][previewKey][i][ipk],
@@ -1554,7 +1559,7 @@ const Booking = props => {
             }
             if (previewKey == 'extra_equipment') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -1563,7 +1568,7 @@ const Booking = props => {
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
-                  for (let ipk in data[dataKey][previewKey][a]) {
+                  for (const ipk in data[dataKey][previewKey][a]) {
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
@@ -1646,23 +1651,21 @@ const Booking = props => {
       vehicleObj.route == 'ow'
     ) {
       // console.log('Loggedddd', myGeneralObj.myData.destination_address);
-      var myDestinationLatLng = null;
-      var previousDestAddress = null;
+      let myDestinationLatLng = null;
+      let previousDestAddress = null;
       if (
         myGeneralObj.myData.destination_address &&
         myGeneralObj.myData.Destination.lat
       ) {
-        destinationLatLng =
-          '(' +
-          myGeneralObj.myData.Destination.lat +
-          ', ' +
-          myGeneralObj.myData.Destination.lng +
-          ')';
+        destinationLatLng = `(${myGeneralObj.myData.Destination.lat}, ${
+          myGeneralObj.myData.Destination.lng
+        })`;
         previousDestAddress = myGeneralObj.myData.destination_address;
       } else {
         // console.log('Objeeeeeeeeee', advnacedSearchVal);
-        myDestinationLatLng =
-          '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+        myDestinationLatLng = `(${advnacedSearchVal.lat}, ${
+          advnacedSearchVal.lng
+        })`;
         previousDestAddress = advnacedSearchFieldText;
       }
       var myStringNumbers = departure_flight_number.replace(/\D/g, '').trim();
@@ -1705,7 +1708,7 @@ const Booking = props => {
         };
       }
 
-      let data = {
+      const data = {
         command: 'create_reservation',
         identifier: IDENTIFIER,
         key: GET_CREATE_RESERVATION_KEY(),
@@ -1720,12 +1723,12 @@ const Booking = props => {
             destination_point: myDestinationLatLng,
             destination_address: previousDestAddress,
             pax_num: paxSelected,
-            remark: remark,
+            remark,
           },
           passenger: {
-            first_name: first_name,
-            last_name: last_name,
-            email: email,
+            first_name,
+            last_name,
+            email,
             phone: phone_number,
           },
           vehicle: {
@@ -1754,7 +1757,7 @@ const Booking = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey == 'command') {
           formData.append(`command`, 'create_reservation');
         } else if (dataKey == 'identifier') {
@@ -1764,7 +1767,7 @@ const Booking = props => {
         }
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             if (previewKey == 'environment') {
               formData.append(`data[${previewKey}]`, 'test');
             }
@@ -1780,7 +1783,7 @@ const Booking = props => {
                 );
               }
 
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -1788,7 +1791,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'passenger') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -1796,7 +1799,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'vehicle') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -1805,7 +1808,7 @@ const Booking = props => {
             }
             if (previewKey == 'services') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -1813,7 +1816,7 @@ const Booking = props => {
                 }
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
-                for (let ipk in data[dataKey][previewKey][i]) {
+                for (const ipk in data[dataKey][previewKey][i]) {
                   formData.append(
                     `data[${previewKey}][${i}][${ipk}]`,
                     data[dataKey][previewKey][i][ipk],
@@ -1826,7 +1829,7 @@ const Booking = props => {
             }
             if (previewKey == 'extra_equipment') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -1839,7 +1842,7 @@ const Booking = props => {
                 // );
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
-                  for (let ipk in data[dataKey][previewKey][a]) {
+                  for (const ipk in data[dataKey][previewKey][a]) {
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
@@ -1918,8 +1921,9 @@ const Booking = props => {
       vehicleObj.route == 'ow'
     ) {
       // console.log('myGObj.data', myGeneralObj.myData);
-      const destinationLatLng =
-        '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+      const destinationLatLng = `(${advnacedSearchVal.lat}, ${
+        advnacedSearchVal.lng
+      })`;
       var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
       var withNoDigits = arrival_flight_number.replace(/[0-9]/g, '').trim();
       var babyObj1 = null;
@@ -1960,7 +1964,7 @@ const Booking = props => {
         };
       }
 
-      let data = {
+      const data = {
         command: 'create_reservation',
         identifier: IDENTIFIER,
         key: GET_CREATE_RESERVATION_KEY(),
@@ -1975,12 +1979,12 @@ const Booking = props => {
             destination_point: destinationLatLng,
             destination_address: advnacedSearchFieldText,
             pax_num: paxSelected,
-            remark: remark,
+            remark,
           },
           passenger: {
-            first_name: first_name,
-            last_name: last_name,
-            email: email,
+            first_name,
+            last_name,
+            email,
             phone: phone_number,
           },
           vehicle: {
@@ -2009,7 +2013,7 @@ const Booking = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey == 'command') {
           formData.append(`command`, 'create_reservation');
         } else if (dataKey == 'identifier') {
@@ -2019,7 +2023,7 @@ const Booking = props => {
         }
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             if (previewKey == 'environment') {
               formData.append(`data[${previewKey}]`, 'test');
             }
@@ -2035,7 +2039,7 @@ const Booking = props => {
                   localStorage.getItem('ref_id'),
                 );
               }
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -2043,7 +2047,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'passenger') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -2051,7 +2055,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'vehicle') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -2060,7 +2064,7 @@ const Booking = props => {
             }
             if (previewKey == 'services') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -2068,7 +2072,7 @@ const Booking = props => {
                 }
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
-                for (let ipk in data[dataKey][previewKey][i]) {
+                for (const ipk in data[dataKey][previewKey][i]) {
                   formData.append(
                     `data[${previewKey}][${i}][${ipk}]`,
                     data[dataKey][previewKey][i][ipk],
@@ -2081,7 +2085,7 @@ const Booking = props => {
             }
             if (previewKey == 'extra_equipment') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -2090,7 +2094,7 @@ const Booking = props => {
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
-                  for (let ipk in data[dataKey][previewKey][a]) {
+                  for (const ipk in data[dataKey][previewKey][a]) {
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
@@ -2156,15 +2160,16 @@ const Booking = props => {
           });
         }
       }
-    } //isAdvance=false,switched=false,ow
+    } // isAdvance=false,switched=false,ow
     else if (
       myGeneralObj.myData.isAdvanced == false &&
       JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt'
-      //myGeneralObj.myData.switched == false &&
+      // myGeneralObj.myData.switched == false &&
     ) {
       //
-      const destinationLatLng =
-        '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+      const destinationLatLng = `(${advnacedSearchVal.lat}, ${
+        advnacedSearchVal.lng
+      })`;
       var myStringNumbers = arrival_flight_number.replace(/\D/g, '').trim();
       var withNoDigits = arrival_flight_number.replace(/[0-9]/g, '').trim();
       var myStringNumbersDeparting = departure_flight_number
@@ -2211,7 +2216,7 @@ const Booking = props => {
         };
       }
 
-      let data = {
+      const data = {
         command: 'create_reservation',
         identifier: IDENTIFIER,
         key: GET_CREATE_RESERVATION_KEY(),
@@ -2226,12 +2231,12 @@ const Booking = props => {
             destination_point: destinationLatLng,
             destination_address: advnacedSearchFieldText,
             pax_num: paxSelected,
-            remark: remark,
+            remark,
           },
           passenger: {
-            first_name: first_name,
-            last_name: last_name,
-            email: email,
+            first_name,
+            last_name,
+            email,
             phone: phone_number,
           },
           vehicle: {
@@ -2268,7 +2273,7 @@ const Booking = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey == 'command') {
           formData.append(`command`, 'create_reservation');
         } else if (dataKey == 'identifier') {
@@ -2278,7 +2283,7 @@ const Booking = props => {
         }
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             if (previewKey == 'environment') {
               formData.append(`data[${previewKey}]`, 'test');
             }
@@ -2294,7 +2299,7 @@ const Booking = props => {
                   localStorage.getItem('ref_id'),
                 );
               }
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -2302,7 +2307,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'passenger') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -2310,7 +2315,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'vehicle') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -2319,7 +2324,7 @@ const Booking = props => {
             }
             if (previewKey == 'services') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -2328,7 +2333,7 @@ const Booking = props => {
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
-                  for (let ipk in data[dataKey][previewKey][a]) {
+                  for (const ipk in data[dataKey][previewKey][a]) {
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
@@ -2345,7 +2350,7 @@ const Booking = props => {
             }
             if (previewKey == 'extra_equipment') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -2354,7 +2359,7 @@ const Booking = props => {
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
-                  for (let ipk in data[dataKey][previewKey][a]) {
+                  for (const ipk in data[dataKey][previewKey][a]) {
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
@@ -2427,7 +2432,7 @@ const Booking = props => {
     else if (
       myGeneralObj.myData.isAdvanced == true &&
       JSON.parse(localStorage.getItem('vehicleObj')).route == 'rt'
-      //myGeneralObj.myData.switched == false &&
+      // myGeneralObj.myData.switched == false &&
     ) {
       //
       // console.log('IsAdvanced is TRUEEEE Heree', myGeneralObj);
@@ -2436,18 +2441,16 @@ const Booking = props => {
         myGeneralObj.myData.Destination.lat != undefined &&
         myGeneralObj.myData.Destination.lng != undefined
       ) {
-        destinationLatLng =
-          '(' +
-          myGeneralObj.myData.Destination.lat +
-          ', ' +
-          myGeneralObj.myData.Destination.lng +
-          ')';
+        destinationLatLng = `(${myGeneralObj.myData.Destination.lat}, ${
+          myGeneralObj.myData.Destination.lng
+        })`;
       } else if (advnacedSearchVal) {
-        destinationLatLng =
-          '(' + advnacedSearchVal.lat + ', ' + advnacedSearchVal.lng + ')';
+        destinationLatLng = `(${advnacedSearchVal.lat}, ${
+          advnacedSearchVal.lng
+        })`;
       }
 
-      var myAdvnacedSearchFieldText = advnacedSearchFieldText;
+      let myAdvnacedSearchFieldText = advnacedSearchFieldText;
       if (myAdvnacedSearchFieldText == null) {
         myAdvnacedSearchFieldText = myGeneralObj.myData.destination_address;
       }
@@ -2497,7 +2500,7 @@ const Booking = props => {
         };
       }
 
-      let data = {
+      const data = {
         command: 'create_reservation',
         identifier: IDENTIFIER,
         key: GET_CREATE_RESERVATION_KEY(),
@@ -2512,12 +2515,12 @@ const Booking = props => {
             destination_point: destinationLatLng,
             destination_address: myAdvnacedSearchFieldText,
             pax_num: paxSelected,
-            remark: remark,
+            remark,
           },
           passenger: {
-            first_name: first_name,
-            last_name: last_name,
-            email: email,
+            first_name,
+            last_name,
+            email,
             phone: phone_number,
           },
           vehicle: {
@@ -2554,7 +2557,7 @@ const Booking = props => {
         },
       };
 
-      for (let dataKey in data) {
+      for (const dataKey in data) {
         if (dataKey == 'command') {
           formData.append(`command`, 'create_reservation');
         } else if (dataKey == 'identifier') {
@@ -2564,7 +2567,7 @@ const Booking = props => {
         }
         if (dataKey === 'data') {
           // append nested object
-          for (let previewKey in data[dataKey]) {
+          for (const previewKey in data[dataKey]) {
             if (previewKey == 'environment') {
               formData.append(`data[${previewKey}]`, 'test');
             }
@@ -2579,7 +2582,7 @@ const Booking = props => {
                   localStorage.getItem('ref_id'),
                 );
               }
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -2587,7 +2590,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'passenger') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -2595,7 +2598,7 @@ const Booking = props => {
               }
             }
             if (previewKey == 'vehicle') {
-              for (let ipk in data[dataKey][previewKey]) {
+              for (const ipk in data[dataKey][previewKey]) {
                 formData.append(
                   `data[${previewKey}][${ipk}]`,
                   data[dataKey][previewKey][ipk],
@@ -2604,7 +2607,7 @@ const Booking = props => {
             }
             if (previewKey == 'services') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -2613,7 +2616,7 @@ const Booking = props => {
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
-                  for (let ipk in data[dataKey][previewKey][a]) {
+                  for (const ipk in data[dataKey][previewKey][a]) {
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
@@ -2626,7 +2629,7 @@ const Booking = props => {
             }
             if (previewKey == 'extra_equipment') {
               if (data[dataKey][previewKey].length == 1) {
-                for (let ipk in data[dataKey][previewKey][0]) {
+                for (const ipk in data[dataKey][previewKey][0]) {
                   formData.append(
                     `data[${previewKey}][${0}][${ipk}]`,
                     data[dataKey][previewKey][0][ipk],
@@ -2635,7 +2638,7 @@ const Booking = props => {
               } else if (data[dataKey][previewKey].length > 1) {
                 var i = 0;
                 for (var a = 0; a < data[dataKey][previewKey].length; a++) {
-                  for (let ipk in data[dataKey][previewKey][a]) {
+                  for (const ipk in data[dataKey][previewKey][a]) {
                     formData.append(
                       `data[${previewKey}][${a}][${ipk}]`,
                       data[dataKey][previewKey][a][ipk],
@@ -2725,7 +2728,7 @@ const Booking = props => {
 
   return (
     <div>
-      <LoadingOverlay active={isActive} spinner text="Loading...">
+      <LoadingOverlay active={isActive} spinner={<HashLoader />}>
         <Header props={props} />
 
         <div>
@@ -2741,19 +2744,19 @@ const Booking = props => {
                     <Formik
                       initialValues={{
                         // ordernumber: '',
-                        first_name: first_name,
-                        last_name: last_name,
-                        phone_number: phone_number,
-                        email: email,
-                        arrival_date: arrival_date,
-                        arrival_flight_number: arrival_flight_number,
-                        arrival_time: arrival_time,
-                        departure_date: departure_date,
-                        departure_flight_number: departure_flight_number,
-                        departure_time: departure_time,
-                        destination: destination,
-                        remark: remark,
-                        type: type,
+                        first_name,
+                        last_name,
+                        phone_number,
+                        email,
+                        arrival_date,
+                        arrival_flight_number,
+                        arrival_time,
+                        departure_date,
+                        departure_flight_number,
+                        departure_time,
+                        destination,
+                        remark,
+                        type,
                         // card_holder_name: '',
                         // card_number: '',
                         // exp_date: '',
@@ -2791,7 +2794,7 @@ const Booking = props => {
                                 onChange={e => {
                                   // call the built-in handleChange for formik
                                   handleChange(e);
-                                  let someValue = e.currentTarget.value;
+                                  const someValue = e.currentTarget.value;
                                   setFieldValue('first_name', someValue);
                                 }}
                               />
@@ -2813,7 +2816,7 @@ const Booking = props => {
                                 onChange={e => {
                                   // call the built-in handleChange for formik
                                   handleChange(e);
-                                  let someValue = e.currentTarget.value;
+                                  const someValue = e.currentTarget.value;
                                   setFieldValue('last_name', someValue);
                                 }}
                               />
@@ -2837,7 +2840,7 @@ const Booking = props => {
                                 onChange={e => {
                                   // call the built-in handleChange for formik
                                   handleChange(e);
-                                  let someValue = e.currentTarget.value;
+                                  const someValue = e.currentTarget.value;
                                   setFieldValue('phone_number', someValue);
                                 }}
                               />
@@ -2859,7 +2862,7 @@ const Booking = props => {
                                 onChange={e => {
                                   // call the built-in handleChange for formik
                                   handleChange(e);
-                                  let someValue = e.currentTarget.value;
+                                  const someValue = e.currentTarget.value;
                                   setFieldValue('email', someValue);
                                 }}
                               />
@@ -2884,7 +2887,7 @@ const Booking = props => {
                                     onChange={e => {
                                       // call the built-in handleChange for formik
                                       handleFlightInputsChange(e);
-                                      let someValue = e.currentTarget.value;
+                                      const someValue = e.currentTarget.value;
                                       setFieldValue('arrival_date', someValue);
                                       if (arrival_flight_number) {
                                         setArrival_flight_number('');
@@ -2969,7 +2972,7 @@ const Booking = props => {
                                     onChange={e => {
                                       // call the built-in handleChange for formik
                                       handleFlightInputsChange(e);
-                                      let someValue = e.currentTarget.value;
+                                      const someValue = e.currentTarget.value;
                                       setFieldValue(
                                         'departure_date',
                                         someValue,
@@ -3089,7 +3092,7 @@ const Booking = props => {
                                     onChange={e => {
                                       // call the built-in handleChange for formik
                                       handleFlightInputsChange(e);
-                                      let someValue = e.currentTarget.value;
+                                      const someValue = e.currentTarget.value;
                                       setFieldValue(
                                         'departure_date',
                                         someValue,
@@ -3213,7 +3216,7 @@ const Booking = props => {
                                     onChange={e => {
                                       // call the built-in handleChange for formik
                                       handleFlightInputsChange(e);
-                                      let someValue = e.currentTarget.value;
+                                      const someValue = e.currentTarget.value;
                                       setFieldValue('arrival_date', someValue);
                                       if (arrival_flight_number) {
                                         setArrival_flight_number('');
@@ -3524,7 +3527,7 @@ const Booking = props => {
                                 onChange={e => {
                                   // call the built-in handleChange for formik
                                   remarkEntered(e);
-                                  let someValue = e.currentTarget.value;
+                                  const someValue = e.currentTarget.value;
                                   setFieldValue('remark', someValue);
                                 }}
                                 type="text"
@@ -3756,22 +3759,30 @@ const Booking = props => {
             onRequestClose={closeModal}
             style={customStyles}
             contentLabel="Reservation"
-            shouldCloseOnOverlayClick={true}
+            shouldCloseOnOverlayClick
           >
-            <h2 ref={_subtitle => (subtitle = _subtitle)}>
-              Reservation ID: {res_ID}
-            </h2>
+            <div className="reservation">
+              <h2>Thank you for booking</h2>
+              <p>
+                Your booking is confirmed with us. Please keep your below
+                <br /> reservation number to check details in future.
+              </p>
+              <h3 ref={_subtitle => (subtitle = _subtitle)}>
+                Reservation ID: {res_ID}
+              </h3>
+            </div>
+
             {/* <h4></h4> */}
           </Modal>
         ) : null}
 
         {modalIsOpen ? (
-          <div className="">
+          <div className="selectcar">
             <Modal
               isOpen={modalIsOpen}
               onAfterOpen={afterOpenModal}
               onRequestClose={closeModal}
-              style={customStyles}
+              style={customStyles2}
               contentLabel="Vehicles"
               shouldCloseOnOverlayClick={false}
             >
@@ -3781,7 +3792,9 @@ const Booking = props => {
               >
                 Select Vehicle
               </h2>
-
+              <p className="text-center selectcarpara">
+                Due to change in address you need to select vehicle again.
+              </p>
               <div className="row selectcarslider">
                 <div className="col-md-12">
                   {differentVehicles && differentVehicles.length > 0 ? (
