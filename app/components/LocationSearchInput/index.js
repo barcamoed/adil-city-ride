@@ -62,6 +62,7 @@ class LocationSearchInput extends React.Component {
       this.setState({ address });
       this.setState({ disableField: true });
       this.setState({ enableField: false });
+      // this.props.onSetFeildText(address);
     } else {
       this.setState({ disableField: false });
       this.setState({ enableField: true });

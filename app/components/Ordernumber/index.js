@@ -5,21 +5,36 @@
  */
 
 import React, { useState, useEffect } from 'react';
-// import PropTypes from 'prop-types';
-// import styled from 'styled-components';
 import { Formik, Form, Field } from 'formik';
 import Header from '../Header';
 import Footer from '../Footer';
-import { FormattedMessage } from 'react-intl';
 import { IDENTIFIER, GET_RESERVATION_DETAILS_KEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 import searchImg from '../../assets/images/search.png';
-import messages from './messages';
 import { OrderNumberSchema } from '../Login/schema';
+import Modal from 'react-modal';
 
+Modal.setAppElement('#app');
+
+const customStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+    maxWidth: '560px',
+    width: '100%',
+    heigh: '50%',
+  },
+  overlay: { zIndex: 1000 },
+};
 const Ordernumber = props => {
   const [orderNumber, setOrderNumber] = useState('');
   const [lastName, setLastName] = useState('');
+  const [showModal, setShowReservationModal] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {}, [orderNumber, lastName]);
 
@@ -77,11 +92,15 @@ const Ordernumber = props => {
           );
           window.location.href = 'http://localhost:3000/order-summary';
           // setFormData(myObj);
+        } else if (data.result == 'error') {
+          console.log('Nothing Found or Error', data);
+          setErrorMsg(data.error_message.toUpperCase());
+          setShowReservationModal(true);
+          setTimeout(() => {
+            setShowReservationModal(false);
+          }, 5000);
+          const noResultFound = 'No Result Found';
         }
-        // else if (data.result == 'no_results') {
-        //   const noResultFound = 'No Result Found';
-
-        // }
       });
     }
   }
@@ -100,16 +119,17 @@ const Ordernumber = props => {
             <div className="col-md-12">
               <Formik
                 initialValues={{
-                  ordernumber: orderNumber,
-                  lastname: lastName,
+                  order_number: orderNumber,
+                  last_name: lastName,
                 }}
                 validationSchema={OrderNumberSchema}
                 onSubmit={values => {
                   // orderRequest(values);
+                  handleClick();
                   // console.log('My Valuessssss:', values);
                 }}
               >
-                {({ errors, touched }) => (
+                {({ errors, touched, setFieldValue }) => (
                   <Form>
                     <div className="input-group">
                       <Field
@@ -117,7 +137,12 @@ const Ordernumber = props => {
                         name="order_number"
                         className="form-control"
                         placeholder="6 Digits"
-                        onChange={handleOrder}
+                        value={orderNumber}
+                        onChange={e => {
+                          handleOrder(e);
+                          const someValue = e.currentTarget.value;
+                          setFieldValue('order_number', someValue);
+                        }}
                       />
 
                       <Field
@@ -125,14 +150,19 @@ const Ordernumber = props => {
                         name="last_name"
                         className="form-control"
                         placeholder="Last name"
-                        onChange={handleOrder}
+                        value={lastName}
+                        onChange={e => {
+                          handleOrder(e);
+                          const someValue = e.currentTarget.value;
+                          setFieldValue('last_name', someValue);
+                        }}
                       />
 
                       <div className="input-group-append">
                         <button
                           className="btn btn-outline-secondary searchbtn"
                           type="submit"
-                          onClick={handleClick}
+                          // onClick={handleClick}
                         >
                           <img
                             src={searchImg}
@@ -157,6 +187,27 @@ const Ordernumber = props => {
           </div>
         </div>
       </section>
+
+      {showModal ? (
+        <Modal
+          isOpen={showModal}
+          // onAfterOpen={afterOpenModal}
+          // onRequestClose={closeModal}
+          style={customStyles}
+          contentLabel="Reservation"
+          shouldCloseOnOverlayClick={true}
+        >
+          <div className="reservation">
+            <h2>We could not find your booking</h2>
+            <p>{errorMsg}</p>
+            {/* <h3 ref={_subtitle => (subtitle = _subtitle)}>
+                Reservation ID: {res_ID}
+              </h3> */}
+          </div>
+
+          {/* <h4></h4> */}
+        </Modal>
+      ) : null}
 
       <Footer />
     </div>

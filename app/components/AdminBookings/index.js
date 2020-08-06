@@ -179,7 +179,7 @@ function AdminBookings(props) {
         }}
         active={isActive}
         spinner
-        spinner={<HashLoader />}
+        spinner={<HashLoader size={120} color={'#3C84BB'} />}
       >
         <AdminHeader props={props} />
 

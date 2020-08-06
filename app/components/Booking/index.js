@@ -68,6 +68,7 @@ const Booking = props => {
   let subtitle;
   const [cookies, setCookie, removeCookie] = useCookies(['cookie_days']);
   const [type, setFlightType] = useState(localStorage.getItem('flightType'));
+  const [isAdv, setIsAdv] = useState(localStorage.getItem('isAdvanced'));
   const [arrival_flight_number, setArrival_flight_number] = useState('');
   const [departure_flight_number, setDeparture_flight_number] = useState('');
   const [showThis, setArrivalFlightError] = useState(false);
@@ -248,7 +249,12 @@ const Booking = props => {
       myGeneralObj = JSON.parse(localStorage.getItem('myGeneralObj'));
       // console.log('myGeneral Obj', myGeneralObj.myData);
       myVehicleObj = JSON.parse(localStorage.getItem('vehicleObj'));
-      // console.log('vehicleObj Obj', myVehicleObj);
+      console.log('myGeneralObj Obj', myGeneralObj);
+      if (myGeneralObj.myData.isAdvanced == true) {
+        localStorage.setItem('isAdvanced', 'true');
+        setIsAdv('true');
+        console.log('Hhhhhhhhhhh');
+      }
 
       // setSeconds_before_pick(myVehicleObj.seconds_before_pick);
       // JSON.parse(
@@ -272,7 +278,7 @@ const Booking = props => {
       setShowJustDeparture(true);
       localStorage.setItem('flightType', 'justDeparture');
       setFlightType('justDeparture');
-      // console.log('Set FlightType as justDeparture');
+      console.log('Set FlightType as justDeparture');
     } else if (
       myVehicleObj &&
       myVehicleObj.route == 'ow' &&
@@ -1111,6 +1117,7 @@ const Booking = props => {
 
   function submitRequest() {
     // e.preventDefault();
+    console.log('Hereeeaaaazzz');
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded',
     };
@@ -1325,10 +1332,21 @@ const Booking = props => {
         postRequest(formData, headers).then(data => {
           // console.log('Data Status:', data);
           if (data.status == 'ok') {
-            setLodaerIsActive(false);
-            // console.log('Data Status:', data.status);
-            setReservationID(data.res_id);
+            const summaryPageRequest = {
+              last_name,
+              reservation_id: data.res_id,
+            };
+
+            localStorage.setItem(
+              'lastNameAndOrderNo',
+              JSON.stringify(summaryPageRequest),
+            ),
+              setReservationID(data.res_id);
             setShowReservationIdModal(true);
+            setTimeout(() => {
+              setShowReservationIdModal(false);
+              window.location.href = 'http://localhost:3000/order-summary';
+            }, 5000);
             setDepartureTimeError('');
           } else if (data.status == 'error') {
             setLodaerIsActive(false);
@@ -1598,8 +1616,21 @@ const Booking = props => {
           setLodaerIsActive(false);
           // console.log('Data Status:', data);
           if (data.status == 'ok') {
-            setReservationID(data.res_id);
+            const summaryPageRequest = {
+              last_name,
+              reservation_id: data.res_id,
+            };
+
+            localStorage.setItem(
+              'lastNameAndOrderNo',
+              JSON.stringify(summaryPageRequest),
+            ),
+              setReservationID(data.res_id);
             setShowReservationIdModal(true);
+            setTimeout(() => {
+              setShowReservationIdModal(false);
+              window.location.href = 'http://localhost:3000/order-summary';
+            }, 5000);
             // console.log('Data Status:', data.status);
           }
         });
@@ -1651,19 +1682,20 @@ const Booking = props => {
       vehicleObj.route == 'ow'
     ) {
       // console.log('Loggedddd', myGeneralObj.myData.destination_address);
-      let myDestinationLatLng = null;
+      var destinationLatLng = null;
       let previousDestAddress = null;
       if (
         myGeneralObj.myData.destination_address &&
         myGeneralObj.myData.Destination.lat
       ) {
+        console.log('From Previous Data', myGeneralObj.myData.Destination);
         destinationLatLng = `(${myGeneralObj.myData.Destination.lat}, ${
           myGeneralObj.myData.Destination.lng
         })`;
         previousDestAddress = myGeneralObj.myData.destination_address;
       } else {
-        // console.log('Objeeeeeeeeee', advnacedSearchVal);
-        myDestinationLatLng = `(${advnacedSearchVal.lat}, ${
+        console.log('Objeeeeeeeeee', advnacedSearchVal);
+        destinationLatLng = `(${advnacedSearchVal.lat}, ${
           advnacedSearchVal.lng
         })`;
         previousDestAddress = advnacedSearchFieldText;
@@ -1720,7 +1752,7 @@ const Booking = props => {
             ap_code: myGeneralObj.myData.ap_iata,
             // destination_id: myGeneralObj.myData.Destination,
             is_advanced: '1',
-            destination_point: myDestinationLatLng,
+            destination_point: destinationLatLng,
             destination_address: previousDestAddress,
             pax_num: paxSelected,
             remark,
@@ -1872,9 +1904,21 @@ const Booking = props => {
           // console.log('Data Status:', data);
           setLodaerIsActive(false);
           if (data.status == 'ok') {
-            // console.log('Data Status:', data.status);
-            setReservationID(data.res_id);
+            const summaryPageRequest = {
+              last_name,
+              reservation_id: data.res_id,
+            };
+
+            localStorage.setItem(
+              'lastNameAndOrderNo',
+              JSON.stringify(summaryPageRequest),
+            ),
+              setReservationID(data.res_id);
             setShowReservationIdModal(true);
+            setTimeout(() => {
+              setShowReservationIdModal(false);
+              window.location.href = 'http://localhost:3000/order-summary';
+            }, 5000);
           }
         });
       } else if (!showPaymentArea) {
@@ -2125,8 +2169,22 @@ const Booking = props => {
           setLodaerIsActive(false);
           if (data.status == 'ok') {
             // console.log('Data Status:', data.status);
-            setReservationID(data.res_id);
+            // console.log('Setting Modal time Here');
+            const summaryPageRequest = {
+              last_name,
+              reservation_id: data.res_id,
+            };
+
+            localStorage.setItem(
+              'lastNameAndOrderNo',
+              JSON.stringify(summaryPageRequest),
+            ),
+              setReservationID(data.res_id);
             setShowReservationIdModal(true);
+            setTimeout(() => {
+              setShowReservationIdModal(false);
+              window.location.href = 'http://localhost:3000/order-summary';
+            }, 5000);
           }
         });
       } else if (!showPaymentArea) {
@@ -2384,9 +2442,21 @@ const Booking = props => {
           // console.log('Data Status:', data);
           setLodaerIsActive(false);
           if (data.status == 'ok') {
-            // console.log('Data Status:', data.status);
-            setReservationID(data.res_id);
+            const summaryPageRequest = {
+              last_name,
+              reservation_id: data.res_id,
+            };
+
+            localStorage.setItem(
+              'lastNameAndOrderNo',
+              JSON.stringify(summaryPageRequest),
+            ),
+              setReservationID(data.res_id);
             setShowReservationIdModal(true);
+            setTimeout(() => {
+              setShowReservationIdModal(false);
+              window.location.href = 'http://localhost:3000/order-summary';
+            }, 5000);
           }
         });
       } else if (!showPaymentArea) {
@@ -2663,9 +2733,21 @@ const Booking = props => {
           setLodaerIsActive(false);
           // console.log('Data Status:', data);
           if (data.status == 'ok') {
-            // console.log('Data Status:', data.status);
-            setReservationID(data.res_id);
+            const summaryPageRequest = {
+              last_name,
+              reservation_id: data.res_id,
+            };
+
+            localStorage.setItem(
+              'lastNameAndOrderNo',
+              JSON.stringify(summaryPageRequest),
+            ),
+              setReservationID(data.res_id);
             setShowReservationIdModal(true);
+            setTimeout(() => {
+              setShowReservationIdModal(false);
+              window.location.href = 'http://localhost:3000/order-summary';
+            }, 5000);
           }
         });
       } else if (!showPaymentArea) {
@@ -2728,7 +2810,10 @@ const Booking = props => {
 
   return (
     <div>
-      <LoadingOverlay active={isActive} spinner={<HashLoader />}>
+      <LoadingOverlay
+        active={isActive}
+        spinner={<HashLoader size={120} color={'#3C84BB'} />}
+      >
         <Header props={props} />
 
         <div>
@@ -2744,19 +2829,21 @@ const Booking = props => {
                     <Formik
                       initialValues={{
                         // ordernumber: '',
-                        first_name,
-                        last_name,
-                        phone_number,
-                        email,
-                        arrival_date,
-                        arrival_flight_number,
-                        arrival_time,
-                        departure_date,
-                        departure_flight_number,
-                        departure_time,
-                        destination,
-                        remark,
-                        type,
+                        first_name: first_name,
+                        last_name: last_name,
+                        phone_number: phone_number,
+                        email: email,
+                        arrival_date: arrival_date,
+                        arrival_flight_number: arrival_flight_number,
+                        arrival_time: arrival_time,
+                        departure_date: departure_date,
+                        departure_flight_number: departure_flight_number,
+                        departure_time: departure_time,
+                        destination: destination,
+                        remark: remark,
+                        type: type,
+                        isAdv: isAdv,
+                        address_search: destination,
                         // card_holder_name: '',
                         // card_number: '',
                         // exp_date: '',
@@ -3750,7 +3837,7 @@ const Booking = props => {
           </section>
         </div>
 
-        <Footer />
+        <Footer props={props} />
 
         {showReservationIdModal ? (
           <Modal
@@ -3759,7 +3846,7 @@ const Booking = props => {
             onRequestClose={closeModal}
             style={customStyles}
             contentLabel="Reservation"
-            shouldCloseOnOverlayClick
+            shouldCloseOnOverlayClick={true}
           >
             <div className="reservation">
               <h2>Thank you for booking</h2>

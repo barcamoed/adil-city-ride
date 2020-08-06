@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 
 import Header from '../Header';
 import Footer from '../Footer';

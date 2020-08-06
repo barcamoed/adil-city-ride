@@ -5,16 +5,15 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Route, withRouter } from 'react-router-dom';
+// import { Route, withRouter } from 'react-router-dom';
 import Modal from 'react-modal';
 import LoadingOverlay from 'react-loading-overlay';
-import { Router, browserHistory } from 'react-router';
+// import { Router, browserHistory } from 'react-router';
 import HashLoader from 'react-spinners/HashLoader';
 import car1Img from '../../assets/images/car1.png';
 import { IDENTIFIER, GETVEHICLESKEY } from '../../utils/constants';
 import { postRequest } from '../../utils/requests';
 import ReactGMap from '../ReactGMap/index';
-import messages from './messages';
 
 Modal.setAppElement('#app'); // For Modal used below
 const customStyles = {
@@ -54,6 +53,7 @@ const AvailableCars = props => {
       }
     }
 
+    console.log('props.myDATAAAAAA', props.myData);
     const myData1 = props.myData;
     myData1.ap_iata = ap_iata;
     setMyObj(myData1);
@@ -100,8 +100,9 @@ const AvailableCars = props => {
           // setFormData(myObj);
         } else if (data.status == 'no_results') {
           const noResultFound = 'No Result Found';
+          setAvailableCars([]);
           setNoResultFound(noResultFound);
-          setLodaerIsActive(false);
+          setVehiclesCount('0');
           // setFormData(myObj);
         }
       });
@@ -152,7 +153,10 @@ const AvailableCars = props => {
           // setFormData(myObj);
         } else if (data.status == 'no_results') {
           const noResultFound = 'No Result Found';
+          setLodaerIsActive(false);
+          setAvailableCars([]);
           setNoResultFound(noResultFound);
+          setVehiclesCount('0');
           // setFormData(myObj);
         }
       });
@@ -207,13 +211,16 @@ const AvailableCars = props => {
           // setFormData(myObj);
         } else if (data.status == 'no_results') {
           const noResultFound = 'No Result Found';
+          setAvailableCars([]);
+
           setNoResultFound(noResultFound);
+          setVehiclesCount('0');
           setLodaerIsActive(false);
           // setFormData(myObj);
         }
       });
     } else if (myObj.isAdvanced == true && myObj.switched == false) {
-      // console.log('Advanceddddd....', myObj);
+      console.log('Inside UseEffect Advanced True ....Switch False', myObj);
       const destinationLatLng = `(${myObj.Destination.lat}, ${
         myObj.Destination.lng
       })`;
@@ -250,19 +257,26 @@ const AvailableCars = props => {
       //   console.log(pair[0] + ', ' + pair[1]);
       // }
       setLodaerIsActive(true);
+      console.log('Loader Start');
       postRequest(formData, headers).then(data => {
-        // console.log('Data Status:', data);
+        console.log('Inisde Post Reqqqq:', data);
         if (data.status == 'ok') {
           // console.log('Data Status:', data.status);
           const vehiclesData = data.vehicles;
           setAvailableCars(vehiclesData);
+          console.log('Vehicles Set');
           setVehiclesCount(vehiclesData.length);
+          console.log('Vehicles Length Set');
 
           setLodaerIsActive(false);
+          console.log('Loader Stopped');
         } else if (data.status == 'no_results') {
           const noResultFound = 'No Result Found';
+          setAvailableCars([]);
           setNoResultFound(noResultFound);
+          setVehiclesCount('0');
           setLodaerIsActive(false);
+          console.log('Loader Stopped No REsult');
           // setFormData(myObj);
         }
       });
@@ -292,6 +306,7 @@ const AvailableCars = props => {
       },
     });
   }, [
+    // props.myData,
     props.myData.ap_iata,
     availableCars.length,
     props.myData.From,
@@ -299,16 +314,19 @@ const AvailableCars = props => {
   ]);
 
   function openModal() {
+    // alert('Modalllllllllll');
     setIsOpen(true);
   }
 
   function afterOpenModal() {
+    // alert('Modalllllllllll AfterOpen');
     // references are now sync'd and can be accessed.
     subtitle.style.color = '#3C84BB';
   }
 
   function closeModal() {
-    setIsOpen(false);
+    // alert('Modalllllllllll Close');
+    // setIsOpen(false);
   }
   const onRoundTripChecked = (
     priceVal,
@@ -333,6 +351,7 @@ const AvailableCars = props => {
     }
     setRoundTrip(vehicle_id);
     localStorage.setItem('vehicleObj', JSON.stringify(vehicleObj));
+
     // console.log('VehicleObject.. .. ..', localStorage.getItem('vehicleObj'));
   };
 
@@ -359,6 +378,7 @@ const AvailableCars = props => {
       setRoundTrip(null);
     }
     setOneWayTrip(vehicle_id);
+
     localStorage.setItem('vehicleObj', JSON.stringify(vehicleObj));
   };
 
@@ -405,130 +425,140 @@ const AvailableCars = props => {
   };
   return (
     <div>
-      <section className="cars">
-        <div className="container ">
-          <div className="col-md-12 p-0">
-            <h2 className="bb">
-              Available Cars{' '}
-              <span className="count">
-                {vehiclesCount}
-                <span />
-              </span>
-            </h2>
+      {props.myData ? (
+        <section className="cars">
+          <div className="container ">
+            <div className="col-md-12 p-0">
+              <h2 className="bb">
+                Available Cars{' '}
+                <span className="count">
+                  {vehiclesCount}
+                  <span />
+                </span>
+              </h2>
+            </div>
           </div>
-        </div>
-        <div className="container">
-          <div className="row">
-            <div className="col-md-12">
-              <div className="viewmap">
-                <div className="input-group">
-                  <div className="fromdes">
-                    <div className="values">
-                      <p>
-                        Values based on route
-                        <br /> to selected destination:
-                      </p>
-                    </div>
-                    <div className="from">
-                      <i className="fas fa-plane-departure" />
-                      <div className>
-                        <label>From</label>
+          <div className="container">
+            <div className="row">
+              <div className="col-md-12">
+                <div className="viewmap">
+                  <div className="input-group">
+                    <div className="fromdes">
+                      <div className="values">
+                        <p>
+                          Values based on route
+                          <br /> to selected destination:
+                        </p>
+                      </div>
+                      <div className="from">
+                        <i className="fas fa-plane-departure" />
+                        <div className>
+                          <label>From</label>
 
-                        {!props.myData.switched && !props.myData.isAdvanced ? (
-                          <p>{props.myData.From}</p>
-                        ) : props.myData.switched &&
+                          {!props.myData.switched &&
                           !props.myData.isAdvanced ? (
-                          <p>{props.myData.dropDownDestinationText}</p>
-                        ) : !props.myData.switched &&
-                          props.myData.isAdvanced ? (
-                          <p>{props.myData.From}</p>
-                        ) : props.myData.switched && props.myData.isAdvanced ? (
-                          <p>{props.myData.destination_address}</p>
-                        ) : null}
+                            <p>{props.myData.From}</p>
+                          ) : props.myData.switched &&
+                            !props.myData.isAdvanced ? (
+                            <p>{props.myData.dropDownDestinationText}</p>
+                          ) : !props.myData.switched &&
+                            props.myData.isAdvanced ? (
+                            <p>{props.myData.From}</p>
+                          ) : props.myData.switched &&
+                            props.myData.isAdvanced ? (
+                            <p>{props.myData.destination_address}</p>
+                          ) : null}
+                        </div>
+                      </div>
+                      <div className="des">
+                        <i className="fas fa-map-marker-alt" />
+                        <div className>
+                          <label>Destination</label>
+                          {!props.myData.switched &&
+                          !props.myData.isAdvanced ? (
+                            <p>{props.myData.dropDownDestinationText}</p>
+                          ) : props.myData.switched &&
+                            !props.myData.isAdvanced ? (
+                            <p>{props.myData.From}</p>
+                          ) : !props.myData.switched &&
+                            props.myData.isAdvanced ? (
+                            <p>{props.myData.destination_address}</p>
+                          ) : props.myData.switched &&
+                            props.myData.isAdvanced ? (
+                            <p>{props.myData.From}</p>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
-                    <div className="des">
-                      <i className="fas fa-map-marker-alt" />
-                      <div className>
-                        <label>Destination</label>
-                        {!props.myData.switched && !props.myData.isAdvanced ? (
-                          <p>{props.myData.dropDownDestinationText}</p>
-                        ) : props.myData.switched &&
-                          !props.myData.isAdvanced ? (
-                          <p>{props.myData.From}</p>
-                        ) : !props.myData.switched &&
-                          props.myData.isAdvanced ? (
-                          <p>{props.myData.destination_address}</p>
-                        ) : props.myData.switched && props.myData.isAdvanced ? (
-                          <p>{props.myData.From}</p>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="input-group-append">
-                    <button
-                      className="btn btn-outline-secondary"
-                      onClick={openModal}
-                      type="button"
-                    >
-                      <i className="far fa-map" /> View Map
-                    </button>
-                    <div>
-                      <Modal
-                        isOpen={modalIsOpen}
-                        onAfterOpen={afterOpenModal}
-                        onRequestClose={closeModal}
-                        style={customStyles}
-                        contentLabel="Map Modal"
+                    <div className="input-group-append">
+                      <button
+                        className="btn btn-outline-secondary"
+                        onClick={openModal}
+                        type="button"
                       >
-                        <h2
-                          className="mb-4"
-                          ref={_subtitle => (subtitle = _subtitle)}
+                        <i className="far fa-map" /> View Map
+                      </button>
+                      <React.Fragment>
+                        <Modal
+                          isOpen={modalIsOpen}
+                          onAfterOpen={afterOpenModal}
+                          onRequestClose={closeModal}
+                          style={customStyles}
+                          contentLabel="Map Modal"
                         >
-                          Map
-                        </h2>
-                        {typeof props.myData.Destination === 'string' ? (
-                          <ReactGMap
-                            containerElement={
-                              <div style={{ height: `100%`, width: '100%' }} />
-                            }
-                            mapElement={<div style={{ height: `100%` }} />}
-                            isMarkerShown
-                            origin={props.myData.apLatLong}
-                            destination={props.myData.destLatLng}
-                          />
-                        ) : (
-                          <ReactGMap
-                            containerElement={
-                              <div style={{ height: `100%`, width: '100%' }} />
-                            }
-                            mapElement={<div style={{ height: `100%` }} />}
-                            isMarkerShown
-                            origin={props.myData.apLatLong}
-                            destination={props.myData.Destination}
-                          />
-                        )}
-                        {/* <button onClick={closeModal}>close</button> */}
-                      </Modal>
+                          <h2
+                            className="mb-4"
+                            ref={_subtitle => (subtitle = _subtitle)}
+                          >
+                            Map
+                          </h2>
+                          {typeof myObj.Destination === 'string' ? (
+                            <React.Fragment>
+                              <ReactGMap
+                                containerElement={
+                                  <div
+                                    style={{ height: `100%`, width: '100%' }}
+                                  />
+                                }
+                                mapElement={<div style={{ height: `100%` }} />}
+                                isMarkerShown
+                                origin={myObj.apLatLong}
+                                destination={myObj.destLatLng}
+                              />
+                            </React.Fragment>
+                          ) : (
+                            <React.Fragment>
+                              <ReactGMap
+                                containerElement={
+                                  <div
+                                    style={{ height: `100%`, width: '100%' }}
+                                  />
+                                }
+                                mapElement={<div style={{ height: `100%` }} />}
+                                isMarkerShown
+                                origin={myObj.apLatLong}
+                                destination={myObj.Destination}
+                              />
+                            </React.Fragment>
+                          )}
+                        </Modal>
+                      </React.Fragment>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className>
-          <div className="container max1080">
-            <div className="row">
-              <div className="col-md-12">
-                {availableCars && availableCars.length > 0 ? (
-                  <div className="owl-carousel owl-theme carslider">
-                    {/* {availableCars.length} */}
-
-                    {!noResultVehicles &&
-                    availableCars &&
-                    availableCars.length > 0
-                      ? availableCars.map((item, index) => (
+          <div className>
+            <div className="container max1080">
+              <div className="row">
+                <div className="col-md-12">
+                  {availableCars && availableCars.length > 0 ? (
+                    <div className="owl-carousel owl-theme carslider">
+                      {noResultVehicles == '' &&
+                      availableCars &&
+                      availableCars.length > 0 ? (
+                        availableCars.map((item, index) => (
                           <div className="item" key={index}>
                             <div className="carbox">
                               <div className="bluebg" />
@@ -564,9 +594,7 @@ const AvailableCars = props => {
                                     <input
                                       type="radio"
                                       value={item.rt_price}
-                                      // checked={true}
                                       checked={roundTrip === item.vehicle_id}
-                                      // defaultChecked={index}
                                       onChange={e =>
                                         onRoundTripChecked(
                                           item.rt_price,
@@ -620,41 +648,43 @@ const AvailableCars = props => {
                             </div>
                           </div>
                         ))
-                      : noResultVehicles}
-                  </div>
-                ) : (
-                  <LoadingOverlay
-                    styles={{
-                      overlay: {
-                        position: 'absolute',
-                        height: '100%',
-                        width: '100%',
-                        top: '0px',
-                        left: '0px',
-                        display: '-webkit - box',
-                        display: '-webkit - flex',
-                        display: '-ms - flexbox',
-                        display: 'flex',
-                        'text-align': 'center',
-                        'font-size': '1.2em',
-                        color: '#000',
-                        background: 'rgba(0, 0, 0, 0)',
-                        zIndex: 800,
-                        // -webkit-transition: opacity 500ms ease-in;
-                        // transition: opacity 500ms ease-in;
-                        opacity: 1,
-                      },
-                    }}
-                    active={isActive}
-                    spinner
-                    spinner={<HashLoader />}
-                  />
-                )}
+                      ) : (
+                        <div>{noResultVehicles}</div>
+                      )}
+                    </div>
+                  ) : (
+                    <LoadingOverlay
+                      styles={{
+                        overlay: {
+                          position: 'absolute',
+                          height: '100%',
+                          width: '100%',
+                          top: '0px',
+                          left: '0px',
+                          display: '-webkit - box',
+                          display: '-webkit - flex',
+                          display: '-ms - flexbox',
+                          display: 'flex',
+                          'text-align': 'center',
+                          'font-size': '1.2em',
+                          color: '#000',
+                          background: 'rgba(0, 0, 0, 0)',
+                          zIndex: 800,
+
+                          opacity: 1,
+                        },
+                      }}
+                      active={isActive}
+                      spinner
+                      spinner={<HashLoader size={120} color={'#3C84BB'} />}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
     </div>
   );
 };

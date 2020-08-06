@@ -5,13 +5,27 @@
  */
 
 import React, { useState, useEffect } from 'react';
-// import PropTypes from 'prop-types';
-// import styled from 'styled-components';
+
 import logoImage from '../../assets/images/logo.png';
 import { Link } from 'react-router-dom';
 
-const Footer = () => {
-  const [showThis, handleShowThis] = useState(1);
+const Footer = props => {
+  const [showThis, handleShowThis] = useState(null);
+  console.log('Propsssss', props);
+
+  useEffect(() => {
+    if (Object.keys(props).length != 0 && props.constructor === Object) {
+      console.log('Pro', props);
+      if (
+        props.props.match.path == '/booking' ||
+        props.props.match.path == '/order-number' ||
+        props.props.match.path == '/order-summary'
+      ) {
+        handleShowThis(0);
+      }
+    }
+  }, []);
+
   const handleClick = () => {
     console.log('State before', showThis);
     handleShowThis(0);
@@ -51,7 +65,7 @@ const Footer = () => {
         </div>
       </footer>
 
-      {showThis ? (
+      {showThis != 0 ? (
         <div className="cookies">
           <div className="container">
             <div className="cookieswrap">

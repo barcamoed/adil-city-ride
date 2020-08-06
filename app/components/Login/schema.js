@@ -361,11 +361,10 @@ export const UpdatePasswordSchema = Yup.object().shape({
 
 export const OrderNumberSchema = Yup.object().shape({
   order_number: Yup.number()
-    .typeError('Must be a number')
-    .required('Required')
-    .min(6, 'Number too short!')
-    .max(6, 'Number too long'),
-  last_name: Yup.string().required('Required'),
+    .typeError('Must be Number')
+    .test('len', 'Must be 6 digits', val => val && val.toString().length === 6),
+
+  last_name: Yup.string().required('Last Name Required'),
 });
 
 export const searchSchema = Yup.object().shape({
@@ -385,6 +384,7 @@ export const bookingSchema = Yup.object().shape({
     .matches(/^[a-zA-Z]+$/, 'Use only alphabets')
     .required('Required'),
   type: Yup.string(),
+  isAdv: Yup.string(),
   last_name: Yup.string().required('Required'),
   phone_number: Yup.number()
     .required('Required')
@@ -417,9 +417,6 @@ export const bookingSchema = Yup.object().shape({
   //   //   /^([A-Z][A-Z][A-Z]?|[A-Z][0-9]|[0-9][A-Z])[0-9]{1,4}$/,
   //   //   'Invalid Flight Number',
   //   // )
-  // arrival_time: Yup.string()
-  //   .nullable()
-  //   .required('Required'),
 
   departure_date: Yup.date().when('type', {
     is: val => val === 'justDeparture' || val === 'both',
@@ -463,7 +460,16 @@ export const bookingSchema = Yup.object().shape({
   //   .max(4)
   //   .required(),
   remark: Yup.string().required('Required'),
-  destination: Yup.string().required('Required'),
+  destination: Yup.string().when('isAdv', {
+    is: val => val != 'true',
+    then: Yup.string().required('Required'),
+    otherwise: Yup.string(),
+  }),
+  // address_search: Yup.string().when('isAdv', {
+  //   is: val => val === 'true',
+  //   then: Yup.string().required('Required'),
+  //   otherwise: Yup.string(),
+  // }),
 });
 
 export const ProfileSchema = Yup.object().shape(

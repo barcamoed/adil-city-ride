@@ -360,7 +360,7 @@ const ChooseDestination = (props, { prop }) => {
                     }}
                     active={isActive}
                     spinner
-                    spinner={<HashLoader />}
+                    spinner={<HashLoader size={120} color={'#3C84BB'} />}
                   />
                 )}
               </div>
@@ -412,7 +412,7 @@ const ChooseDestination = (props, { prop }) => {
                     }}
                     active={isActive}
                     spinner
-                    spinner={<HashLoader />}
+                    spinner={<HashLoader size={120} color={'#3C84BB'} />}
                   />
                 )}
                 {/* <div className="item">
